@@ -1,32 +1,25 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { Moon, Sun, Menu, X, Search, ShoppingCart, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTheme } from "@/components/theme-provider";
-
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
+import { useAppSelector } from "@/state-manager/hook";
 export default function Navbar() {
-  const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-const navigate=useNavigate();
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return null;
-  }
-
-  const navItems = [
-    { name: "Men", href: "#" },
-    { name: "Women", href: "#" },
-    { name: "Kids", href: "#" },
-    { name: "Accessories", href: "#" },
-    { name: "Sale", href: "#" },
-  ];
+  const { categories } = useAppSelector((state) => state.product);
 
   return (
     <nav className="bg-background border-b">
@@ -39,16 +32,39 @@ const navigate=useNavigate();
               </span>
             </Link>
             <div className="hidden md:block ml-10">
-              <div className="flex items-baseline space-x-4">
-                {navItems.map((item) => (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    className="text-muted-foreground hover:text-primary px-3 py-2 rounded-md text-sm font-medium"
-                  >
-                    {item.name}
-                  </Link>
-                ))}
+              <div className="container px-4 md:px-6 py-4">
+                <NavigationMenu>
+                  <NavigationMenuList>
+                    {categories.map((categoryItem, index) => (
+                      <NavigationMenuItem key={index}>
+                        <NavigationMenuTrigger>
+                          {categoryItem.category}
+                        </NavigationMenuTrigger>
+                        <NavigationMenuContent>
+                          <div className="grid w-[400px] p-2">
+                            {categoryItem.subcategories.map(
+                              (subcat, subIndex) => (
+                                <NavigationMenuLink asChild key={subIndex}>
+                                  <Link
+                                    to="#"
+                                    className="group grid h-auto w-full items-center justify-start gap-1 rounded-md bg-background p-4 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+                                  >
+                                    <div className="text-sm font-medium leading-none group-hover:underline">
+                                      {subcat.subcategory}
+                                    </div>
+                                    <div className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                                      {subcat.childcategories.join(", ")}
+                                    </div>
+                                  </Link>
+                                </NavigationMenuLink>
+                              )
+                            )}
+                          </div>
+                        </NavigationMenuContent>
+                      </NavigationMenuItem>
+                    ))}
+                  </NavigationMenuList>
+                </NavigationMenu>
               </div>
             </div>
           </div>
@@ -78,16 +94,16 @@ const navigate=useNavigate();
               <span className="sr-only">Toggle theme</span>
             </Button>
             <Button
-                variant="outline"
-                size="sm"
-                className={`font-semibold transition-colors duration-200 dark:text-black dark:bg-white text-white bg-black`}
-                onClick={() => {
-                  navigate("/sign-in")
-                }}
-              >
-                <LogIn className="w-4 h-4 mr-2" />
-                Sign In
-              </Button>
+              variant="outline"
+              size="sm"
+              className={`font-semibold transition-colors duration-200 dark:text-black dark:bg-white text-white bg-black`}
+              onClick={() => {
+                navigate("/sign-in");
+              }}
+            >
+              <LogIn className="w-4 h-4 mr-2" />
+              Sign In
+            </Button>
           </div>
           <div className="md:hidden flex items-center">
             <Button
@@ -107,17 +123,7 @@ const navigate=useNavigate();
       </div>
       {mobileMenuOpen && (
         <div className="md:hidden">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            {navItems.map((item) => (
-              <Link
-                key={item.name}
-                to={item.href}
-                className="text-muted-foreground hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
-              >
-                {item.name}
-              </Link>
-            ))}
-          </div>
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3"></div>
           <div className="pt-4 pb-3 border-t border-muted">
             <div className="flex items-center px-5">
               <div className="relative flex-grow">
@@ -150,7 +156,7 @@ const navigate=useNavigate();
                 size="sm"
                 className={`font-semibold transition-colors duration-200 `}
                 onClick={() => {
-                  navigate("/sign-in")
+                  navigate("/sign-in");
                 }}
               >
                 <LogIn className="w-4 h-4 mr-2" />
