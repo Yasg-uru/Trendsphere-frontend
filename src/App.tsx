@@ -15,15 +15,15 @@ const App: React.FunctionComponent = () => {
   useEffect(() => {
     dispatch(getUniqueCategories());
   }, []);
-  if (isLoading) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-        <div className="flex animate-spin items-center justify-center rounded-full bg-primary p-4 text-primary-foreground">
-          <LoaderIcon className="h-8 w-8" />
-        </div>
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+  //       <div className="flex animate-spin items-center justify-center rounded-full bg-primary p-4 text-primary-foreground">
+  //         <LoaderIcon className="h-8 w-8" />
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   function LoaderIcon(
     props: JSX.IntrinsicAttributes & React.SVGProps<SVGSVGElement>

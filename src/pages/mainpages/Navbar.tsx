@@ -13,14 +13,60 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
-import { useAppSelector } from "@/state-manager/hook";
+import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
+import { ApplyFilter } from "@/state-manager/slices/productSlice";
+import { useToast } from "@/hooks/use-toast";
 export default function Navbar() {
   const { theme, setTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [currentCategory, setCurrentCategory] = useState<string>("");
+  const [currentSubCategory, setCurrentSubCategory] = useState<string>("");
+  const [currentChildCategory, setCurrentChildCategory] = useState<string>("");
+  const dispatch = useAppDispatch();
+  const { toast } = useToast();
+  const handleClick = () => {
+    const params = {
+      category: currentCategory,
+      subcategory: currentSubCategory,
+      childcategory: currentChildCategory,
+    };
+    dispatch(ApplyFilter(params))
+      .then(() => {
+        toast({
+          title: "Fetched successfully your results ",
+        });
+      })
+      .catch(() => {
+        toast({
+          title: "Failed to Fetch results",
+        });
+      });
+  };
   const navigate = useNavigate();
-
+  console.log(
+    "states",
+    currentCategory +
+      "   " +
+      currentSubCategory +
+      "   " +
+      "   " +
+      currentChildCategory
+  );
   const { categories } = useAppSelector((state) => state.product);
+  const handleCategoryHover = (category: string) => {
+    setCurrentCategory(category);
+    setCurrentSubCategory(""); // Clear subcategory and child category on new category hover
+    setCurrentChildCategory("");
+  };
 
+  const handleSubcategoryHover = (subcategory: string) => {
+    setCurrentSubCategory(subcategory);
+    setCurrentChildCategory(""); // Clear child category on new subcategory hover
+  };
+
+  const handleChildCategoryClick = (childCategory: string) => {
+    setCurrentChildCategory(childCategory);
+  };
   return (
     <nav className="bg-background border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -36,27 +82,57 @@ export default function Navbar() {
                 <NavigationMenu>
                   <NavigationMenuList>
                     {categories.map((categoryItem, index) => (
-                      <NavigationMenuItem key={index}>
+                      <NavigationMenuItem
+                        key={index}
+                        onMouseEnter={() => {
+                          handleCategoryHover(categoryItem.category);
+                        }}
+                        onClick={handleClick}
+                      >
                         <NavigationMenuTrigger>
                           {categoryItem.category}
                         </NavigationMenuTrigger>
-                        <NavigationMenuContent>
+                        <NavigationMenuContent className="cursor-pointer">
                           <div className="grid w-[400px] p-2">
                             {categoryItem.subcategories.map(
                               (subcat, subIndex) => (
-                                <NavigationMenuLink asChild key={subIndex}>
-                                  <Link
-                                    to="#"
-                                    className="group grid h-auto w-full items-center justify-start gap-1 rounded-md bg-background p-4 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+                                <div key={subIndex}>
+                                  <NavigationMenuLink
+                                    asChild
+                                    onMouseEnter={() =>
+                                      handleSubcategoryHover(subcat.subcategory)
+                                    }
+                                    onClick={handleClick}
                                   >
-                                    <div className="text-sm font-medium leading-none group-hover:underline">
-                                      {subcat.subcategory}
-                                    </div>
-                                    <div className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                                      {subcat.childcategories.join(", ")}
-                                    </div>
-                                  </Link>
-                                </NavigationMenuLink>
+                                    <Link
+                                      to="#"
+                                      className="group grid h-auto w-full items-center justify-start gap-1 rounded-md bg-background p-4 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+                                    >
+                                      <div className="text-sm font-medium leading-none group-hover:underline">
+                                        {subcat.subcategory}
+                                      </div>
+                                    </Link>
+                                  </NavigationMenuLink>
+                                  {subcat.childcategories &&
+                                    subcat.childcategories.length > 0 && (
+                                      <div className="ml-4  flex flex-col ">
+                                        {subcat.childcategories.map(
+                                          (child, childIndex) => (
+                                            <div
+                                              onClick={() => {
+                                                handleChildCategoryClick(child);
+                                                handleClick();
+                                              }}
+                                              key={childIndex}
+                                              className="text-sm text-muted-foreground"
+                                            >
+                                              {child}
+                                            </div>
+                                          )
+                                        )}
+                                      </div>
+                                    )}
+                                </div>
                               )
                             )}
                           </div>
