@@ -23,11 +23,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
+import { Register } from "@/state-manager/slices/authSlice";
 
 const MAX_FILE_SIZE = 5000000; // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
-const signUpSchema = z.object({
+export const signUpSchema = z.object({
   username: z
     .string()
     .min(3, { message: "Username must be at least 3 characters long" }),
@@ -96,6 +100,10 @@ export default function SignUpForm() {
   });
 
   const avatarFile = watch("avatar");
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { isLoading } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
     if (avatarFile && avatarFile[0]) {
@@ -111,16 +119,17 @@ export default function SignUpForm() {
 
   const onSubmit = async (data: SignUpFormValues) => {
     setSignUpError(null);
-    try {
-      // Here you would typically call your API to create a new user
-      console.log("Sign up attempt with:", data);
-      // Simulating an API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      // If sign-up is successful, you might redirect the user or update the app state
-      console.log("Sign up successful");
-    } catch (error) {
-      setSignUpError("An error occurred during sign up. Please try again.");
-    }
+    dispatch(Register(data))
+      .unwrap()
+      .then(() => {
+        toast({
+          title: "Your Account created successfully",
+        });
+        navigate(`/verify/${data.email}`);
+      })
+      .catch(() => {
+        setSignUpError("An error occurred during sign up. Please try again.");
+      });
   };
 
   const handleRemoveAvatar = () => {

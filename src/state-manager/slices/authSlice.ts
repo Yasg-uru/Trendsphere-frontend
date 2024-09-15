@@ -1,5 +1,7 @@
 import axiosInstance from "@/helper/axiosinstance";
 import { signInSchema } from "@/pages/mainpages/authpages/login";
+import { signUpSchema } from "@/pages/mainpages/authpages/register";
+import { VerifySchema } from "@/pages/mainpages/authpages/verify";
 import { authState } from "@/types/authState/initialState";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { AxiosError } from "axios";
@@ -28,11 +30,11 @@ export const Login = createAsyncThunk(
 );
 export const Register = createAsyncThunk(
   "auth/register",
-  async (formdata, { rejectWithValue }) => {
+  async (formdata:z.infer<typeof signUpSchema>, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.post(
         "/user/register",
-        { formdata },
+         formdata ,
         { withCredentials: true }
       );
       return response.data;
@@ -45,7 +47,7 @@ export const Register = createAsyncThunk(
 );
 export const VerifyCode = createAsyncThunk(
   "auth/verify-code",
-  async (formdata, { rejectWithValue }) => {
+  async (formdata:z.infer<typeof VerifySchema>, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.post(
         "user/verify-code",

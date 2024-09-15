@@ -42,7 +42,7 @@ export default function SignInForm() {
   const dispatch = useAppDispatch();
   const { isLoading } = useAppSelector((state) => state.auth);
   const { toast } = useToast();
-  const navigate=useNavigate();
+  const navigate = useNavigate();
   const onSubmit = async (data: SignInFormValues) => {
     setSignInError(null);
     dispatch(Login(data))
@@ -51,7 +51,7 @@ export default function SignInForm() {
         toast({
           title: "Logged in successfully",
         });
-        navigate("/")
+        navigate("/");
       })
       .catch(() => {
         setSignInError("Invalid email or password. Please try again.");
@@ -121,7 +121,11 @@ export default function SignInForm() {
                 <AlertDescription>{signInError}</AlertDescription>
               </Alert>
             )}
-            <Button type="submit" className="w-full" disabled={isSubmitting && isLoading}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isSubmitting && isLoading}
+            >
               {isLoading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
