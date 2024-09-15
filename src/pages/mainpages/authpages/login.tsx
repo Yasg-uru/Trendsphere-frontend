@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,7 +15,11 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-const signInSchema = z.object({
+import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
+import { Login } from "@/state-manager/slices/authSlice";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+export const signInSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
   password: z
     .string()
@@ -35,19 +39,23 @@ export default function SignInForm() {
   } = useForm<SignInFormValues>({
     resolver: zodResolver(signInSchema),
   });
-
+  const dispatch = useAppDispatch();
+  const { isLoading } = useAppSelector((state) => state.auth);
+  const { toast } = useToast();
+  const navigate=useNavigate();
   const onSubmit = async (data: SignInFormValues) => {
     setSignInError(null);
-    try {
-      // Here you would typically call your authentication API
-      console.log("Sign in attempt with:", data);
-      // Simulating an API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      // If sign-in is successful, you might redirect the user or update the app state
-      console.log("Sign in successful");
-    } catch (error) {
-      setSignInError("Invalid email or password. Please try again.");
-    }
+    dispatch(Login(data))
+      .unwrap()
+      .then(() => {
+        toast({
+          title: "Logged in successfully",
+        });
+        navigate("/")
+      })
+      .catch(() => {
+        setSignInError("Invalid email or password. Please try again.");
+      });
   };
 
   return (
@@ -113,8 +121,12 @@ export default function SignInForm() {
                 <AlertDescription>{signInError}</AlertDescription>
               </Alert>
             )}
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Signing In..." : "Sign In"}
+            <Button type="submit" className="w-full" disabled={isSubmitting && isLoading}>
+              {isLoading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                "Sign In"
+              )}
             </Button>
           </form>
         </CardContent>
