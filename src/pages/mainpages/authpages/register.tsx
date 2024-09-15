@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Eye, EyeOff, Upload, X } from "lucide-react";
+import { Eye, EyeOff, Loader2, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -377,8 +377,16 @@ export default function SignUpForm() {
               </Alert>
             )}
 
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Signing Up..." : "Sign Up"}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isSubmitting || isLoading}
+            >
+              {isLoading ? (
+                <Loader2 className="h-6 w-6 mr-2 animate-spin" />
+              ) : (
+                "Sign Up"
+              )}
             </Button>
           </form>
         </CardContent>

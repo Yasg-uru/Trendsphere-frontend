@@ -30,13 +30,11 @@ export const Login = createAsyncThunk(
 );
 export const Register = createAsyncThunk(
   "auth/register",
-  async (formdata:z.infer<typeof signUpSchema>, { rejectWithValue }) => {
+  async (formdata: z.infer<typeof signUpSchema>, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post(
-        "/user/register",
-         formdata ,
-        { withCredentials: true }
-      );
+      const response = await axiosInstance.post("/user/register", formdata, {
+        withCredentials: true,
+      });
       return response.data;
     } catch (err) {
       let error: AxiosError = err as AxiosError;
@@ -47,13 +45,11 @@ export const Register = createAsyncThunk(
 );
 export const VerifyCode = createAsyncThunk(
   "auth/verify-code",
-  async (formdata:z.infer<typeof VerifySchema>, { rejectWithValue }) => {
+  async (formdata: z.infer<typeof VerifySchema>, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post(
-        "user/verify-code",
-        { formdata },
-        { withCredentials: true }
-      );
+      const response = await axiosInstance.post("user/verify-code", formdata, {
+        withCredentials: true,
+      });
       return response.data;
     } catch (err) {
       let error: AxiosError = err as AxiosError;
