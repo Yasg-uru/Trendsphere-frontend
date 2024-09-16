@@ -100,7 +100,7 @@ export default function Component() {
         </div>
       </div>
       <div className="grid gap-6">
-        <div>
+        {/* <div>
           <Select onValueChange={handleProductChange} value={selectedProductId}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select a product" />
@@ -113,15 +113,23 @@ export default function Component() {
               ))}
             </SelectContent>
           </Select>
+          </div> */}
+        <div>
           <h1 className="text-3xl font-bold mt-4">{selectedProduct.name}</h1>
           <p className="text-muted-foreground">{selectedProduct.description}</p>
         </div>
         <div className="grid gap-2">
           <div className="flex items-center gap-2">
             {[1, 2, 3, 4, 5].map((val) => (
-              <StarIcon className={`w-5 h-5 ${val<=selectedProduct.rating?"fill-primary":"fill-muted stroke-muted-foreground"}`} />
+              <StarIcon
+                className={`w-5 h-5 ${
+                  val <= selectedProduct.rating
+                    ? "fill-primary"
+                    : "fill-muted stroke-muted-foreground"
+                }`}
+              />
             ))}
-           
+
             <span className="text-muted-foreground text-sm">
               (
               {selectedProduct.reviews.length === 0
@@ -138,7 +146,9 @@ export default function Component() {
               ${selectedVariant.price.toFixed(2)}
             </span>
             <Badge variant="outline" className="px-2 py-1">
-              {selectedVariant.available ? "In stock" : "Out of stock"}
+              {selectedProduct.available
+                ? "Available"
+                : "currently unavailable"}
             </Badge>
           </div>
         </div>
@@ -183,11 +193,22 @@ export default function Component() {
                     id={`size-${sizeOption.size}`}
                     value={sizeOption.size}
                   />
-                  {sizeOption.size}
+                  <div className="flex flex-col gap-1">
+                    <p>{sizeOption.size}</p>
+                    <p>
+                      {" "}
+                      (
+                      {sizeOption.stock > 0
+                        ? `${sizeOption.stock} in stock`
+                        : "Out of stock"}
+                      )
+                    </p>
+                  </div>
                 </Label>
               ))}
             </RadioGroup>
           </div>
+
           <Button size="lg">Add to Cart</Button>
         </div>
         <Separator />
