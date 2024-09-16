@@ -10,6 +10,7 @@ import { getUniqueCategories } from "./state-manager/slices/productSlice";
 
 import Products from "./pages/product-pages/products";
 import Details from "./pages/product-pages/details";
+import Carts from "./pages/product-pages/carts";
 const App: React.FunctionComponent = () => {
   const dispatch = useAppDispatch();
 
@@ -29,6 +30,7 @@ const App: React.FunctionComponent = () => {
         <Route path="/verify/:email" element={<VerifyOTP />} />
         <Route path="/products" element={<Products />} />
         <Route path="/details" element={<Details />} />
+        <Route path="/mycarts" element={<Carts />} />
       </Routes>
     </>
   );

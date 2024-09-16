@@ -1,3 +1,8 @@
+import {
+  IProductFrontend,
+  IProductVariantFrontend,
+} from "../productState/product.type";
+
 export interface authState {
   isLoading: boolean;
   userInfo: User | null;
@@ -8,7 +13,12 @@ interface Preferences {
   favoriteColors: string[];
   preferredMaterials: string[];
 }
-
+interface cart {
+  productId: IProductFrontend;
+  quantity: number;
+  variantId: IProductVariantFrontend;
+  _id: string;
+}
 interface User {
   preferences: Preferences;
   _id: string;
@@ -23,7 +33,7 @@ interface User {
   loyaltyPoints: number;
   browsingHistory: any[]; // Specify type if needed
   tryOnHistory: any[]; // Specify type if needed
-  cart: any[]; // Specify type if needed
+  cart: cart[]; // Specify type if needed
   orderHistory: any[]; // Specify type if needed
   paymentMethods: any[]; // Specify type if needed
   createdAt: string;

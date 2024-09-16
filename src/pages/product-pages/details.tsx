@@ -12,11 +12,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SVGProps } from "react";
-import { useAppSelector } from "@/state-manager/hook";
+import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 // import { IProductFrontend } from "@/types/productState/product.type";
 import { useLocation } from "react-router-dom";
+import { AddToCart } from "@/state-manager/slices/productSlice";
+import { useToast } from "@/hooks/use-toast";
 
-export default function Component() {
+export default function Details() {
+  const { toast } = useToast();
   const { products } = useAppSelector((state) => state.product);
   const location = useLocation();
   const [selectedProductId, setSelectedProductId] = useState<string | null>(
@@ -51,13 +54,6 @@ export default function Component() {
       (1 - selectedProduct.discount.discountPercentage / 100)
     : 0;
 
-  const handleProductChange = (productId: string) => {
-    setSelectedProductId(productId);
-    const newProduct = products.find((p) => p._id === productId) || products[0];
-    setSelectedVariantId(newProduct.variants[0]._id);
-    setSelectedSize(newProduct.variants[0].size[0].size);
-  };
-
   const handleVariantChange = (variantId: string) => {
     setSelectedVariantId(variantId);
     const newVariant =
@@ -68,6 +64,28 @@ export default function Component() {
   };
   const handleImageChange = (image: string) => {
     setImage(image);
+  };
+  const dispatch = useAppDispatch();
+  const handleCart = () => {
+    if (selectedVariantId) {
+      const formData = {
+        productId: selectedProductId,
+        variantId: selectedVariantId,
+        quantity: 1,
+      };
+      dispatch(AddToCart(formData))
+        .unwrap()
+        .then(() => {
+          toast({
+            title: "Cart Added Successfully",
+          });
+        })
+        .catch((error) => {
+          toast({
+            title: "Failed to add cart",
+          });
+        });
+    }
   };
   return (
     <div className="grid md:grid-cols-2 gap-6 lg:gap-12 items-start max-w-6xl px-4 mx-auto py-6">
@@ -209,7 +227,12 @@ export default function Component() {
             </RadioGroup>
           </div>
 
-          <Button size="lg">Add to Cart</Button>
+          <div className="flex gap-1 w-full">
+            <Button size="lg" onClick={handleCart}>
+              Add to Cart
+            </Button>
+            <Button size="lg">Buy Now</Button>
+          </div>
         </div>
         <Separator />
         <div className="grid gap-4">

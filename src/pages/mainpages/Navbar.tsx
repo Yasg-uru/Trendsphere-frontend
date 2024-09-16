@@ -73,6 +73,7 @@ export default function Navbar() {
       currentChildCategory
   );
   const { categories } = useAppSelector((state) => state.product);
+  const { userInfo } = useAppSelector((state) => state.auth);
   const handleCategoryHover = (category: string) => {
     setCurrentCategory(category);
     setCurrentSubCategory(""); // Clear subcategory and child category on new category hover
@@ -173,10 +174,15 @@ export default function Navbar() {
                 className="pl-8 w-64"
               />
             </div>
-            <Button variant="ghost" size="icon">
+            <Link to="/mycarts"><Button variant="ghost" size="icon" className="relative">
               <ShoppingCart className="h-5 w-5" />
+              {userInfo && userInfo.cart.length > 0 && (
+                <div className="absolute top-0 right-0  flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground">
+                  {userInfo.cart.length}
+                </div>
+              )}
               <span className="sr-only">Shopping cart</span>
-            </Button>
+            </Button></Link>
             <Button
               variant="ghost"
               size="icon"
@@ -230,10 +236,12 @@ export default function Navbar() {
                   className="pl-8 w-full"
                 />
               </div>
-              <Button variant="ghost" size="icon" className="ml-4">
-                <ShoppingCart className="h-5 w-5" />
-                <span className="sr-only">Shopping cart</span>
-              </Button>
+              <Link to="/mycarts">
+                <Button variant="ghost" size="icon" className="ml-4">
+                  <ShoppingCart className="h-5 w-5" />
+                  <span className="sr-only">Shopping cart</span>
+                </Button>
+              </Link>
               <Button
                 variant="ghost"
                 size="icon"

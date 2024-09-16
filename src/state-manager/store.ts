@@ -8,6 +8,7 @@ const persistConfig = {
   key: "root",
   storage,
   whitelist: ["auth", "product"],
+  
 };
 
 const rootReducer = combineReducers({
@@ -19,6 +20,7 @@ const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 export const store = configureStore({
   reducer: persistedReducer,
+  devTools:true,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,

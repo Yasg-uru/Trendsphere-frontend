@@ -57,6 +57,27 @@ export const ApplyFilter = createAsyncThunk(
     }
   }
 );
+export const AddToCart = createAsyncThunk(
+  "product/addcart",
+  async (
+    formdata: { productId: string; variantId: string; quantity: number },
+    { rejectWithValue }
+  ) => {
+    try {
+      const { productId, variantId, quantity } = formdata;
+      const response = await axiosInstance.post(
+        `/product/addcart/${productId}/${variantId}`,
+        { quantity },
+        {
+          withCredentials: true,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue("Failed to Add cart");
+    }
+  }
+);
 const productSlice = createSlice({
   name: "product",
   initialState,
