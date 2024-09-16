@@ -1,6 +1,6 @@
 // Frontend interface for a product variant
 export interface IProductVariantFrontend {
-    size: { size: string; stock: number }[]; // Array of sizes and their stocks
+    size: { size: string; stock: number ,_id:string}[]; // Array of sizes and their stocks
     color: string;
     material: string;
     price: number;
@@ -8,6 +8,7 @@ export interface IProductVariantFrontend {
     sku: string;
     images: string[]; // Array of images for this variant
     available: boolean; // Is this variant available?
+    _id:string;
   }
   
   // Frontend interface for a product review

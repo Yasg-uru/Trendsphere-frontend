@@ -7,8 +7,9 @@ import SignUpForm from "./pages/mainpages/authpages/register";
 import VerifyOTP from "./pages/mainpages/authpages/verify";
 import { useAppDispatch, useAppSelector } from "./state-manager/hook";
 import { getUniqueCategories } from "./state-manager/slices/productSlice";
-import { JSX } from "react/jsx-runtime";
+
 import Products from "./pages/product-pages/products";
+import Details from "./pages/product-pages/details";
 const App: React.FunctionComponent = () => {
   const dispatch = useAppDispatch();
 
@@ -27,6 +28,7 @@ const App: React.FunctionComponent = () => {
         <Route path="/register" element={<SignUpForm />} />
         <Route path="/verify/:email" element={<VerifyOTP />} />
         <Route path="/products" element={<Products />} />
+        <Route path="/details" element={<Details />} />
       </Routes>
     </>
   );

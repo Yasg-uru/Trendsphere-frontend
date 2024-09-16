@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { Moon, Sun, Menu, X, Search, ShoppingCart, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,7 @@ export default function Navbar() {
   const dispatch = useAppDispatch();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
   const handleClick = () => {
     const params = {
       category: currentCategory,
@@ -36,13 +37,24 @@ export default function Navbar() {
         toast({
           title: "Fetched successfully your results ",
         });
-        navigate("/products", {
-          state: {
-            category: currentCategory,
-            subcategory: currentSubCategory,
-            childcategory: currentChildCategory,
-          },
-        });
+        if (location.pathname === "/products") {
+          navigate("/products", {
+            replace: true,
+            state: {
+              category: currentCategory,
+              subcategory: currentSubCategory,
+              childcategory: currentChildCategory,
+            },
+          });
+        } else {
+          navigate("/products", {
+            state: {
+              category: currentCategory,
+              subcategory: currentSubCategory,
+              childcategory: currentChildCategory,
+            },
+          });
+        }
       })
       .catch(() => {
         toast({

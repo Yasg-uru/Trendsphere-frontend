@@ -33,7 +33,7 @@ import Loader from "@/helper/Loader";
 import { IProductFrontend } from "@/types/productState/product.type";
 import { ApplyFilter } from "@/state-manager/slices/productSlice";
 import { useToast } from "@/hooks/use-toast";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 export default function ProductsPage() {
   const { isLoading, products } = useAppSelector((state) => state.product);
@@ -46,7 +46,9 @@ export default function ProductsPage() {
   const [sizes, setSizes] = useState<string[]>([]);
   const [minRating, setMinRating] = useState<number>(0);
   const [materials, setMaterials] = useState<string[]>([]);
-const [isRefreshFunctionCalled,setISRefreshFunctionCalled]=useState<boolean>(false);
+  const [isRefreshFunctionCalled, setISRefreshFunctionCalled] =
+    useState<boolean>(false);
+  const navigate = useNavigate();
   const [filters, setFilters] = useState({
     search: "",
     gender: "",
@@ -188,7 +190,8 @@ const [isRefreshFunctionCalled,setISRefreshFunctionCalled]=useState<boolean>(fal
         toast({
           title: "Failed to refresh",
         });
-      }).finally(()=>{
+      })
+      .finally(() => {
         setISRefreshFunctionCalled(false);
       });
   };
@@ -498,12 +501,12 @@ const [isRefreshFunctionCalled,setISRefreshFunctionCalled]=useState<boolean>(fal
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {products.map((product) => (
-                <Card key={product._id}>
+                <Card key={product._id} onClick={()=>navigate("/details",{state:{id:product._id}})} className="cursor-pointer">
                   <CardHeader>
                     <img
                       src={product.defaultImage}
                       alt={product.name}
-                      className="w-full h-48 object-cover rounded-t-lg"
+                      className="w-full h-56 object-cover rounded-t-lg"
                     />
                   </CardHeader>
                   <CardContent>
@@ -531,7 +534,12 @@ const [isRefreshFunctionCalled,setISRefreshFunctionCalled]=useState<boolean>(fal
                         </span>
                       ))}
                     </div>
-                    <Button variant="outline">View</Button>
+                    <Button
+                      variant="outline"
+                      className={`font-semibold transition-colors duration-200 dark:text-black dark:bg-white text-white bg-black`}
+                    >
+                      Add Cart
+                    </Button>
                   </CardFooter>
                 </Card>
               ))}
