@@ -26,13 +26,14 @@ export default function Component() {
     null
   );
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
-
+  const [image, setImage] = useState<string>("");
   useEffect(() => {
     const productId = location.state?.id || products[0]._id;
     setSelectedProductId(productId);
     const product = products.find((p) => p._id === productId);
     if (product) {
       setSelectedVariantId(product.variants[0]._id);
+      setImage(product.variants[0].images[0]);
       setSelectedSize(product.variants[0].size[0].size);
     }
   }, [location.state?.id]);
@@ -45,9 +46,10 @@ export default function Component() {
     selectedProduct.variants.find((v) => v._id === selectedVariantId) ||
     selectedProduct.variants[0];
 
-  const discountedPrice =
-  selectedProduct.discount? selectedVariant.price *
-    (1 - selectedProduct.discount.discountPercentage / 100) :0;
+  const discountedPrice = selectedProduct.discount
+    ? selectedVariant.price *
+      (1 - selectedProduct.discount.discountPercentage / 100)
+    : 0;
 
   const handleProductChange = (productId: string) => {
     setSelectedProductId(productId);
@@ -63,20 +65,23 @@ export default function Component() {
       selectedProduct.variants[0];
     setSelectedSize(newVariant.size[0].size);
   };
-
+  const handleImageChange = (image: string) => {
+    setImage(image);
+  };
   return (
     <div className="grid md:grid-cols-2 gap-6 lg:gap-12 items-start max-w-6xl px-4 mx-auto py-6">
       <div className="grid gap-4">
         <img
-          src={selectedVariant.images[0]}
+          src={image}
           alt={selectedProduct.name}
           width={600}
           height={900}
           className="aspect-[2/3] object-cover border w-full rounded-lg overflow-hidden"
         />
-        <div className="hidden md:grid grid-cols-4 gap-3">
+        <div className=" md:grid grid-cols-4 gap-3">
           {selectedVariant.images.map((image, index) => (
             <button
+              onClick={() => handleImageChange(image)}
               key={index}
               className="border hover:border-primary rounded-lg overflow-hidden transition-colors"
             >
