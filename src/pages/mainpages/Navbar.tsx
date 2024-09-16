@@ -24,6 +24,7 @@ export default function Navbar() {
   const [currentChildCategory, setCurrentChildCategory] = useState<string>("");
   const dispatch = useAppDispatch();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const handleClick = () => {
     const params = {
       category: currentCategory,
@@ -35,6 +36,13 @@ export default function Navbar() {
         toast({
           title: "Fetched successfully your results ",
         });
+        navigate("/products", {
+          state: {
+            category: currentCategory,
+            subcategory: currentSubCategory,
+            childcategory: currentChildCategory,
+          },
+        });
       })
       .catch(() => {
         toast({
@@ -42,7 +50,7 @@ export default function Navbar() {
         });
       });
   };
-  const navigate = useNavigate();
+
   console.log(
     "states",
     currentCategory +
@@ -66,6 +74,7 @@ export default function Navbar() {
 
   const handleChildCategoryClick = (childCategory: string) => {
     setCurrentChildCategory(childCategory);
+    handleClick();
   };
   return (
     <nav className="bg-background border-b">
@@ -118,16 +127,15 @@ export default function Navbar() {
                                       <div className="ml-4  flex flex-col ">
                                         {subcat.childcategories.map(
                                           (child, childIndex) => (
-                                            <div
-                                              onClick={() => {
-                                                handleChildCategoryClick(child);
-                                                handleClick();
-                                              }}
+                                            <span
+                                              onClick={() =>
+                                                handleChildCategoryClick(child)
+                                              }
                                               key={childIndex}
                                               className="text-sm text-muted-foreground"
                                             >
                                               {child}
-                                            </div>
+                                            </span>
                                           )
                                         )}
                                       </div>

@@ -10,6 +10,15 @@ interface FilterParams {
   category?: string;
   subcategory?: string;
   childcategory?: string;
+
+  minPrice?: number;
+  maxPrice?: number;
+  available?: boolean;
+  brands?: string[];
+  colors?: string[];
+  sizes?: string[];
+  minRating?: number;
+  materials?: string[];
 }
 const initialState: ProductState = {
   isLoading: false,
@@ -71,8 +80,8 @@ const productSlice = createSlice({
         state.isLoading = false;
       })
       .addCase(ApplyFilter.fulfilled, (state, action) => {
+        state.isLoading = false;
         state.products = action.payload?.products;
-        state.isLoading = true;
       });
   },
 });

@@ -72,7 +72,7 @@ export interface IProductVariantFrontend {
     loyalityPoints: number; // Loyalty points associated with the product
     returnPolicy: IReturnPolicyFrontend; // Return policy for the product
     replacementPolicy: IReplacePolicyFrontend; // Replacement policy for the product
-    gender: "mens" | "womens" | "kids" | null; // Gender category for the product
+    gender: "mens" | "womens" | "kids" | ""; // Gender category for the product
     highlights: string[]; // Product highlights (e.g., features)
     productDetails: Record<string, string>; // Additional details as a key-value map
   }
