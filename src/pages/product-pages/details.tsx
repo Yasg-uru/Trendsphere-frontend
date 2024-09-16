@@ -64,6 +64,7 @@ export default function Component() {
       selectedProduct.variants.find((v) => v._id === variantId) ||
       selectedProduct.variants[0];
     setSelectedSize(newVariant.size[0].size);
+    setImage(newVariant.images[0]);
   };
   const handleImageChange = (image: string) => {
     setImage(image);
@@ -81,6 +82,7 @@ export default function Component() {
         <div className=" md:grid grid-cols-4 gap-3">
           {selectedVariant.images.map((image, index) => (
             <button
+              type="button"
               onClick={() => handleImageChange(image)}
               key={index}
               className="border hover:border-primary rounded-lg overflow-hidden transition-colors"
@@ -116,13 +118,16 @@ export default function Component() {
         </div>
         <div className="grid gap-2">
           <div className="flex items-center gap-2">
-            <StarIcon className="w-5 h-5 fill-primary" />
-            <StarIcon className="w-5 h-5 fill-primary" />
-            <StarIcon className="w-5 h-5 fill-primary" />
-            <StarIcon className="w-5 h-5 fill-muted stroke-muted-foreground" />
-            <StarIcon className="w-5 h-5 fill-muted stroke-muted-foreground" />
+            {[1, 2, 3, 4, 5].map((val) => (
+              <StarIcon className={`w-5 h-5 ${val<=selectedProduct.rating?"fill-primary":"fill-muted stroke-muted-foreground"}`} />
+            ))}
+           
             <span className="text-muted-foreground text-sm">
-              (No reviews yet)
+              (
+              {selectedProduct.reviews.length === 0
+                ? "No reviews yet"
+                : selectedProduct.reviews.length}
+              )
             </span>
           </div>
           <div className="flex items-center gap-2">
