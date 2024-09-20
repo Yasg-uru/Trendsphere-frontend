@@ -540,12 +540,12 @@ export default function ProductsPage() {
                         </span>
                       ))}
                     </div>
-                    <Button
+                    {/* <Button
                       variant="outline"
                       className={`font-semibold transition-colors duration-200 dark:text-black dark:bg-white text-white bg-black`}
                     >
                       Add Cart
-                    </Button>
+                    </Button> */}
                   </CardFooter>
                 </Card>
               ))}

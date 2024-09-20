@@ -65,7 +65,10 @@ export const ApplyFilter = createAsyncThunk(
 );
 export const updateCartQuantity = createAsyncThunk(
   "auth/update-quantity",
-  async (formData: { productId: string,variantId:string ; quantity: number }, { rejectWithValue }) => {
+  async (
+    formData: { productId: string; variantId: string; quantity: number },
+    { rejectWithValue }
+  ) => {
     try {
       // const {productId,variantId, quantity } = formData;
 
@@ -92,6 +95,23 @@ export const addcart = createAsyncThunk(
       return response.data;
     } catch (error) {
       return rejectWithValue("Failed to add cart ");
+    }
+  }
+);
+export const GiveReview = createAsyncThunk(
+  "review/create",
+  async (formData, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post(
+        `/product/review/${4}`,
+        formData,
+        {
+          withCredentials: true,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue("Failed to create Review ");
     }
   }
 );
