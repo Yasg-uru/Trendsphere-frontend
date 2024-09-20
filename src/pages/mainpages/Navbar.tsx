@@ -89,6 +89,7 @@ export default function Navbar() {
     setCurrentChildCategory(childCategory);
     handleClick();
   };
+  const {carts}=useAppSelector(state=>state.auth)
   return (
     <nav className="bg-background border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -174,15 +175,17 @@ export default function Navbar() {
                 className="pl-8 w-64"
               />
             </div>
-            <Link to="/mycarts"><Button variant="ghost" size="icon" className="relative">
-              <ShoppingCart className="h-5 w-5" />
-              {userInfo && userInfo.cart.length > 0 && (
-                <div className="absolute top-0 right-0  flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground">
-                  {userInfo.cart.length}
-                </div>
-              )}
-              <span className="sr-only">Shopping cart</span>
-            </Button></Link>
+            <Link to="/mycarts">
+              <Button variant="ghost" size="icon" className="relative">
+                <ShoppingCart className="h-5 w-5" />
+                {  carts.length > 0 && (
+                  <div className="absolute top-0 right-0  flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground">
+                    {carts.length}
+                  </div>
+                )}
+                <span className="sr-only">Shopping cart</span>
+              </Button>
+            </Link>
             <Button
               variant="ghost"
               size="icon"
