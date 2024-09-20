@@ -1,71 +1,106 @@
 import { Button } from "@/components/ui/button";
-import { useAppSelector } from "@/state-manager/hook";
-import { cart } from "@/types/authState/initialState";
-import { SVGProps, useEffect, useState } from "react";
+import Loader from "@/helper/Loader";
+import { useToast } from "@/hooks/use-toast";
+import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
+import { GetCarts } from "@/state-manager/slices/authSlice";
+
+import { SVGProps, useEffect } from "react";
 import { JSX } from "react/jsx-runtime";
 
 export default function Carts() {
-  const { userInfo } = useAppSelector((state) => state.auth);
-  const [carts, setCarts] = useState<cart[]>([]);
-  //     useEffect(()=>{
-  //         if(userInfo && userInfo.cart.length>0){
-  // const Carts=userInfo.cart.map((cart)=>)
-  //         }
-  //     })
-  const cartItems = [
-    {
-      id: 1,
-      image: "/placeholder.svg",
-      name: "Cozy Knit Sweater",
-      quantity: 2,
-      price: 49.99,
-    },
-    {
-      id: 2,
-      image: "/placeholder.svg",
-      name: "Leather Backpack",
-      quantity: 1,
-      price: 79.99,
-    },
-    {
-      id: 3,
-      image: "/placeholder.svg",
-      name: "Distressed Denim Jeans",
-      quantity: 1,
-      price: 59.99,
-    },
-  ];
-  const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
-  const totalCost = cartItems.reduce(
-    (acc, item) => acc + item.quantity * item.price,
+  const { carts=[], isLoading } = useAppSelector((state) => state.auth);
+
+  const dispatch = useAppDispatch();
+  const { toast } = useToast();
+  useEffect(() => {
+    dispatch(GetCarts())
+      .then(() => {
+        toast({
+          title: "Successfully fetched carts ",
+        });
+      })
+      .catch((error) => {
+        toast({
+          title: error,
+        });
+      });
+  }, []);
+
+  if (isLoading) {
+    return <Loader />;
+  }
+ 
+  const totalItems = carts.reduce((acc, item) => acc + item.quantity, 0);
+  const totalCost = carts.reduce((acc, item: any) => {
+    const discountedPrice = item.discount
+      ? item.price * (1 - item.discount.discountPercentage / 100)
+      : item.price;
+    return acc + item.quantity * discountedPrice;
+  }, 0);
+  const totalLoyaltyPoints = carts.reduce(
+    (acc, item: any) => acc + item.loyaltyPoints,
     0
   );
+
   return (
     <div className="container mx-auto px-4 md:px-6 py-12">
       <h1 className="text-2xl font-bold mb-8">Your Cart</h1>
       <div className="grid gap-8">
         <div className="grid gap-6">
-          {cartItems.map((item) => (
+          {carts.map((item, index) => (
             <div
-              key={item.id}
-              className="grid grid-cols-[80px_1fr_auto] items-center gap-4"
+              key={index}
+              className="grid grid-cols-[80px_1fr_auto] items-center gap-4 border-b pb-4"
             >
               <img
-                src="/placeholder.svg"
-                alt={item.name}
-                width={80}
-                height={80}
-                className="rounded-md object-cover"
-                style={{ aspectRatio: "80/80", objectFit: "cover" }}
+                src={item.image}
+                alt={item.title}
+                className="rounded-md object-cover w-20 h-20"
               />
               <div className="grid gap-1">
-                <h3 className="font-medium">{item.name}</h3>
-                <div className="text-muted-foreground">
+                <h3 className="font-medium">{item.title}</h3>
+                <div className="text-sm text-muted-foreground">
                   Quantity: {item.quantity}
                 </div>
+                <div className="text-sm text-muted-foreground">
+                  Return:{" "}
+                  {item.returnPolicy.eligible
+                    ? `${item.returnPolicy.refundDays} days`
+                    : "Not eligible"}
+                </div>
+                {item.replacementPolicy && (
+                  <div className="text-sm text-muted-foreground">
+                    Replacement:{" "}
+                    {item.replacementPolicy.elgible
+                      ? `${item.replacementPolicy.replacementDays} days`
+                      : "Not eligible"}
+                  </div>
+                )}
+                <div className="text-sm text-muted-foreground">
+                  Loyalty Points: {item.loyaltyPoints}
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="font-medium">${item.price.toFixed(2)}</div>
+              <div className="flex flex-col items-end gap-2">
+                <div className="font-medium flex items-center gap-2">
+                  {item.discount && (
+                    <>
+                      <span className="line-through text-muted-foreground">
+                        ${item.price.toFixed(2)}
+                      </span>
+                      <span className="text-green-600">
+                        $
+                        {(
+                          item.price *
+                          (1 - item.discount.discountPercentage / 100)
+                        ).toFixed(2)}
+                      </span>
+                      <span className="text-sm text-green-600">
+                        ({item.discount.discountPercentage}% off)
+                      </span>
+                    </>
+                  )}
+                  {!item.discount && <span>${item.price.toFixed(2)}</span>}
+                </div>
                 <Button variant="outline" size="icon">
                   <TrashIcon className="h-4 w-4" />
                   <span className="sr-only">Remove</span>
@@ -83,6 +118,10 @@ export default function Carts() {
             <div className="flex items-center justify-between">
               <div className="font-medium">Total Cost</div>
               <div className="font-medium">${totalCost.toFixed(2)}</div>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="font-medium">Total Loyalty Points</div>
+              <div className="font-medium">{totalLoyaltyPoints}</div>
             </div>
           </div>
           <div className="grid gap-4">

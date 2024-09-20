@@ -9,6 +9,7 @@ import { z } from "zod";
 const initialState: authState = {
   isLoading: false,
   userInfo: null,
+  carts: []
 };
 interface authError {
   error: string;
@@ -58,6 +59,18 @@ export const VerifyCode = createAsyncThunk(
     }
   }
 );
+export const GetCarts=createAsyncThunk("auth/carts",async (_,{rejectWithValue})=>{
+  try {
+    const response=await axiosInstance.get('/user/carts',{
+      withCredentials:true 
+    });
+    return response.data;
+
+  } catch (error) {
+    
+    rejectWithValue("failed to fetch your carts ");
+  }
+})
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -90,6 +103,16 @@ const authSlice = createSlice({
     });
     builder.addCase(VerifyCode.pending, (state) => {
       state.isLoading = true;
+    });
+    builder.addCase(GetCarts.rejected, (state) => {
+      state.isLoading = false;
+    });
+    builder.addCase(GetCarts.pending, (state) => {
+      state.isLoading = true;
+    });
+    builder.addCase(GetCarts.fulfilled, (state,action) => {
+      state.carts=action.payload?.carts;
+      state.isLoading = false;
     });
   },
 });

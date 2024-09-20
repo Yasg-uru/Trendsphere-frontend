@@ -76,6 +76,7 @@ export const addcart = createAsyncThunk(
     }
   }
 );
+
 const productSlice = createSlice({
   name: "product",
   initialState,

@@ -6,6 +6,7 @@ import {
 export interface authState {
   isLoading: boolean;
   userInfo: User | null;
+  carts:CartItem[];
 }
 
 interface Preferences {
@@ -40,3 +41,37 @@ interface User {
   updatedAt: string;
   __v: number;
 }
+interface Discount {
+  discountPercentage: number;
+  validFrom: string; // ISO date string
+  validUntil: string; // ISO date string
+  _id: string;
+}
+
+interface ReturnPolicy {
+  eligible: boolean;
+  refundDays: number;
+  terms: string;
+  _id: string;
+}
+
+interface ReplacementPolicy {
+  eligible: boolean;
+  replacementDays: number;
+  terms: string;
+  validReason: any[]; // Adjust the type as necessary
+  _id: string;
+}
+
+interface CartItem {
+  title: string;
+  quantity: number;
+  price: number;
+  image: string;
+  discount: Discount;
+  returnPolicy: ReturnPolicy;
+  replacementPolicy: ReplacementPolicy;
+  loyaltyPoints: number;
+}
+
+

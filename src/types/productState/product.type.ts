@@ -78,3 +78,5 @@ export interface IProductVariantFrontend {
     productDetails: Record<string, string>; // Additional details as a key-value map
   }
   
+
+  
