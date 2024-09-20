@@ -13,7 +13,7 @@ interface Preferences {
   favoriteColors: string[];
   preferredMaterials: string[];
 }
-interface cart {
+export interface cart {
   productId: IProductFrontend;
   quantity: number;
   variantId: IProductVariantFrontend;

@@ -17,6 +17,7 @@ import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 import { useLocation } from "react-router-dom";
 import { AddToCart } from "@/state-manager/slices/productSlice";
 import { useToast } from "@/hooks/use-toast";
+import { CheckIcon } from "lucide-react";
 
 export default function Details() {
   const { toast } = useToast();
@@ -28,6 +29,7 @@ export default function Details() {
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
     null
   );
+  const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [image, setImage] = useState<string>("");
   useEffect(() => {
@@ -71,6 +73,7 @@ export default function Details() {
       const formData = {
         productId: selectedProductId,
         variantId: selectedVariantId,
+        size: selectedSize,
         quantity: 1,
       };
       dispatch(AddToCart(formData))
@@ -191,6 +194,28 @@ export default function Details() {
               </SelectContent>
             </Select>
           </div>
+          {/* <div className="mb-8">
+            <h2 className="text-lg font-semibold mb-4">Color Variants</h2>
+            <div className="grid grid-cols-5 gap-4">
+              {selectedVariant.color > 0 &&
+                selectedVariant.map((color) => (
+                  <button
+                    key={color.value}
+                    className={`w-12 h-12 rounded-full transition-all ${
+                      selectedColor === color.value
+                        ? "ring-2 ring-primary"
+                        : "hover:ring-2 hover:ring-muted"
+                    }`}
+                    style={{ backgroundColor: color.value }}
+                    onClick={() => setSelectedColor(color.value)}
+                  >
+                    {selectedColor === color.value && (
+                      <CheckIcon className="w-6 h-6 text-primary-foreground" />
+                    )}
+                  </button>
+                ))}
+            </div>
+          </div> */}
           <div className="grid gap-2">
             <Label htmlFor="size" className="text-base">
               Size
