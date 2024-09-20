@@ -249,6 +249,7 @@ import Loader from "@/helper/Loader";
 import { useToast } from "@/hooks/use-toast";
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 import { GetCarts, removeCart } from "@/state-manager/slices/authSlice";
+import { updateCartQuantity } from "@/state-manager/slices/productSlice";
 import { SVGProps, useEffect } from "react";
 import { JSX } from "react/jsx-runtime";
 
@@ -288,22 +289,22 @@ export default function Carts() {
       });
   };
 
-  // const handleQuantityChange = (
-  //   productId: string,
-  //   variantId: string,
-  //   newQuantity: number
-  // ) => {
-  //   if (newQuantity > 0) {
-  //     dispatch(updateCartQuantity({ productId, variantId, quantity: newQuantity }))
-  //       .then(() => {
-  //         toast({ title: "Successfully updated quantity" });
-  //         dispatch(GetCarts());
-  //       })
-  //       .catch((error) => {
-  //         toast({ title: error.message });
-  //       });
-  //   }
-  // };
+  const handleQuantityChange = (
+    productId: string,
+    variantId: string,
+    quantity: number
+  ) => {
+    if (quantity > 0) {
+      dispatch(updateCartQuantity({ productId, variantId, quantity }))
+        .then(() => {
+          toast({ title: "Successfully updated quantity" });
+          dispatch(GetCarts());
+        })
+        .catch((error) => {
+          toast({ title: error.message });
+        });
+    }
+  };
 
   const isAvailable = (stock: number) => stock > 0;
 
@@ -363,13 +364,13 @@ export default function Carts() {
                   item.discount.validUntil
                 )
               : false;
-            const available = item.stocks>0;
+            const available = item.stocks > 0;
 
             return (
               <div
                 key={index}
                 className={`grid grid-cols-[80px_1fr_auto] items-center gap-4 border-b pb-4 ${
-                  !available ? 'opacity-50' : ''
+                  !available ? "opacity-50" : ""
                 }`}
               >
                 <img
@@ -434,7 +435,13 @@ export default function Carts() {
                     <Button
                       variant="outline"
                       size="icon"
-                      // onClick={() => handleQuantityChange(item.productId, item.variantId, item.quantity - 1)}
+                      onClick={() =>
+                        handleQuantityChange(
+                          item.productId,
+                          item.variantId,
+                          item.quantity - 1
+                        )
+                      }
                       disabled={!available || item.quantity <= 1}
                     >
                       -
@@ -443,7 +450,13 @@ export default function Carts() {
                     <Button
                       variant="outline"
                       size="icon"
-                      // onClick={() => handleQuantityChange(item.productId, item.variantId, item.quantity + 1)}
+                      onClick={() =>
+                        handleQuantityChange(
+                          item.productId,
+                          item.variantId,
+                          item.quantity + 1
+                        )
+                      }
                       disabled={!available}
                     >
                       +

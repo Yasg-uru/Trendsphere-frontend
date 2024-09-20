@@ -77,6 +77,7 @@ interface CartItem {
   returnPolicy: ReturnPolicy;
   replacementPolicy: ReplacementPolicy;
   loyaltyPoints: number;
+  _id:string;
 }
 
 

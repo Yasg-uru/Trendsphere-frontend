@@ -63,6 +63,25 @@ export const ApplyFilter = createAsyncThunk(
     }
   }
 );
+export const updateCartQuantity = createAsyncThunk(
+  "auth/update-quantity",
+  async (formData: { productId: string,variantId:string ; quantity: number }, { rejectWithValue }) => {
+    try {
+      // const {productId,variantId, quantity } = formData;
+
+      const response = await axiosInstance.put(
+        "/product/update-cart",
+        formData,
+        {
+          withCredentials: true,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue("Failed to update cart quantity");
+    }
+  }
+);
 export const addcart = createAsyncThunk(
   "product/addcart",
   async (formData: cardFormData, { rejectWithValue }) => {

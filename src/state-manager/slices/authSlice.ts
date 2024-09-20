@@ -14,6 +14,7 @@ const initialState: authState = {
 interface authError {
   error: string;
 }
+
 export const Login = createAsyncThunk(
   "auth/sign-in",
   async (formdata: z.infer<typeof signInSchema>, { rejectWithValue }) => {
@@ -84,12 +85,12 @@ export const removeCart = createAsyncThunk(
       const response = await axiosInstance.delete(
         `/product/remove/${productId}/${variantId}`,
         {
-          withCredentials:true
+          withCredentials: true,
         }
       );
       return response.data;
     } catch (error) {
-      console.log("Error in cart removing :",error)
+      console.log("Error in cart removing :", error);
       return rejectWithValue("Failed to remove cart ");
     }
   }
