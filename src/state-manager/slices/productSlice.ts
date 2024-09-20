@@ -2,9 +2,15 @@ import axiosInstance from "@/helper/axiosinstance";
 import { ProductState } from "@/types/productState/productstate";
 
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { AxiosError } from "axios";
+import axios, { AxiosError } from "axios";
 interface productError {
   error: string;
+}
+interface cardFormData {
+  productId: string;
+  variantId: string;
+  size: string;
+  quantity: number;
 }
 interface FilterParams {
   category?: string;
@@ -57,24 +63,16 @@ export const ApplyFilter = createAsyncThunk(
     }
   }
 );
-export const AddToCart = createAsyncThunk(
+export const addcart = createAsyncThunk(
   "product/addcart",
-  async (
-    formdata: { productId: string; variantId: string; quantity: number },
-    { rejectWithValue }
-  ) => {
+  async (formData: cardFormData, { rejectWithValue }) => {
     try {
-      const { productId, variantId, quantity } = formdata;
-      const response = await axiosInstance.post(
-        `/product/addcart/${productId}/${variantId}`,
-        { quantity },
-        {
-          withCredentials: true,
-        }
-      );
+      const response = await axiosInstance.post("/product/addcarts", formData, {
+        withCredentials: true,
+      });
       return response.data;
     } catch (error) {
-      return rejectWithValue("Failed to Add cart");
+      return rejectWithValue("Failed to add cart ");
     }
   }
 );

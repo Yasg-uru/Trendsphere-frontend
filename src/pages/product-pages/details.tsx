@@ -15,7 +15,7 @@ import { SVGProps } from "react";
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 // import { IProductFrontend } from "@/types/productState/product.type";
 import { useLocation } from "react-router-dom";
-import { AddToCart } from "@/state-manager/slices/productSlice";
+import { addcart } from "@/state-manager/slices/productSlice";
 import { useToast } from "@/hooks/use-toast";
 import { CheckIcon } from "lucide-react";
 
@@ -70,13 +70,20 @@ export default function Details() {
   const dispatch = useAppDispatch();
   const handleCart = () => {
     if (selectedVariantId) {
+      if (!selectedSize) {
+        toast({
+          title: "Please select size",
+        });
+        return;
+      }
       const formData = {
         productId: selectedProductId,
         variantId: selectedVariantId,
         size: selectedSize,
         quantity: 1,
       };
-      dispatch(AddToCart(formData))
+
+      dispatch(addcart(formData))
         .unwrap()
         .then(() => {
           toast({

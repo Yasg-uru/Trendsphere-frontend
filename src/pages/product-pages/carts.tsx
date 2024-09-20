@@ -5,13 +5,13 @@ import { SVGProps, useEffect, useState } from "react";
 import { JSX } from "react/jsx-runtime";
 
 export default function Carts() {
-    const {userInfo}=useAppSelector(state=>state.auth);
-    const [carts,setCarts]=useState<cart[]>([]);
-//     useEffect(()=>{
-//         if(userInfo && userInfo.cart.length>0){
-// const Carts=userInfo.cart.map((cart)=>)
-//         }
-//     })
+  const { userInfo } = useAppSelector((state) => state.auth);
+  const [carts, setCarts] = useState<cart[]>([]);
+  //     useEffect(()=>{
+  //         if(userInfo && userInfo.cart.length>0){
+  // const Carts=userInfo.cart.map((cart)=>)
+  //         }
+  //     })
   const cartItems = [
     {
       id: 1,
