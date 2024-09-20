@@ -14,13 +14,14 @@ import {
 import { SVGProps } from "react";
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 // import { IProductFrontend } from "@/types/productState/product.type";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { addcart } from "@/state-manager/slices/productSlice";
 import { useToast } from "@/hooks/use-toast";
 import { CheckIcon } from "lucide-react";
 
 export default function Details() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const { products } = useAppSelector((state) => state.product);
   const location = useLocation();
   const [selectedProductId, setSelectedProductId] = useState<string | null>(
@@ -96,6 +97,12 @@ export default function Details() {
           });
         });
     }
+  };
+  
+  const handleBuyNow = () => {
+    navigate("/order", {
+      state: { selectedProductId, selectedVariantId },
+    });
   };
   return (
     <div className="grid md:grid-cols-2 gap-6 lg:gap-12 items-start max-w-6xl px-4 mx-auto py-6">
@@ -263,7 +270,9 @@ export default function Details() {
             <Button size="lg" onClick={handleCart}>
               Add to Cart
             </Button>
-            <Button size="lg">Buy Now</Button>
+            <Button size="lg" onClick={handleBuyNow}>
+              Buy Now
+            </Button>
           </div>
         </div>
         <Separator />

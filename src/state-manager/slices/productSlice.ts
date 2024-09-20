@@ -1,4 +1,5 @@
 import axiosInstance from "@/helper/axiosinstance";
+import { FormValues } from "@/pages/product-pages/Review";
 import { ProductState } from "@/types/productState/productstate";
 
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
@@ -100,10 +101,27 @@ export const addcart = createAsyncThunk(
 );
 export const GiveReview = createAsyncThunk(
   "review/create",
-  async (formData, { rejectWithValue }) => {
+  async (
+    Form_Data: { data: FormValues; productId?: string },
+    { rejectWithValue }
+  ) => {
+    const { data, productId } = Form_Data;
+    const formData = new FormData();
+    formData.append("comment", data.comment);
+    formData.append("rating", data.rating.toString());
+
+    data.images.forEach((image, index) => {
+      formData.append("images", image.file[0]);
+      formData.append(`description[${index}]`, image.description);
+    });
+
+    console.log("this is a formdata");
+    for (const [key, value] of formData.entries()) {
+      console.log(`${key}=======> ${value}`);
+    }
     try {
       const response = await axiosInstance.post(
-        `/product/review/${4}`,
+        `/product/review/${productId}`,
         formData,
         {
           withCredentials: true,

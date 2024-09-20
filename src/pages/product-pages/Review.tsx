@@ -17,6 +17,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { useAppDispatch } from "@/state-manager/hook";
+import { useToast } from "@/hooks/use-toast";
+import { useParams } from "react-router-dom";
+import { GiveReview } from "@/state-manager/slices/productSlice";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = [
@@ -48,7 +52,7 @@ const schema = z.object({
     .max(5, "Maximum 5 images allowed"),
 });
 
-type FormValues = z.infer<typeof schema>;
+export type FormValues = z.infer<typeof schema>;
 
 export default function AddReview() {
   const [submitStatus, setSubmitStatus] = useState<
@@ -73,22 +77,23 @@ export default function AddReview() {
   });
 
   const watchedImages = watch("images");
+  const dispatch = useAppDispatch();
+  const { toast } = useToast();
+  const { productId } = useParams();
 
   const onSubmit = async (data: FormValues) => {
     console.log("this is a data :", data);
-    const formData = new FormData();
-    formData.append("comment", data.comment);
-    formData.append("rating", data.rating.toString());
-
-    data.images.forEach((image, index) => {
-      formData.append("images", image.file[0]);
-      formData.append(`description[${index}]`, image.description);
-    });
-
-    console.log("this is a formdata");
-    for (const [key, value] of formData.entries()) {
-      console.log(`${key}=======> ${value}`);
-    }
+    dispatch(GiveReview({ data, productId }))
+      .then(() => {
+        toast({
+          title: "Successfully added review",
+        });
+      })
+      .catch((error) => {
+        toast({
+          title: error,
+        });
+      });
   };
   console.log("this is errors related to the validation :", errors);
   return (
