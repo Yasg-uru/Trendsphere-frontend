@@ -56,7 +56,7 @@ interface ReturnPolicy {
 }
 
 interface ReplacementPolicy {
-  eligible: boolean;
+  elgible: boolean;
   replacementDays: number;
   terms: string;
   validReason: any[]; // Adjust the type as necessary
@@ -67,6 +67,8 @@ interface CartItem {
   title: string;
   quantity: number;
   price: number;
+  variantId:string;
+  productId:string;
   image: string;
   discount: Discount;
   returnPolicy: ReturnPolicy;

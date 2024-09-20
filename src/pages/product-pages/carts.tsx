@@ -2,13 +2,13 @@ import { Button } from "@/components/ui/button";
 import Loader from "@/helper/Loader";
 import { useToast } from "@/hooks/use-toast";
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
-import { GetCarts } from "@/state-manager/slices/authSlice";
+import { GetCarts, removeCart } from "@/state-manager/slices/authSlice";
 
 import { SVGProps, useEffect } from "react";
 import { JSX } from "react/jsx-runtime";
 
 export default function Carts() {
-  const { carts=[], isLoading } = useAppSelector((state) => state.auth);
+  const { carts = [], isLoading } = useAppSelector((state) => state.auth);
 
   const dispatch = useAppDispatch();
   const { toast } = useToast();
@@ -29,7 +29,27 @@ export default function Carts() {
   if (isLoading) {
     return <Loader />;
   }
- 
+  const handleRemove = ({
+    productId,
+    variantId,
+  }: {
+    productId: string;
+    variantId: string;
+  }) => {
+    dispatch(removeCart({ productId, variantId }))
+      .then(() => {
+        toast({
+          title: "Successfully removed your cart",
+        });
+        dispatch(GetCarts());
+      })
+      .catch((error) => {
+        toast({
+          title: error,
+        });
+      });
+  };
+
   const totalItems = carts.reduce((acc, item) => acc + item.quantity, 0);
   const totalCost = carts.reduce((acc, item: any) => {
     const discountedPrice = item.discount
@@ -101,7 +121,11 @@ export default function Carts() {
                   )}
                   {!item.discount && <span>${item.price.toFixed(2)}</span>}
                 </div>
-                <Button variant="outline" size="icon">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handleRemove(item)}
+                >
                   <TrashIcon className="h-4 w-4" />
                   <span className="sr-only">Remove</span>
                 </Button>

@@ -9,7 +9,7 @@ import { z } from "zod";
 const initialState: authState = {
   isLoading: false,
   userInfo: null,
-  carts: []
+  carts: [],
 };
 interface authError {
   error: string;
@@ -59,18 +59,41 @@ export const VerifyCode = createAsyncThunk(
     }
   }
 );
-export const GetCarts=createAsyncThunk("auth/carts",async (_,{rejectWithValue})=>{
-  try {
-    const response=await axiosInstance.get('/user/carts',{
-      withCredentials:true 
-    });
-    return response.data;
-
-  } catch (error) {
-    
-    rejectWithValue("failed to fetch your carts ");
+export const GetCarts = createAsyncThunk(
+  "auth/carts",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get("/user/carts", {
+        withCredentials: true,
+      });
+      return response.data;
+    } catch (error) {
+      rejectWithValue("failed to fetch your carts ");
+    }
   }
-})
+);
+export const removeCart = createAsyncThunk(
+  "auth/cartremove",
+  async (
+    formData: { productId: string; variantId: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const { variantId, productId } = formData;
+
+      const response = await axiosInstance.delete(
+        `/product/remove/${productId}/${variantId}`,
+        {
+          withCredentials:true
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.log("Error in cart removing :",error)
+      return rejectWithValue("Failed to remove cart ");
+    }
+  }
+);
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -110,8 +133,17 @@ const authSlice = createSlice({
     builder.addCase(GetCarts.pending, (state) => {
       state.isLoading = true;
     });
-    builder.addCase(GetCarts.fulfilled, (state,action) => {
-      state.carts=action.payload?.carts;
+    builder.addCase(GetCarts.fulfilled, (state, action) => {
+      state.carts = action.payload?.carts;
+      state.isLoading = false;
+    });
+    builder.addCase(removeCart.fulfilled, (state) => {
+      state.isLoading = false;
+    });
+    builder.addCase(removeCart.rejected, (state) => {
+      state.isLoading = false;
+    });
+    builder.addCase(removeCart.pending, (state) => {
       state.isLoading = false;
     });
   },
