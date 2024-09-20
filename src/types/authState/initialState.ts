@@ -65,8 +65,11 @@ interface ReplacementPolicy {
 
 interface CartItem {
   title: string;
+  color:string ;
+  size:string;
   quantity: number;
   price: number;
+  stocks:number;
   variantId:string;
   productId:string;
   image: string;
