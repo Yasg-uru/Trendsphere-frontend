@@ -209,20 +209,6 @@ export default function Details() {
         </div>
       </div>
       <div className="grid gap-6">
-        {/* <div>
-          <Select onValueChange={handleProductChange} value={selectedProductId}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select a product" />
-            </SelectTrigger>
-            <SelectContent>
-              {products.map((product) => (
-                <SelectItem key={product._id} value={product._id}>
-                  {product.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          </div> */}
         <div>
           <h1 className="text-3xl font-bold mt-4">{selectedProduct.name}</h1>
           <p className="text-muted-foreground">{selectedProduct.description}</p>
@@ -282,28 +268,7 @@ export default function Details() {
               </SelectContent>
             </Select>
           </div>
-          {/* <div className="mb-8">
-            <h2 className="text-lg font-semibold mb-4">Color Variants</h2>
-            <div className="grid grid-cols-5 gap-4">
-              {selectedVariant.color > 0 &&
-                selectedVariant.map((color) => (
-                  <button
-                    key={color.value}
-                    className={`w-12 h-12 rounded-full transition-all ${
-                      selectedColor === color.value
-                        ? "ring-2 ring-primary"
-                        : "hover:ring-2 hover:ring-muted"
-                    }`}
-                    style={{ backgroundColor: color.value }}
-                    onClick={() => setSelectedColor(color.value)}
-                  >
-                    {selectedColor === color.value && (
-                      <CheckIcon className="w-6 h-6 text-primary-foreground" />
-                    )}
-                  </button>
-                ))}
-            </div>
-          </div> */}
+
           <div className="grid gap-2">
             <Label htmlFor="size" className="text-base">
               Size
