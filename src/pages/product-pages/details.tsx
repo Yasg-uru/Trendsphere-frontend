@@ -101,6 +101,29 @@ export default function Details() {
       selectedProduct.variants[0];
     setSelectedSize(newVariant.size[0].size);
     setImage(newVariant.images[0]);
+    setSelectedProducts([
+      {
+        productId: selectedProductId,
+        variantId,
+        quantity: 1,
+        discount: (selectedProduct?.discount?.discountPercentage ?? 0) / 100,
+        priceAtPurchase: newVariant.price,
+      },
+    ]);
+    setUnselectedProducts(
+      selectedProduct.variants
+        .filter(
+          (variant) =>
+            !selectedProducts.some((p) => p.variantId !== variant._id)
+        )
+        .map((Item) => ({
+          productId: selectedProductId,
+          variantId: Item._id,
+          quantity: 1,
+          discount: (selectedProduct?.discount?.discountPercentage ?? 0) / 100,
+          priceAtPurchase: Item.price,
+        }))
+    );
   };
   const handleImageChange = (image: string) => {
     setImage(image);
@@ -429,11 +452,9 @@ export default function Details() {
                     <div key={index} className="flex items-center gap-4">
                       <img
                         src={variant.images[0]}
-                        // alt={product.name}
                         className="w-16 h-16 object-cover rounded"
                       />
                       <div className="flex-1">
-                        {/* <h3 className="font-semibold">{product.name}</h3> */}
                         <p className="text-sm text-muted-foreground">
                           {variant.color} - {variant.material} -{" "}
                           {variant.size[0].size}
