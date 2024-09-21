@@ -42,8 +42,11 @@ export default function Details() {
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
     null
   );
-  // const [selectedColor, setSelectedColor] = useState<string | null>(null);
+
   const [selectedProducts, setSelectedProducts] = useState<
+    selectProductsForOrder[]
+  >([]);
+  const [unSelectedProducts, setUnselectedProducts] = useState<
     selectProductsForOrder[]
   >([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -66,7 +69,16 @@ export default function Details() {
           discount: (product?.discount?.discountPercentage ?? 0) / 100,
         },
       ]);
+      const remainingVariants = product.variants.slice(1);
+      const Unselectedvariants = remainingVariants.map((variant) => ({
+        productId,
+        variantId: variant._id,
+        quantity: 1,
+        priceAtPurchase: variant.price,
+        discount: (product?.discount?.discountPercentage ?? 0) / 100,
+      }));
     }
+    setUnselectedProducts(unSelectedProducts);
   }, [location.state?.id]);
 
   if (!selectedProductId) return <p>Loading...</p>;
