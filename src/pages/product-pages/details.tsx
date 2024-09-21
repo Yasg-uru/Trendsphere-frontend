@@ -70,15 +70,15 @@ export default function Details() {
         },
       ]);
       const remainingVariants = product.variants.slice(1);
-      const Unselectedvariants = remainingVariants.map((variant) => ({
+      const UnSelectedvariants = remainingVariants.map((variant) => ({
         productId,
         variantId: variant._id,
         quantity: 1,
         priceAtPurchase: variant.price,
         discount: (product?.discount?.discountPercentage ?? 0) / 100,
       }));
+      setUnselectedProducts(UnSelectedvariants);
     }
-    setUnselectedProducts(unSelectedProducts);
   }, [location.state?.id]);
 
   if (!selectedProductId) return <p>Loading...</p>;
@@ -155,9 +155,15 @@ export default function Details() {
     );
   };
   const handleRemoveProduct = (index: number) => {
+    const productToBeRemove = selectedProducts.find((_, i) => i === index);
     setSelectedProducts((prevProducts) =>
       prevProducts.filter((_, i) => i !== index)
     );
+
+    //if user remove the product from the select product variants then we need to push it into the unselect product variants
+    if (productToBeRemove) {
+      setUnselectedProducts([...unSelectedProducts, productToBeRemove]);
+    }
     toast({
       title: "Removed successfully product ",
     });
@@ -433,6 +439,45 @@ export default function Details() {
               );
             })}
           </div>
+          {unSelectedProducts.length > 0 && (
+            <div className="pt-6 border-t">
+              <h3 className="text-lg font-semibold mb-4">
+                Unselected Variants
+              </h3>
+              <div className="grid gap-4">
+                {unSelectedProducts.map((product, index) => {
+                  const variant = selectedProduct.variants.find(
+                    (v) => v._id === product.variantId
+                  );
+                  if (!variant) return null;
+                  return (
+                    <div key={index} className="flex items-center gap-4">
+                      <img
+                        src={variant.images[0]}
+                        // alt={product.name}
+                        className="w-16 h-16 object-cover rounded"
+                      />
+                      <div className="flex-1">
+                        {/* <h3 className="font-semibold">{product.name}</h3> */}
+                        <p className="text-sm text-muted-foreground">
+                          {variant.color} - {variant.material} -{" "}
+                          {variant.size[0].size}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <Button
+                          variant="outline"
+                          // onClick={() => handleAddToSelected(product)}
+                        >
+                          Add to Order
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
           <DialogFooter>
             <Button onClick={confirmAndBuyOrder}>Confirm and Buy Order</Button>
           </DialogFooter>
