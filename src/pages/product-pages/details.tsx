@@ -5,6 +5,16 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -17,7 +27,9 @@ import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 import { useLocation, useNavigate } from "react-router-dom";
 import { addcart } from "@/state-manager/slices/productSlice";
 import { useToast } from "@/hooks/use-toast";
-import { CheckIcon } from "lucide-react";
+import { CheckIcon, MinusIcon, PlusIcon, TrashIcon } from "lucide-react";
+import { selectProductsForOrder } from "@/types/ordertypes/initialState";
+import { Input } from "@/components/ui/input";
 
 export default function Details() {
   const { toast } = useToast();
@@ -30,7 +42,11 @@ export default function Details() {
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
     null
   );
-  const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  // const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  const [selectedProducts, setSelectedProducts] = useState<
+    selectProductsForOrder[]
+  >([]);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [image, setImage] = useState<string>("");
   useEffect(() => {
@@ -41,6 +57,15 @@ export default function Details() {
       setSelectedVariantId(product.variants[0]._id);
       setImage(product.variants[0].images[0]);
       setSelectedSize(product.variants[0].size[0].size);
+      setSelectedProducts([
+        {
+          productId,
+          variantId: product.variants[0]._id,
+          quantity: 1,
+          priceAtPurchase: product.variants[0].price,
+          discount: (product?.discount?.discountPercentage ?? 0) / 100,
+        },
+      ]);
     }
   }, [location.state?.id]);
 
@@ -98,11 +123,24 @@ export default function Details() {
         });
     }
   };
-  
-  const handleBuyNow = () => {
+  const handleOrder = () => {
+    setIsModalOpen(true);
+  };
+
+  const confirmAndBuyOrder = () => {
     navigate("/order", {
       state: { selectedProductId, selectedVariantId },
     });
+  };
+  const handleQuantityChange = (index: number, Quantity: number) => {
+    if (Quantity < 1) {
+      return;
+    }
+    setSelectedProducts((prevProducts) =>
+      prevProducts.map((product, i) =>
+        i === index ? { ...product, quantity: Quantity } : product
+      )
+    );
   };
   return (
     <div className="grid md:grid-cols-2 gap-6 lg:gap-12 items-start max-w-6xl px-4 mx-auto py-6">
@@ -270,7 +308,7 @@ export default function Details() {
             <Button size="lg" onClick={handleCart}>
               Add to Cart
             </Button>
-            <Button size="lg" onClick={handleBuyNow}>
+            <Button size="lg" onClick={handleOrder}>
               Buy Now
             </Button>
           </div>
@@ -294,6 +332,92 @@ export default function Details() {
           </div>
         </div>
       </div>
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Confirm Your Order</DialogTitle>
+            <DialogDescription>
+              Review and modify your selected items before proceeding to
+              checkout.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            {selectedProducts.map((product, index) => {
+              const variant = selectedProduct.variants.find(
+                (v) => v._id === product.variantId
+              );
+              if (!variant) return null;
+              return (
+                <div key={index} className="flex items-center gap-4">
+                  <img
+                    src={variant.images[0]}
+                    alt={selectedProduct.name}
+                    className="w-16 h-16 object-cover rounded"
+                  />
+                  <div className="flex-1">
+                    <h3 className="font-semibold">{selectedProduct.name}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {variant.color} - {variant.material} -{" "}
+                      {variant.size[0].size}
+                    </p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() =>
+                          handleQuantityChange(index, product.quantity - 1)
+                        }
+                      >
+                        <MinusIcon className="h-4 w-4" />
+                      </Button>
+                      <Input
+                        type="number"
+                        value={product.quantity}
+                        onChange={(e) =>
+                          handleQuantityChange(
+                            index,
+                            parseInt(e.target.value, 10)
+                          )
+                        }
+                        className="w-16 text-center"
+                      />
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() =>
+                          handleQuantityChange(index, product.quantity + 1)
+                        }
+                      >
+                        <PlusIcon className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold">
+                      $
+                      {(
+                        product.priceAtPurchase *
+                        (1 - product.discount) *
+                        product.quantity
+                      ).toFixed(2)}
+                    </p>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      // onClick={() => handleRemoveProduct(index)}
+                    >
+                      <TrashIcon className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <DialogFooter>
+            <Button onClick={confirmAndBuyOrder}>Confirm and Buy Order</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

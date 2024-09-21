@@ -28,6 +28,23 @@ export const AddnewAddress = createAsyncThunk(
     }
   }
 );
+export const UpdateAddress = createAsyncThunk(
+  "auth/update-address",
+  async (formData:{addressId:string ;data:ChangeAddressForm}, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.put(
+        `/user/update-address1/${34}`,
+        formData,
+        {
+          withCredentials: true,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue("Failed to Add update existing Address");
+    }
+  }
+);
 export const Login = createAsyncThunk(
   "auth/sign-in",
   async (formdata: z.infer<typeof signInSchema>, { rejectWithValue }) => {
@@ -169,6 +186,16 @@ const authSlice = createSlice({
     });
     builder.addCase(AddnewAddress.pending, (state) => {
       state.isLoading = true;
+    });
+    builder.addCase(UpdateAddress.pending, (state) => {
+      state.isLoading = true;
+    });
+    builder.addCase(UpdateAddress.rejected, (state) => {
+      state.isLoading = false;
+    });
+    builder.addCase(UpdateAddress.fulfilled, (state,action) => {
+      state.userInfo=action.payload?.user;
+      state.isLoading = false;
     });
   },
 });

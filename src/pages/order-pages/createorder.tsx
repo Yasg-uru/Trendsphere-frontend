@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { SiRazorpay } from "react-icons/si";
 import {
   Card,
   CardContent,
@@ -48,7 +49,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { AddnewAddress } from "@/state-manager/slices/authSlice";
+import { AddnewAddress, UpdateAddress } from "@/state-manager/slices/authSlice";
 import Loader from "@/helper/Loader";
 import {
   Select,
@@ -81,45 +82,55 @@ const formSchema = z.object({
   }),
 });
 export type ChangeAddressForm = z.infer<typeof formSchema>;
-export default function Component() {
-  const [selectedAddress, setSelectedAddress] = useState("address1");
+export default function CreateOrder() {
+  const { userInfo, isLoading } = useAppSelector((state) => state.auth);
+  const [selectedAddress, setSelectedAddress] = useState(
+    userInfo?.address[0]._id
+  );
   const [expressDelivery, setExpressDelivery] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingAddress, setIsEditingAddress] = useState<any>(null);
+
   const dispatch = useAppDispatch();
   const { toast } = useToast();
   const onSubmit = (data: ChangeAddressForm) => {
     console.log("this is a new address data :", data);
-    dispatch(AddnewAddress(data))
-      .then(() => {
-        toast({
-          title: "successfully added new address",
+
+    if (editingAddress) {
+      dispatch(UpdateAddress({ addressId: editingAddress._id, data }))
+        .then(() => {
+          toast({
+            title: "Successfully updated your address",
+          });
+          setIsEditingAddress(null);
+        })
+        .catch((error) => {
+          toast({
+            title: error,
+          });
         });
-        setIsModalOpen(false);
-      })
-      .catch((error) => {
-        toast({
-          title: error,
-          variant: "destructive",
+    } else {
+      dispatch(AddnewAddress(data))
+        .then(() => {
+          toast({
+            title: "successfully added new address",
+          });
+          setIsModalOpen(false);
+        })
+        .catch((error) => {
+          toast({
+            title: error,
+            variant: "destructive",
+          });
         });
-      });
+    }
   };
-  const addresses = [
-    {
-      id: "address1",
-      name: "John Doe",
-      type: "HOME",
-      phone: "9876543210",
-      address: "123 Trendy Street, Fashion District, Style City - 100001",
-    },
-    {
-      id: "address2",
-      name: "John Doe",
-      type: "WORK",
-      phone: "9876543211",
-      address: "456 Chic Avenue, Glamour Zone, Style City - 100002",
-    },
-  ];
+  const handleEditAddress = (address: ChangeAddressForm) => {
+    setIsEditingAddress(address);
+    form.reset(address);
+    setIsModalOpen(true);
+  };
 
   const items = [
     { name: "Trendy T-Shirt", price: 29.99, quantity: 2 },
@@ -157,7 +168,6 @@ export default function Component() {
       type: "Home",
     },
   });
-  const { userInfo, isLoading } = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
   if (isLoading) {
     return <Loader />;
@@ -259,7 +269,11 @@ export default function Component() {
                             }, ${address.country}`}
                           </p>
                         </div>
-                        <Button variant="ghost" size="sm">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEditAddress(address)}
+                        >
                           <Edit2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -315,44 +329,26 @@ export default function Component() {
             </CardHeader>
             <CardContent className="pt-6">
               <Tabs defaultValue="credit-card" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="credit-card">Credit Card</TabsTrigger>
-                  <TabsTrigger value="paypal">PayPal</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="razorpay">Credit Card</TabsTrigger>
+
                   <TabsTrigger value="cash">Cash on Delivery</TabsTrigger>
                 </TabsList>
-                <TabsContent value="credit-card">
+                <TabsContent value="razorpay">
                   <Card>
                     <CardHeader>
-                      <CardTitle>Credit / Debit Card</CardTitle>
-                      <CardDescription>
-                        Enter your card details to pay
-                      </CardDescription>
+                      <CardTitle>Razorpay</CardTitle>
+                      <CardDescription>Pay using your Razorpay</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                      <div className="space-y-1">
-                        <Label htmlFor="card-number">Card Number</Label>
-                        <Input
-                          id="card-number"
-                          placeholder="1234 5678 9012 3456"
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1">
-                          <Label htmlFor="expiry">Expiry Date</Label>
-                          <Input id="expiry" placeholder="MM/YY" />
-                        </div>
-                        <div className="space-y-1">
-                          <Label htmlFor="cvv">CVV</Label>
-                          <Input id="cvv" placeholder="123" />
-                        </div>
-                      </div>
+                      <Button className="w-full">
+                        <SiRazorpay className="mr-2 h-4 w-4" />
+                        Pay with Razorpay
+                      </Button>
                     </CardContent>
-                    <CardFooter>
-                      <Button className="w-full">Pay Now</Button>
-                    </CardFooter>
                   </Card>
                 </TabsContent>
-                <TabsContent value="paypal">
+                {/* <TabsContent value="paypal">
                   <Card>
                     <CardHeader>
                       <CardTitle>PayPal</CardTitle>
@@ -362,12 +358,12 @@ export default function Component() {
                     </CardHeader>
                     <CardContent className="space-y-2">
                       <Button className="w-full">
-                        {/* <Paypal className="mr-2 h-4 w-4" /> */}
+                        
                         Pay with PayPal
                       </Button>
                     </CardContent>
                   </Card>
-                </TabsContent>
+                </TabsContent> */}
                 <TabsContent value="cash">
                   <Card>
                     <CardHeader>
@@ -473,7 +469,29 @@ export default function Component() {
                 <div>
                   <p className="font-semibold">Delivery to:</p>
                   <p className="text-sm text-muted-foreground">
-                    {addresses.find((a) => a.id === selectedAddress)?.address}
+                    {`${
+                      userInfo?.address.find((a) => a._id === selectedAddress)
+                        ?.addressLine1
+                    }, ${
+                      userInfo?.address.find((a) => a._id === selectedAddress)
+                        ?.addressLine2
+                        ? userInfo?.address.find(
+                            (a) => a._id === selectedAddress
+                          )?.addressLine2 + ", "
+                        : ""
+                    }${
+                      userInfo?.address.find((a) => a._id === selectedAddress)
+                        ?.city
+                    }, ${
+                      userInfo?.address.find((a) => a._id === selectedAddress)
+                        ?.state
+                    } ${
+                      userInfo?.address.find((a) => a._id === selectedAddress)
+                        ?.postalCode
+                    }, ${
+                      userInfo?.address.find((a) => a._id === selectedAddress)
+                        ?.country
+                    }`}
                   </p>
                 </div>
               </div>
