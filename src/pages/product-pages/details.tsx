@@ -168,6 +168,16 @@ export default function Details() {
       title: "Removed successfully product ",
     });
   };
+  const handleAddToSelected = (
+    variant: selectProductsForOrder,
+    index: number
+  ) => {
+    // we need to push the product and remove from the unselected product variants
+    setSelectedProducts([...selectedProducts, variant]);
+    setUnselectedProducts((prevProducts) =>
+      prevProducts.filter((_, i) => i !== index).map((product) => product)
+    );
+  };
   return (
     <div className="grid md:grid-cols-2 gap-6 lg:gap-12 items-start max-w-6xl px-4 mx-auto py-6">
       <div className="grid gap-4">
@@ -467,7 +477,7 @@ export default function Details() {
                       <div className="text-right">
                         <Button
                           variant="outline"
-                          // onClick={() => handleAddToSelected(product)}
+                          onClick={() => handleAddToSelected(product, index)}
                         >
                           Add to Order
                         </Button>
