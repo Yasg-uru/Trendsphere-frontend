@@ -178,7 +178,7 @@ export default function Navbar() {
             <Link to="/mycarts">
               <Button variant="ghost" size="icon" className="relative">
                 <ShoppingCart className="h-5 w-5" />
-                {carts.length > 0 && (
+                { carts && carts?.length > 0 && (
                   <div className="absolute top-0 right-0  flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground">
                     {carts.length}
                   </div>

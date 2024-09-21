@@ -2,6 +2,7 @@ import axiosInstance from "@/helper/axiosinstance";
 import { signInSchema } from "@/pages/mainpages/authpages/login";
 import { signUpSchema } from "@/pages/mainpages/authpages/register";
 import { VerifySchema } from "@/pages/mainpages/authpages/verify";
+import { ChangeAddressForm } from "@/pages/order-pages/createorder";
 import { authState } from "@/types/authState/initialState";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { AxiosError } from "axios";
@@ -14,7 +15,19 @@ const initialState: authState = {
 interface authError {
   error: string;
 }
-
+export const AddnewAddress = createAsyncThunk(
+  "auth/add-address",
+  async (formData: ChangeAddressForm, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post("/user/add-address", formData, {
+        withCredentials: true,
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue("Failed to Add new Address");
+    }
+  }
+);
 export const Login = createAsyncThunk(
   "auth/sign-in",
   async (formdata: z.infer<typeof signInSchema>, { rejectWithValue }) => {
@@ -146,6 +159,16 @@ const authSlice = createSlice({
     });
     builder.addCase(removeCart.pending, (state) => {
       state.isLoading = false;
+    });
+    builder.addCase(AddnewAddress.fulfilled, (state, action) => {
+      state.userInfo = action.payload.user;
+      state.isLoading = false;
+    });
+    builder.addCase(AddnewAddress.rejected, (state) => {
+      state.isLoading == false;
+    });
+    builder.addCase(AddnewAddress.pending, (state) => {
+      state.isLoading = true;
     });
   },
 });

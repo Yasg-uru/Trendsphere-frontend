@@ -6,7 +6,7 @@ import {
 export interface authState {
   isLoading: boolean;
   userInfo: User | null;
-  carts:CartItem[];
+  carts: CartItem[];
 }
 
 interface Preferences {
@@ -39,6 +39,18 @@ interface User {
   paymentMethods: any[]; // Specify type if needed
   createdAt: string;
   updatedAt: string;
+  address: {
+    name: string;
+    addressLine1: string;
+    addressLine2: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+    phone: string;
+    type: "Home" | "University" | "Work" | "Hotel";
+    _id:string;
+  }[];
   __v: number;
 }
 interface Discount {
@@ -65,19 +77,17 @@ interface ReplacementPolicy {
 
 interface CartItem {
   title: string;
-  color:string ;
-  size:string;
+  color: string;
+  size: string;
   quantity: number;
   price: number;
-  stocks:number;
-  variantId:string;
-  productId:string;
+  stocks: number;
+  variantId: string;
+  productId: string;
   image: string;
   discount: Discount;
   returnPolicy: ReturnPolicy;
   replacementPolicy: ReplacementPolicy;
   loyaltyPoints: number;
-  _id:string;
+  _id: string;
 }
-
-

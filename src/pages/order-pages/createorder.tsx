@@ -34,12 +34,76 @@ import {
   Percent,
 } from "lucide-react";
 import { motion } from "framer-motion";
-
+import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
+import { useNavigate } from "react-router-dom";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { useToast } from "@/hooks/use-toast";
+import { AddnewAddress } from "@/state-manager/slices/authSlice";
+import Loader from "@/helper/Loader";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+const formSchema = z.object({
+  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
+  addressLine1: z
+    .string()
+    .min(5, { message: "Address Line 1 must be at least 5 characters." }),
+  addressLine2: z.string().optional(),
+  city: z.string().min(2, { message: "City must be at least 2 characters." }),
+  state: z.string().min(2, { message: "State must be at least 2 characters." }),
+  postalCode: z
+    .string()
+    .min(5, { message: "Postal Code must be at least 5 characters." }),
+  country: z
+    .string()
+    .min(2, { message: "Country must be at least 2 characters." }),
+  phone: z
+    .string()
+    .min(10, { message: "Phone number must be at least 10 characters." }),
+  type: z.enum(["Home", "University", "Work", "Hotel"], {
+    message: "Invalid address type",
+  }),
+});
+export type ChangeAddressForm = z.infer<typeof formSchema>;
 export default function Component() {
   const [selectedAddress, setSelectedAddress] = useState("address1");
   const [expressDelivery, setExpressDelivery] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const dispatch = useAppDispatch();
+  const { toast } = useToast();
+  const onSubmit = (data: ChangeAddressForm) => {
+    console.log("this is a new address data :", data);
+    dispatch(AddnewAddress(data))
+      .then(() => {
+        toast({
+          title: "successfully added new address",
+        });
+        setIsModalOpen(false);
+      })
+      .catch((error) => {
+        toast({
+          title: error,
+          variant: "destructive",
+        });
+      });
+  };
   const addresses = [
     {
       id: "address1",
@@ -78,6 +142,26 @@ export default function Component() {
     setCurrentStep((prev) => Math.max(prev - 1, 1));
   };
 
+  // my implementation
+  const form = useForm<ChangeAddressForm>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      addressLine1: "",
+      addressLine2: "",
+      city: "",
+      state: "",
+      postalCode: "",
+      country: "",
+      phone: "",
+      type: "Home",
+    },
+  });
+  const { userInfo, isLoading } = useAppSelector((state) => state.auth);
+  const navigate = useNavigate();
+  if (isLoading) {
+    return <Loader />;
+  }
   return (
     <div className="container mx-auto p-4 md:p-6 lg:p-8">
       <h1 className="text-3xl font-bold mb-8 text-center">
@@ -122,12 +206,14 @@ export default function Component() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-semibold">+1 (555) 123-4567</p>
+                  <p className="font-semibold">{userInfo?.email}</p>
                   <Badge variant="outline" className="mt-1">
-                    Verified
+                    {userInfo?.isVerified ? "Verified" : "Un Verified"}
                   </Badge>
                 </div>
-                <Button variant="outline">CHANGE</Button>
+                <Button variant="outline" onClick={() => navigate("/Sign-in")}>
+                  CHANGE
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -143,16 +229,16 @@ export default function Component() {
                 value={selectedAddress}
                 onValueChange={setSelectedAddress}
               >
-                {addresses.map((address) => (
+                {userInfo?.address.map((address) => (
                   <motion.div
-                    key={address.id}
+                    key={address._id}
                     className="flex items-center space-x-2 mb-4 p-4 border rounded-lg hover:border-primary transition-colors"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    <RadioGroupItem value={address.id} id={address.id} />
+                    <RadioGroupItem value={address._id} id={address._id} />
                     <Label
-                      htmlFor={address.id}
+                      htmlFor={address._id}
                       className="flex-grow cursor-pointer"
                     >
                       <div className="flex justify-between items-start">
@@ -164,7 +250,13 @@ export default function Component() {
                             {address.phone}
                           </p>
                           <p className="text-sm text-muted-foreground">
-                            {address.address}
+                            {`${address.addressLine1}, ${
+                              address.addressLine2
+                                ? address.addressLine2 + ", "
+                                : ""
+                            }${address.city}, ${address.state} ${
+                              address.postalCode
+                            }, ${address.country}`}
                           </p>
                         </div>
                         <Button variant="ghost" size="sm">
@@ -175,7 +267,11 @@ export default function Component() {
                   </motion.div>
                 ))}
               </RadioGroup>
-              <Button variant="outline" className="mt-4 w-full">
+              <Button
+                variant="outline"
+                className="mt-4 w-full"
+                onClick={() => setIsModalOpen(true)}
+              >
                 <Plus className="mr-2 h-4 w-4" /> ADD NEW ADDRESS
               </Button>
             </CardContent>
@@ -403,6 +499,185 @@ export default function Component() {
           </div>
         </div>
       </div>
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
+          <div className="bg-background p-6 rounded-lg w-full max-w-3xl max-h-[80vh] overflow-y-auto">
+            <h2 className="text-xl font-bold mb-4">Add Address</h2>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
+              >
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="dark:text-white text-black">
+                          Name
+                        </FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage className="text-sm font-semibold italic text-red-600" />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="dark:text-white text-black">
+                          Phone
+                        </FormLabel>
+                        <FormControl>
+                          <Input {...field} type="tel" />
+                        </FormControl>
+                        <FormMessage className="text-sm font-semibold italic text-red-600" />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <FormField
+                  control={form.control}
+                  name="addressLine1"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="dark:text-white text-black">
+                        Address Line 1
+                      </FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage className="text-sm font-semibold italic text-red-600" />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="addressLine2"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="dark:text-white text-black">
+                        Address Line 2 (Optional)
+                      </FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage className="text-sm font-semibold italic text-red-600" />
+                    </FormItem>
+                  )}
+                />
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  <FormField
+                    control={form.control}
+                    name="city"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="dark:text-white text-black">
+                          City
+                        </FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage className="text-sm font-semibold italic text-red-600" />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="state"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="dark:text-white text-black">
+                          State
+                        </FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage className="text-sm font-semibold italic text-red-600" />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="postalCode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="dark:text-white text-black">
+                          Postal Code
+                        </FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage className="text-sm font-semibold italic text-red-600" />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <FormField
+                  control={form.control}
+                  name="country"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="dark:text-white text-black">
+                        Country
+                      </FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage className="text-sm font-semibold italic text-red-600" />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="dark:text-white text-black">
+                        Address Type
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select an address type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectLabel>Address Types</SelectLabel>
+                            <SelectItem value="Home">Home</SelectItem>
+                            <SelectItem value="University">
+                              University
+                            </SelectItem>
+                            <SelectItem value="Work">Work</SelectItem>
+                            <SelectItem value="Hotel">Hotel</SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage className="text-sm font-semibold italic text-red-600" />
+                    </FormItem>
+                  )}
+                />
+                <div className="flex justify-end space-x-2 mt-6">
+                  <Button type="submit">Save Address</Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsModalOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
