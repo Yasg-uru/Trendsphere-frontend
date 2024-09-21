@@ -142,6 +142,14 @@ export default function Details() {
       )
     );
   };
+  const handleRemoveProduct = (index: number) => {
+    setSelectedProducts((prevProducts) =>
+      prevProducts.filter((_, i) => i !== index)
+    );
+    toast({
+      title: "Removed successfully product ",
+    });
+  };
   return (
     <div className="grid md:grid-cols-2 gap-6 lg:gap-12 items-start max-w-6xl px-4 mx-auto py-6">
       <div className="grid gap-4">
@@ -404,7 +412,7 @@ export default function Details() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      // onClick={() => handleRemoveProduct(index)}
+                      onClick={() => handleRemoveProduct(index)}
                     >
                       <TrashIcon className="h-4 w-4" />
                     </Button>
