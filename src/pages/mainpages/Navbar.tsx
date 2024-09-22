@@ -249,7 +249,7 @@ export default function Navbar() {
                   </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem>
-                    <Link to="#" className="flex items-center gap-2">
+                    <Link to="/u/orders" className="flex items-center gap-2">
                       <div className="h-4 w-4" />
                       <span>My Orders</span>
                     </Link>

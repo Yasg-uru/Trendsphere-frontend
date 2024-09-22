@@ -13,6 +13,7 @@ import Details from "./pages/product-pages/details";
 import Carts from "./pages/product-pages/carts";
 import AddReview from "./pages/product-pages/Review";
 import CreateOrder from "./pages/order-pages/createorder";
+import Orders from "./pages/order-pages/orders";
 const App: React.FunctionComponent = () => {
   const dispatch = useAppDispatch();
 
@@ -34,6 +35,7 @@ const App: React.FunctionComponent = () => {
         <Route path="/mycarts" element={<Carts />} />
         <Route path="/review" element={<AddReview />} />
         <Route path="/order" element={<CreateOrder />} />
+        <Route path="/u/orders" element={<Orders />} />
       </Routes>
     </>
   );
