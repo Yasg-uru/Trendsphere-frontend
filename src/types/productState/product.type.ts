@@ -47,8 +47,8 @@ export interface IProductVariantFrontend {
   // Frontend interface for the product discount
   export interface IProductDiscountFrontend {
     discountPercentage: number;
-    validFrom: Date;
-    validUntil: Date;
+    validFrom: string;
+    validUntil: string;
   }
   
   // Main interface for the product on the frontend

@@ -52,34 +52,78 @@ export default function Details() {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [image, setImage] = useState<string>("");
+
+  const isDiscountValid = (validFrom: string, validUntil: string) => {
+    const currentDate = new Date();
+    return (
+      currentDate >= new Date(validFrom) && currentDate <= new Date(validUntil)
+    );
+  };
+
   useEffect(() => {
     const productId = location.state?.id || products[0]._id;
     setSelectedProductId(productId);
     const product = products.find((p) => p._id === productId);
+
     if (product) {
-      setSelectedVariantId(product.variants[0]._id);
-      setImage(product.variants[0].images[0]);
-      setSelectedSize(product.variants[0].size[0].size);
+      // Set initial selected variant details
+      const initialVariant = product.variants[0];
+      setSelectedVariantId(initialVariant._id);
+      setImage(initialVariant.images[0]);
+      setSelectedSize(initialVariant.size[0].size);
+
+      // Function to check if the discount is valid
+      const isDiscountValid = (validFrom: string, validUntil: string) => {
+        const currentDate = new Date();
+        return (
+          currentDate >= new Date(validFrom) &&
+          currentDate <= new Date(validUntil)
+        );
+      };
+
+      // Calculate the discount for the selected variant
+      const validDiscount = product.discount
+        ? isDiscountValid(
+            product.discount.validFrom,
+            product.discount.validUntil
+          )
+        : false;
+      const discountedPrice =
+        validDiscount && product.discount
+          ? initialVariant.price *
+            (1 - product.discount.discountPercentage / 100)
+          : initialVariant.price;
+
+      // Set selected product details
       setSelectedProducts([
         {
           productId,
-          variantId: product.variants[0]._id,
+          variantId: initialVariant._id,
           quantity: 1,
-          priceAtPurchase: product.variants[0].price,
-          discount: (product?.discount?.discountPercentage ?? 0) / 100,
+          priceAtPurchase: initialVariant.price,
+          discount: discountedPrice, // Set discounted price here
         },
       ]);
+
+      // Set unselected products' variants
       const remainingVariants = product.variants.slice(1);
-      const UnSelectedvariants = remainingVariants.map((variant) => ({
-        productId,
-        variantId: variant._id,
-        quantity: 1,
-        priceAtPurchase: variant.price,
-        discount: (product?.discount?.discountPercentage ?? 0) / 100,
-      }));
-      setUnselectedProducts(UnSelectedvariants);
+      const unSelectedVariants = remainingVariants.map((variant) => {
+        const variantDiscountedPrice =
+          validDiscount && product.discount
+            ? variant.price * (1 - product.discount.discountPercentage / 100)
+            : variant.price;
+
+        return {
+          productId,
+          variantId: variant._id,
+          quantity: 1,
+          priceAtPurchase: variant.price,
+          discount: variantDiscountedPrice, // Use discounted price for unselected products too
+        };
+      });
+      setUnselectedProducts(unSelectedVariants);
     }
-  }, [location.state?.id]);
+  }, [location.state?.id, products]);
 
   if (!selectedProductId) return <p>Loading...</p>;
 
@@ -164,7 +208,7 @@ export default function Details() {
 
   const confirmAndBuyOrder = () => {
     navigate("/order", {
-      state: { selectedProductId, selectedVariantId },
+      state: { selectedProductId, selectedProducts },
     });
   };
   const handleQuantityChange = (index: number, Quantity: number) => {
@@ -417,14 +461,17 @@ export default function Details() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold">
-                      $
-                      {(
-                        product.priceAtPurchase *
-                        (1 - product.discount) *
-                        product.quantity
-                      ).toFixed(2)}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <div className="text-muted-foreground line-through">
+                        $
+                        {(product.priceAtPurchase * product.quantity).toFixed(
+                          2
+                        )}
+                      </div>
+                      <div className="text-lg font-bold text-green-600">
+                        ${(product.discount * product.quantity).toFixed(2)}
+                      </div>
+                    </div>
                     <Button
                       variant="ghost"
                       size="icon"

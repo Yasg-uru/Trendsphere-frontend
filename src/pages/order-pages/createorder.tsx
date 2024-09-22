@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { SiRazorpay } from "react-icons/si";
+import { SiQuantcast, SiRazorpay } from "react-icons/si";
 import {
   Card,
   CardContent,
@@ -36,7 +36,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
-import { useNavigate } from "react-router-dom";
+import { useFetcher, useLocation, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -60,6 +60,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { selectProductsForOrder } from "@/types/ordertypes/initialState";
+import { IProductFrontend } from "@/types/productState/product.type";
+
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   addressLine1: z
@@ -82,6 +85,12 @@ const formSchema = z.object({
   }),
 });
 export type ChangeAddressForm = z.infer<typeof formSchema>;
+export interface orderDetails {
+  quantity: number;
+  variantInfo: string;
+  firstImage: string;
+  price: number;
+}
 export default function CreateOrder() {
   const { userInfo, isLoading } = useAppSelector((state) => state.auth);
   const [selectedAddress, setSelectedAddress] = useState(
@@ -94,6 +103,43 @@ export default function CreateOrder() {
 
   const dispatch = useAppDispatch();
   const { toast } = useToast();
+  const location = useLocation();
+  const { products } = useAppSelector((state) => state.product);
+  const { selectedProductId, selectedProducts } = location.state;
+  const [product, setProduct] = useState<IProductFrontend | null>(null);
+  const [orderSummaryDetails, setOrderSummayDetails] = useState<orderDetails[]>(
+    []
+  );
+  const [TotalPrice, SetTotalPrice] = useState<number>(0);
+  const [finalPrice, setFinalPrice] = useState<number>(0);
+  const [discountPrice, setDiscountPrice] = useState<number>(0);
+  useEffect(() => {
+    const Product = products.find((p) => p._id === selectedProductId);
+    if (Product) {
+      setProduct(Product);
+      calculatePrice();
+    }
+  }, [expressDelivery, selectedProducts, product]);
+  const calculatePrice = () => {
+    if (product) {
+      let discount = 0;
+      let totalPrice = 0;
+      console.log("this is selected products :", selectedProducts);
+      selectedProducts.forEach((product: selectProductsForOrder) => {
+        discount +=
+          product.priceAtPurchase * product.quantity - product.discount;
+        totalPrice += product.priceAtPurchase * product.quantity;
+      });
+      if (expressDelivery) {
+        setFinalPrice(totalPrice - discount + 10);
+      } else {
+        setFinalPrice(totalPrice - discount);
+      }
+      SetTotalPrice(totalPrice);
+      setDiscountPrice(discount);
+    }
+  };
+
   const onSubmit = (data: ChangeAddressForm) => {
     console.log("this is a new address data :", data);
 
@@ -141,9 +187,6 @@ export default function CreateOrder() {
     (sum, item) => sum + item.price * item.quantity,
     0
   );
-  const discount = 20;
-  const deliveryCharge = expressDelivery ? 10 : 0;
-  const finalTotal = totalPrice - discount + deliveryCharge;
 
   const handleNextStep = () => {
     setCurrentStep((prev) => Math.min(prev + 1, 4));
@@ -168,6 +211,36 @@ export default function CreateOrder() {
       type: "Home",
     },
   });
+
+  useEffect(() => {
+    const GetSelectedVariantinfo = () => {
+      const orderSummary = selectedProducts.map(
+        (selected: selectProductsForOrder) => {
+          const product = products.find(
+            (product) => product._id === selected.productId
+          );
+          if (product) {
+            const variant = product.variants.find(
+              (variant) => variant._id === selected.variantId
+            );
+            if (variant) {
+              const variantInfo = `${variant.color} - ${variant.material} -
+                          ${variant.size[0].size}`;
+              return {
+                variantInfo,
+                quantity: selected.quantity,
+                firstImage: variant.images[0],
+                price: variant.price,
+              };
+            }
+          }
+        }
+      );
+      setOrderSummayDetails(orderSummary);
+      console.log("this is a order summary :", orderSummary);
+    };
+    GetSelectedVariantinfo();
+  }, []);
   const navigate = useNavigate();
   if (isLoading) {
     return <Loader />;
@@ -330,7 +403,7 @@ export default function CreateOrder() {
             <CardContent className="pt-6">
               <Tabs defaultValue="credit-card" className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="razorpay">Credit Card</TabsTrigger>
+                  <TabsTrigger value="razorpay">Pay Via Razorpay</TabsTrigger>
 
                   <TabsTrigger value="cash">Cash on Delivery</TabsTrigger>
                 </TabsList>
@@ -407,20 +480,30 @@ export default function CreateOrder() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {items.map((item, index) => (
-                  <div
+              <div className="grid gap-6">
+                {orderSummaryDetails.map((item, index) => (
+                  <Card
                     key={index}
-                    className="flex justify-between items-center"
+                    className="flex items-center justify-between gap-4 p-4"
                   >
-                    <div>
-                      <p className="font-semibold">{item.name}</p>
-                      <p className="text-sm text-muted-foreground">
+                    <img
+                      src={item.firstImage}
+                      alt=""
+                      width={64}
+                      height={64}
+                      className="rounded-md"
+                      style={{ aspectRatio: "64/64", objectFit: "cover" }}
+                    />
+                    <div className="flex-1 grid gap-1">
+                      <div className="font-medium">{item.variantInfo}</div>
+                      <div className="text-sm text-muted-foreground">
                         Quantity: {item.quantity}
-                      </p>
+                      </div>
                     </div>
-                    <p>${(item.price * item.quantity).toFixed(2)}</p>
-                  </div>
+                    <div className="font-medium">
+                      ${(item.price * item.quantity).toFixed(2)}
+                    </div>
+                  </Card>
                 ))}
               </div>
             </CardContent>
@@ -436,28 +519,28 @@ export default function CreateOrder() {
             <CardContent>
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span>Price ({items.length} items)</span>
-                  <span>${totalPrice.toFixed(2)}</span>
+                  <span>Price ({selectedProducts.length} items)</span>
+                  <span>${TotalPrice.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Discount</span>
                   <span className="text-green-600">
-                    - ${discount.toFixed(2)}
+                    - ${discountPrice.toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span>Delivery Charges</span>
                   <span className={expressDelivery ? "" : "text-green-600"}>
-                    {expressDelivery ? `$${deliveryCharge.toFixed(2)}` : "FREE"}
+                    {expressDelivery ? `$${10}` : "FREE"}
                   </span>
                 </div>
                 <div className="flex justify-between font-bold pt-2 border-t">
                   <span>Total Amount</span>
-                  <span>${finalTotal.toFixed(2)}</span>
+                  <span>${finalPrice.toFixed(2)}</span>
                 </div>
               </div>
               <p className="text-green-600 font-semibold mt-4">
-                You will save ${discount.toFixed(2)} on this order
+                You will save ${discountPrice.toFixed(2)} on this order
               </p>
             </CardContent>
           </Card>
@@ -512,7 +595,7 @@ export default function CreateOrder() {
             <Label htmlFor="promo-code">Promo Code</Label>
             <div className="flex space-x-2">
               <Input id="promo-code" placeholder="Enter promo code" />
-              <Button>Apply</Button>
+              <Button>~</Button>
             </div>
           </div>
         </div>
