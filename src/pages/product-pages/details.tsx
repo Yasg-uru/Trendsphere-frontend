@@ -263,8 +263,8 @@ export default function Details() {
       prevProducts.map((product, i) =>
         i === index ? { ...product, size: newSize } : product
       )
-    )
-  }
+    );
+  };
   return (
     <div className="grid md:grid-cols-2 gap-6 lg:gap-12 items-start max-w-6xl px-4 mx-auto py-6">
       <div className="grid gap-4">
@@ -433,8 +433,8 @@ export default function Details() {
             {selectedProducts.map((product, index) => {
               const variant = selectedProduct.variants.find(
                 (v) => v._id === product.variantId
-              )
-              if (!variant) return null
+              );
+              if (!variant) return null;
               return (
                 <div key={index} className="flex items-center gap-4">
                   <img
@@ -449,14 +449,19 @@ export default function Details() {
                     </p>
                     <Select
                       value={product.size}
-                      onValueChange={(newSize) => handleSizeChange(index, newSize)}
+                      onValueChange={(newSize) =>
+                        handleSizeChange(index, newSize)
+                      }
                     >
                       <SelectTrigger className="w-[100px]">
                         <SelectValue placeholder="Size" />
                       </SelectTrigger>
                       <SelectContent>
                         {variant.size.map((sizeOption) => (
-                          <SelectItem key={sizeOption._id} value={sizeOption.size}>
+                          <SelectItem
+                            key={sizeOption._id}
+                            value={sizeOption.size}
+                          >
                             {sizeOption.size}
                           </SelectItem>
                         ))}
@@ -466,20 +471,29 @@ export default function Details() {
                       <Button
                         variant="outline"
                         size="icon"
-                        onClick={() => handleQuantityChange(index, product.quantity - 1)}
+                        onClick={() =>
+                          handleQuantityChange(index, product.quantity - 1)
+                        }
                       >
                         <MinusIcon className="h-4 w-4" />
                       </Button>
                       <Input
                         type="number"
                         value={product.quantity}
-                        onChange={(e) => handleQuantityChange(index, parseInt(e.target.value, 10))}
+                        onChange={(e) =>
+                          handleQuantityChange(
+                            index,
+                            parseInt(e.target.value, 10)
+                          )
+                        }
                         className="w-16 text-center"
                       />
                       <Button
                         variant="outline"
                         size="icon"
-                        onClick={() => handleQuantityChange(index, product.quantity + 1)}
+                        onClick={() =>
+                          handleQuantityChange(index, product.quantity + 1)
+                        }
                       >
                         <PlusIcon className="h-4 w-4" />
                       </Button>
@@ -488,7 +502,10 @@ export default function Details() {
                   <div className="text-right">
                     <div className="flex items-center gap-2">
                       <div className="text-muted-foreground line-through">
-                        ${(product.priceAtPurchase * product.quantity).toFixed(2)}
+                        $
+                        {(product.priceAtPurchase * product.quantity).toFixed(
+                          2
+                        )}
                       </div>
                       <div className="text-lg font-bold text-green-600">
                         ${(product.discount * product.quantity).toFixed(2)}
@@ -503,7 +520,7 @@ export default function Details() {
                     </Button>
                   </div>
                 </div>
-              )
+              );
             })}
           </div>
           {unSelectedProducts.length > 0 && (

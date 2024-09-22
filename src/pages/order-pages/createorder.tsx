@@ -144,7 +144,9 @@ export default function CreateOrder() {
             title: error,
             variant: "destructive",
           });
+          return ;
         });
+        
     } else {
       toast({
         title: "all the order info is required",
