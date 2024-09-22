@@ -143,12 +143,15 @@ export default function CreateOrder() {
         })
         .catch((error) => {
           toast({
-            title: error,
+            // title: error,
             variant: "destructive",
           });
           return;
         });
-
+    }
+  };
+  useEffect(() => {
+    const paymentVerify = () => {
       if (orderinfo) {
         const options = {
           key: "rzp_live_tK7jKIBkQuTeH7", // Enter the Key ID generated from the Dashboard
@@ -170,7 +173,9 @@ export default function CreateOrder() {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_signature: response.razorpay_signature,
             };
-            dispatch(verifyOrder(response))
+
+            // Dispatch the verifyOrder action after payment is completed
+            dispatch(verifyOrder(data))
               .then(() => {
                 toast({
                   title: "Your payment verified successfully",
@@ -193,8 +198,13 @@ export default function CreateOrder() {
           title: "All the order info is required",
         });
       }
+    };
+
+    // Invoke the paymentVerify function when orderinfo changes
+    if (orderinfo) {
+      paymentVerify();
     }
-  };
+  }, [orderinfo]);
 
   useEffect(() => {
     const Product = products.find((p) => p._id === selectedProductId);
@@ -411,9 +421,9 @@ export default function CreateOrder() {
                 value={selectedAddress}
                 onValueChange={setSelectedAddress}
               >
-                {userInfo?.address.map((address) => (
+                {userInfo?.address.map((address, index) => (
                   <motion.div
-                    key={address._id}
+                    key={index}
                     className="flex items-center space-x-2 mb-4 p-4 border rounded-lg hover:border-primary transition-colors"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
