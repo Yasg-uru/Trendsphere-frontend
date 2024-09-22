@@ -10,6 +10,7 @@ import { z } from "zod";
 const initialState: authState = {
   isLoading: false,
   userInfo: null,
+  isAuthenticated: false,
   carts: [],
 };
 interface authError {
@@ -30,7 +31,10 @@ export const AddnewAddress = createAsyncThunk(
 );
 export const UpdateAddress = createAsyncThunk(
   "auth/update-address",
-  async (formData:{addressId:string ;data:ChangeAddressForm}, { rejectWithValue }) => {
+  async (
+    formData: { addressId: string; data: ChangeAddressForm },
+    { rejectWithValue }
+  ) => {
     try {
       const response = await axiosInstance.put(
         `/user/update-address1/${34}`,
@@ -132,6 +136,7 @@ const authSlice = createSlice({
   extraReducers(builder) {
     builder.addCase(Login.fulfilled, (state, action) => {
       state.userInfo = action.payload.user;
+      state.isAuthenticated = true;
       state.isLoading = false;
     });
     builder.addCase(Login.rejected, (state) => {
@@ -193,8 +198,8 @@ const authSlice = createSlice({
     builder.addCase(UpdateAddress.rejected, (state) => {
       state.isLoading = false;
     });
-    builder.addCase(UpdateAddress.fulfilled, (state,action) => {
-      state.userInfo=action.payload?.user;
+    builder.addCase(UpdateAddress.fulfilled, (state, action) => {
+      state.userInfo = action.payload?.user;
       state.isLoading = false;
     });
   },

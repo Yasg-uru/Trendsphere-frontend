@@ -5,6 +5,7 @@ import {
 
 export interface authState {
   isLoading: boolean;
+  isAuthenticated:boolean;
   userInfo: User | null;
   carts: CartItem[];
 }

@@ -6,6 +6,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTheme } from "@/components/theme-provider";
 import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuSeparator,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+
+import {
   NavigationMenu,
   NavigationMenuContent,
   NavigationMenuItem,
@@ -26,6 +36,7 @@ export default function Navbar() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
   const handleClick = () => {
     const params = {
       category: currentCategory,
@@ -178,7 +189,7 @@ export default function Navbar() {
             <Link to="/mycarts">
               <Button variant="ghost" size="icon" className="relative">
                 <ShoppingCart className="h-5 w-5" />
-                { carts && carts?.length > 0 && (
+                {carts && carts?.length > 0 && (
                   <div className="absolute top-0 right-0  flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground">
                     {carts.length}
                   </div>
@@ -198,17 +209,73 @@ export default function Navbar() {
               )}
               <span className="sr-only">Toggle theme</span>
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className={`font-semibold transition-colors duration-200 dark:text-black dark:bg-white text-white bg-black`}
-              onClick={() => {
-                navigate("/sign-in");
-              }}
-            >
-              <LogIn className="w-4 h-4 mr-2" />
-              Sign In
-            </Button>
+            {!isAuthenticated ? (
+              <Button
+                variant="outline"
+                size="sm"
+                className={`font-semibold transition-colors duration-200 dark:text-black dark:bg-white text-white bg-black`}
+                onClick={() => {
+                  navigate("/sign-in");
+                }}
+              >
+                <LogIn className="w-4 h-4 mr-2" />
+                Sign In
+              </Button>
+            ) : (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src="/placeholder-user.jpg" />
+                      <AvatarFallback>
+                        {userInfo?.username.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="sr-only">Toggle user menu</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-[240px]">
+                  <div className="flex items-center gap-2 p-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src="/placeholder-user.jpg" />
+                      <AvatarFallback>JD</AvatarFallback>
+                    </Avatar>
+                    <div className="grid gap-0.5 leading-none">
+                      <div className="font-semibold">{userInfo?.username}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {userInfo?.email}
+                      </div>
+                    </div>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <Link to="#" className="flex items-center gap-2">
+                      <div className="h-4 w-4" />
+                      <span>My Orders</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link to="#" className="flex items-center gap-2">
+                      <div className="h-4 w-4" />
+                      <span>Wishlist</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link to="#" className="flex items-center gap-2">
+                      <div className="h-4 w-4" />
+                      <span>Account Settings</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <Link to="#" className="flex items-center gap-2">
+                      <div className="h-4 w-4" />
+                      <span>Logout</span>
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
           <div className="md:hidden flex items-center">
             <Button
