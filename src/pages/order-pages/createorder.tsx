@@ -154,7 +154,8 @@ export default function CreateOrder() {
     const paymentVerify = () => {
       if (orderinfo) {
         const options = {
-          key: "rzp_live_tK7jKIBkQuTeH7", // Enter the Key ID generated from the Dashboard
+          // key: "rzp_live_tK7jKIBkQuTeH7", // Enter the Key ID generated from the Dashboard
+          key: "rzp_test_7dU2Zk3usqjmRX", // Enter the Key ID generated from the Dashboard
           amount: orderinfo.finalAmount,
           currency: "INR",
           name: "Trendsphere",
@@ -167,6 +168,10 @@ export default function CreateOrder() {
             razorpay_order_id: string;
             razorpay_signature: string;
           }) {
+            console.log(
+              "this is a response of the razorpay payment order and signature for postman testing ",
+              response
+            );
             const data = {
               orderCreationId: orderinfo.payment.paymentId,
               razorpay_payment_id: response.razorpay_payment_id,

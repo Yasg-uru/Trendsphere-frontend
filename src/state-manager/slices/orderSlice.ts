@@ -20,7 +20,14 @@ export const createOrder = createAsyncThunk(
 );
 export const verifyOrder = createAsyncThunk(
   "/order/verify",
-  async (formData:{ razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string; }, { rejectWithValue }) => {
+  async (
+    formData: {
+      razorpay_payment_id: string;
+      razorpay_order_id: string;
+      razorpay_signature: string;
+    },
+    { rejectWithValue }
+  ) => {
     try {
       const response = await axiosInstance.post("/order/verify", formData, {
         withCredentials: true,
