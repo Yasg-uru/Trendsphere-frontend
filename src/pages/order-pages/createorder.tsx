@@ -36,7 +36,12 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
-import { useFetcher, useLocation, useNavigate } from "react-router-dom";
+import {
+  useFetcher,
+  useFormAction,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -60,8 +65,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { selectProductsForOrder } from "@/types/ordertypes/initialState";
+import {
+  orderDataType,
+  selectProductsForOrder,
+} from "@/types/ordertypes/initialState";
 import { IProductFrontend } from "@/types/productState/product.type";
+import { createOrder } from "@/state-manager/slices/orderSlice";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -100,7 +109,7 @@ export default function CreateOrder() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAddress, setIsEditingAddress] = useState<any>(null);
-
+  const [orderData, setOrderData] = useState<orderDataType | null>(null);
   const dispatch = useAppDispatch();
   const { toast } = useToast();
   const location = useLocation();
@@ -114,13 +123,56 @@ export default function CreateOrder() {
   const [TotalPrice, SetTotalPrice] = useState<number>(0);
   const [finalPrice, setFinalPrice] = useState<number>(0);
   const [discountPrice, setDiscountPrice] = useState<number>(0);
+  console.log(
+    "this is a vlaue of the selected address after change ",
+    selectedAddress
+  );
+  const handleCreateOrder = () => {
+    console.log(
+      "this is a order data inside the handlecreate order function :",
+      orderData
+    );
+    if (orderData) {
+      dispatch(createOrder(orderData))
+        .then(() => {
+          toast({
+            title: "Order created successfully",
+          });
+        })
+        .catch((error) => {
+          toast({
+            title: error,
+            variant: "destructive",
+          });
+        });
+    } else {
+      toast({
+        title: "all the order info is required",
+      });
+    }
+  };
   useEffect(() => {
     const Product = products.find((p) => p._id === selectedProductId);
     if (Product) {
       setProduct(Product);
       calculatePrice();
+      const address = userInfo?.address.find(
+        (address) => address._id === selectedAddress
+      );
+      if (address) {
+        setOrderData({
+          products: selectedProducts,
+          address,
+          couponCode,
+          loyaltyPointsUsed: 0,
+          isGiftOrder: false,
+          giftMessage: "",
+          deliveryType: expressDelivery ? "express" : "standard",
+        });
+        console.log("this is a order data :", orderData);
+      }
     }
-  }, [expressDelivery, selectedProducts, product]);
+  }, [expressDelivery, selectedProducts, product, selectedAddress]);
 
   const calculatePrice = () => {
     if (product) {
@@ -416,7 +468,7 @@ export default function CreateOrder() {
                       <CardDescription>Pay using your Razorpay</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                      <Button className="w-full">
+                      <Button className="w-full" onClick={handleCreateOrder}>
                         <SiRazorpay className="mr-2 h-4 w-4" />
                         Pay with Razorpay
                       </Button>

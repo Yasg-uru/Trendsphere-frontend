@@ -1,20 +1,16 @@
 import axiosInstance from "@/helper/axiosinstance";
-import { orderState } from "@/types/ordertypes/initialState";
+import { orderDataType, orderState } from "@/types/ordertypes/initialState";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 const initialState: orderState = {
   isLoading: false,
 };
 export const createOrder = createAsyncThunk(
   "order/create",
-  async (_, { rejectWithValue }) => {
+  async (formData: orderDataType, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post(
-        "/order/create",
-        {},
-        {
-          withCredentials: true,
-        }
-      );
+      const response = await axiosInstance.post("/order/create", formData, {
+        withCredentials: true,
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue("Failed to create Order");

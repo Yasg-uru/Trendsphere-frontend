@@ -102,6 +102,7 @@ export default function Details() {
           quantity: 1,
           priceAtPurchase: initialVariant.price,
           discount: discountedPrice, // Set discounted price here
+          size: initialVariant.size[0].size,
         },
       ]);
 
@@ -119,6 +120,7 @@ export default function Details() {
           quantity: 1,
           priceAtPurchase: variant.price,
           discount: variantDiscountedPrice, // Use discounted price for unselected products too
+          size: variant.size[0].size,
         };
       });
       setUnselectedProducts(unSelectedVariants);
@@ -152,6 +154,7 @@ export default function Details() {
         quantity: 1,
         discount: (selectedProduct?.discount?.discountPercentage ?? 0) / 100,
         priceAtPurchase: newVariant.price,
+        size: newVariant.size[0].size,
       },
     ]);
     setUnselectedProducts(
@@ -166,6 +169,7 @@ export default function Details() {
           quantity: 1,
           discount: (selectedProduct?.discount?.discountPercentage ?? 0) / 100,
           priceAtPurchase: Item.price,
+          size: Item.size[0].size,
         }))
     );
   };
@@ -204,6 +208,15 @@ export default function Details() {
   };
   const handleOrder = () => {
     setIsModalOpen(true);
+  };
+  const handlechangeSize = (size: string) => {
+    setSelectedSize(size);
+    setSelectedProducts((prevProducts) =>
+      prevProducts.map((product) => ({
+        ...product,
+        size,
+      }))
+    );
   };
 
   const confirmAndBuyOrder = () => {
@@ -245,6 +258,13 @@ export default function Details() {
       prevProducts.filter((_, i) => i !== index).map((product) => product)
     );
   };
+  const handleSizeChange = (index: number, newSize: string) => {
+    setSelectedProducts((prevProducts) =>
+      prevProducts.map((product, i) =>
+        i === index ? { ...product, size: newSize } : product
+      )
+    )
+  }
   return (
     <div className="grid md:grid-cols-2 gap-6 lg:gap-12 items-start max-w-6xl px-4 mx-auto py-6">
       <div className="grid gap-4">
@@ -343,7 +363,7 @@ export default function Details() {
             <RadioGroup
               id="size"
               value={selectedSize || undefined}
-              onValueChange={setSelectedSize}
+              onValueChange={handlechangeSize}
               className="flex items-center gap-2"
             >
               {selectedVariant.size.map((sizeOption) => (
@@ -413,8 +433,8 @@ export default function Details() {
             {selectedProducts.map((product, index) => {
               const variant = selectedProduct.variants.find(
                 (v) => v._id === product.variantId
-              );
-              if (!variant) return null;
+              )
+              if (!variant) return null
               return (
                 <div key={index} className="flex items-center gap-4">
                   <img
@@ -425,36 +445,41 @@ export default function Details() {
                   <div className="flex-1">
                     <h3 className="font-semibold">{selectedProduct.name}</h3>
                     <p className="text-sm text-muted-foreground">
-                      {variant.color} - {variant.material} -{" "}
-                      {variant.size[0].size}
+                      {variant.color} - {variant.material}
                     </p>
+                    <Select
+                      value={product.size}
+                      onValueChange={(newSize) => handleSizeChange(index, newSize)}
+                    >
+                      <SelectTrigger className="w-[100px]">
+                        <SelectValue placeholder="Size" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {variant.size.map((sizeOption) => (
+                          <SelectItem key={sizeOption._id} value={sizeOption.size}>
+                            {sizeOption.size}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <div className="flex items-center gap-2 mt-1">
                       <Button
                         variant="outline"
                         size="icon"
-                        onClick={() =>
-                          handleQuantityChange(index, product.quantity - 1)
-                        }
+                        onClick={() => handleQuantityChange(index, product.quantity - 1)}
                       >
                         <MinusIcon className="h-4 w-4" />
                       </Button>
                       <Input
                         type="number"
                         value={product.quantity}
-                        onChange={(e) =>
-                          handleQuantityChange(
-                            index,
-                            parseInt(e.target.value, 10)
-                          )
-                        }
+                        onChange={(e) => handleQuantityChange(index, parseInt(e.target.value, 10))}
                         className="w-16 text-center"
                       />
                       <Button
                         variant="outline"
                         size="icon"
-                        onClick={() =>
-                          handleQuantityChange(index, product.quantity + 1)
-                        }
+                        onClick={() => handleQuantityChange(index, product.quantity + 1)}
                       >
                         <PlusIcon className="h-4 w-4" />
                       </Button>
@@ -463,10 +488,7 @@ export default function Details() {
                   <div className="text-right">
                     <div className="flex items-center gap-2">
                       <div className="text-muted-foreground line-through">
-                        $
-                        {(product.priceAtPurchase * product.quantity).toFixed(
-                          2
-                        )}
+                        ${(product.priceAtPurchase * product.quantity).toFixed(2)}
                       </div>
                       <div className="text-lg font-bold text-green-600">
                         ${(product.discount * product.quantity).toFixed(2)}
@@ -481,7 +503,7 @@ export default function Details() {
                     </Button>
                   </div>
                 </div>
-              );
+              )
             })}
           </div>
           {unSelectedProducts.length > 0 && (
