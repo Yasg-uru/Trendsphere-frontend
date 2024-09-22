@@ -70,7 +70,7 @@ import {
   selectProductsForOrder,
 } from "@/types/ordertypes/initialState";
 import { IProductFrontend } from "@/types/productState/product.type";
-import { createOrder } from "@/state-manager/slices/orderSlice";
+import { createOrder, verifyOrder } from "@/state-manager/slices/orderSlice";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -105,6 +105,7 @@ export default function CreateOrder() {
   const [selectedAddress, setSelectedAddress] = useState(
     userInfo?.address[0]._id
   );
+  const { orderinfo } = useAppSelector((state) => state.order);
   const [expressDelivery, setExpressDelivery] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -129,9 +130,10 @@ export default function CreateOrder() {
   );
   const handleCreateOrder = () => {
     console.log(
-      "this is a order data inside the handlecreate order function :",
+      "This is the order data inside the handleCreateOrder function:",
       orderData
     );
+
     if (orderData) {
       dispatch(createOrder(orderData))
         .then(() => {
@@ -144,35 +146,56 @@ export default function CreateOrder() {
             title: error,
             variant: "destructive",
           });
-          return ;
+          return;
         });
-        // const options = {
-        //   key: "rzp_live_tK7jKIBkQuTeH7", // Enter the Key ID generated from the Dashboard
-        //   amount: amount,
-        //   currency: currency,
-        //   name: "Procoders",
-        //   description: "Procoders course payment",
-        //   image:
-        //     "https://res.cloudinary.com/duzmyzmpa/image/upload/v1721313988/x9nno0siixwdva4beymy.jpg",
-        //   order_id: id,
-        //   handler: async function (response: {
-        //     razorpay_payment_id: string;
-        //     razorpay_order_id: string;
-        //     razorpay_signature: string;
-        //   }) {
-        //     const data = {
-        //       orderCreationId: id,
-        //       razorpay_payment_id: response.razorpay_payment_id,
-        //       razorpay_order_id: response.razorpay_order_id,
-        //       razorpay_signature: response.razorpay_signature,
-        //     };
-    
-    } else {
-      toast({
-        title: "all the order info is required",
-      });
+
+      if (orderinfo) {
+        const options = {
+          key: "rzp_live_tK7jKIBkQuTeH7", // Enter the Key ID generated from the Dashboard
+          amount: orderinfo.finalAmount,
+          currency: "INR",
+          name: "Trendsphere",
+          description: "Trendsphere product payment",
+          image:
+            "https://res.cloudinary.com/duzmyzmpa/image/upload/v1721313988/x9nno0siixwdva4beymy.jpg",
+          order_id: orderinfo.payment.paymentId,
+          handler: async function (response: {
+            razorpay_payment_id: string;
+            razorpay_order_id: string;
+            razorpay_signature: string;
+          }) {
+            const data = {
+              orderCreationId: orderinfo.payment.paymentId,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
+            };
+            dispatch(verifyOrder(response))
+              .then(() => {
+                toast({
+                  title: "Your payment verified successfully",
+                });
+              })
+              .catch((error) => {
+                toast({
+                  title: error,
+                  variant: "destructive",
+                });
+              });
+          },
+        };
+
+        // Open Razorpay payment gateway
+        const paymentObject = new window.Razorpay(options);
+        paymentObject.open();
+      } else {
+        toast({
+          title: "All the order info is required",
+        });
+      }
     }
   };
+
   useEffect(() => {
     const Product = products.find((p) => p._id === selectedProductId);
     if (Product) {
