@@ -110,6 +110,7 @@ export default function CreateOrder() {
   const [orderSummaryDetails, setOrderSummayDetails] = useState<orderDetails[]>(
     []
   );
+  const [couponCode, setCouponCode] = useState<string>("");
   const [TotalPrice, SetTotalPrice] = useState<number>(0);
   const [finalPrice, setFinalPrice] = useState<number>(0);
   const [discountPrice, setDiscountPrice] = useState<number>(0);
@@ -120,6 +121,7 @@ export default function CreateOrder() {
       calculatePrice();
     }
   }, [expressDelivery, selectedProducts, product]);
+
   const calculatePrice = () => {
     if (product) {
       let discount = 0;
@@ -401,7 +403,7 @@ export default function CreateOrder() {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
-              <Tabs defaultValue="credit-card" className="w-full">
+              <Tabs defaultValue="razorpay" className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="razorpay">Pay Via Razorpay</TabsTrigger>
 
