@@ -3,6 +3,7 @@ import { orderDataType, orderState } from "@/types/ordertypes/initialState";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 const initialState: orderState = {
   isLoading: false,
+  orderinfo: null,
 };
 export const createOrder = createAsyncThunk(
   "order/create",
@@ -23,7 +24,8 @@ const orderSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(createOrder.fulfilled, (state) => {
+      .addCase(createOrder.fulfilled, (state, action) => {
+        state.orderinfo = action.payload?.order;
         state.isLoading = false;
       })
       .addCase(createOrder.rejected, (state) => {

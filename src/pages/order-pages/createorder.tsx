@@ -146,7 +146,27 @@ export default function CreateOrder() {
           });
           return ;
         });
-        
+        // const options = {
+        //   key: "rzp_live_tK7jKIBkQuTeH7", // Enter the Key ID generated from the Dashboard
+        //   amount: amount,
+        //   currency: currency,
+        //   name: "Procoders",
+        //   description: "Procoders course payment",
+        //   image:
+        //     "https://res.cloudinary.com/duzmyzmpa/image/upload/v1721313988/x9nno0siixwdva4beymy.jpg",
+        //   order_id: id,
+        //   handler: async function (response: {
+        //     razorpay_payment_id: string;
+        //     razorpay_order_id: string;
+        //     razorpay_signature: string;
+        //   }) {
+        //     const data = {
+        //       orderCreationId: id,
+        //       razorpay_payment_id: response.razorpay_payment_id,
+        //       razorpay_order_id: response.razorpay_order_id,
+        //       razorpay_signature: response.razorpay_signature,
+        //     };
+    
     } else {
       toast({
         title: "all the order info is required",

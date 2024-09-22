@@ -1,5 +1,6 @@
 export interface orderState {
   isLoading: boolean;
+  orderinfo:IOrder | null;
 }
 export interface selectProductsForOrder {
   productId: string;
@@ -7,7 +8,7 @@ export interface selectProductsForOrder {
   quantity: number;
   priceAtPurchase: number;
   discount: number;
-  size:string;
+  size: string;
 }
 
 export interface orderDataType {
@@ -34,4 +35,74 @@ export interface orderDataType {
   isGiftOrder: boolean;
   giftMessage: string;
   deliveryType: string;
+}
+
+export interface IOrder {
+  user: string;
+  products: {
+    productId: string;
+    variantId: string;
+    quantity: number;
+    size: string;
+    priceAtPurchase: number;
+    discount: number;
+    discountByCoupon: number;
+  }[];
+  totalAmount: number;
+  discountAmount?: number;
+  couponCode?: string;
+  taxAmount?: number;
+  finalAmount: number;
+  deliveryType: "standard" | "express";
+  deliveryCharge?: number;
+  address: {
+    name: string;
+    addressLine1: string;
+    addressLine2: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+    phone: string;
+    type: "Home" | "University" | "Work" | "Hotel";
+  };
+  payment: {
+    paymentId: string; // Payment provider ID (e.g., Razorpay, Stripe)
+    provider: string; // Payment provider (e.g., Razorpay, Stripe, PayPal)
+    paymentMethod: string; // Payment method (e.g., card, UPI, bank transfer)
+    paymentStatus: "pending" | "completed" | "failed" | "refunded";
+    paymentDate?: Date; // Date of successful payment
+  };
+  cancellationDate: Date;
+  cancelReason: string;
+  orderStatus: string;
+  createdAt: Date;
+  updatedAt: Date;
+  replacementRequest?: {
+    productId: string;
+    variantId: string;
+    quantity: number;
+    requested: boolean;
+    reason?: string;
+    status?: "pending" | "approved" | "rejected";
+    requestDate?: Date;
+    responseDate?: Date;
+  }[];
+  refund?: {
+    requested: boolean;
+    amount: number;
+    status: "pending" | "completed" | "failed";
+    requestDate?: Date;
+    completionDate?: Date;
+  };
+  auditLog: {
+    action: string;
+    actor: string;
+    timestamp: Date;
+    description?: string;
+  }[];
+
+  loyaltyPointsUsed?: number;
+  isGiftOrder?: boolean;
+  giftMessage?: string;
 }
