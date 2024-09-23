@@ -1,6 +1,15 @@
 export interface orderState {
   isLoading: boolean;
-  orderinfo:IOrder | null;
+  orderinfo: IOrder | null;
+  Myorders: IOrder[];
+}
+export interface paginationInfo {
+  totalOrders: number;
+  currentPage: number;
+  totalPages: number;
+  limit: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
 }
 export interface selectProductsForOrder {
   productId: string;

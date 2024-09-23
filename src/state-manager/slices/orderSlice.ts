@@ -4,6 +4,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 const initialState: orderState = {
   isLoading: false,
   orderinfo: null,
+  Myorders: [],
 };
 export const createOrder = createAsyncThunk(
   "order/create",
@@ -38,6 +39,22 @@ export const verifyOrder = createAsyncThunk(
     }
   }
 );
+export const Myorders = createAsyncThunk(
+  "order/myorders",
+  async (params, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get("/order", {
+        withCredentials: true,
+        params,
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        "Failed to fetch your orders, please try again later "
+      );
+    }
+  }
+);
 const orderSlice = createSlice({
   name: "order",
   initialState,
@@ -54,6 +71,18 @@ const orderSlice = createSlice({
       .addCase(createOrder.pending, (state) => {
         state.isLoading = true;
       });
+    builder.addCase(Myorders.fulfilled, (state,action) => {
+      state.Myorders=action.payload?.orders;
+      
+      state.isLoading = false;
+      
+    });
+    builder.addCase(Myorders.rejected, (state) => {
+      state.isLoading = false;
+    });
+    builder.addCase(Myorders.pending, (state) => {
+      state.isLoading = true;
+    });
   },
 });
 export const {} = orderSlice.actions;
