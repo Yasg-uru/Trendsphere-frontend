@@ -38,7 +38,7 @@ export interface IProductVariantFrontend {
   
   // Frontend interface for the replacement policy
   export interface IReplacePolicyFrontend {
-    eligible: boolean;
+    elgible: boolean;
     replacementDays: number;
     terms: string;
     validReason: string[];

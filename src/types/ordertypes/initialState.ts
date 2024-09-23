@@ -4,7 +4,7 @@ export interface orderState {
   isLoading: boolean;
   orderinfo: IOrder | null;
   Myorders: IOrder[];
-  paginationInfo: paginationInfo | null;
+  pagination: paginationInfo | null;
 }
 export interface paginationInfo {
   totalOrders: number;
@@ -118,4 +118,22 @@ export interface IOrder {
   loyaltyPointsUsed?: number;
   isGiftOrder?: boolean;
   giftMessage?: string;
+}
+export interface FilterOrderParams {
+  orderStatus?: string;
+  productId?: string;
+  variantId?: string;
+  paymentStatus?: string;
+  startDate?: string;
+  endDate?: string;
+  couponCode?: string;
+  isGiftOrder?: boolean;
+  city?: string;
+  country?: string;
+  minTotalAmount?: number;
+  maxTotalAmount?: number;
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  order?: "asc" | "desc";
 }

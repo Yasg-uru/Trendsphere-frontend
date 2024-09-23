@@ -1,11 +1,15 @@
 import axiosInstance from "@/helper/axiosinstance";
-import { orderDataType, orderState } from "@/types/ordertypes/initialState";
+import {
+  FilterOrderParams,
+  orderDataType,
+  orderState,
+} from "@/types/ordertypes/initialState";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 const initialState: orderState = {
   isLoading: false,
   orderinfo: null,
   Myorders: [],
-  paginationInfo: null,
+  pagination: null,
 };
 export const createOrder = createAsyncThunk(
   "order/create",
@@ -42,7 +46,7 @@ export const verifyOrder = createAsyncThunk(
 );
 export const userorders = createAsyncThunk(
   "order/myorders",
-  async (params, { rejectWithValue }) => {
+  async (params: FilterOrderParams, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get("/order/filter", {
         withCredentials: true,
@@ -74,7 +78,7 @@ const orderSlice = createSlice({
       });
     builder.addCase(userorders.fulfilled, (state, action) => {
       state.Myorders = action.payload?.orders;
-      state.paginationInfo = action.payload?.pagination;
+      state.pagination = action.payload?.pagination;
       state.isLoading = false;
     });
     builder.addCase(userorders.rejected, (state) => {

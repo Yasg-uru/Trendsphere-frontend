@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import {
@@ -9,6 +7,10 @@ import {
   CreditCard,
   MapPin,
   Calendar,
+  RefreshCw,
+  ArrowLeftRight,
+  Search,
+  Filter,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,15 +28,47 @@ import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 import { userorders } from "@/state-manager/slices/orderSlice";
 import { useToast } from "@/hooks/use-toast";
 import Loader from "@/helper/Loader";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Label } from "@/components/ui/label";
+import { DatePicker } from "@/components/ui/date-picker";
 
 export default function Orders() {
   const dispatch = useAppDispatch();
   const { toast } = useToast();
+
+  const [filters, setFilters] = useState({
+    orderStatus: "",
+    paymentStatus: "",
+    startDate: undefined,
+    endDate: undefined,
+    minTotalAmount: undefined,
+    maxTotalAmount: undefined,
+  });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+
   useEffect(() => {
-    dispatch(userorders())
+    fetchOrders();
+  }, [dispatch, toast, searchTerm, currentPage]);
+
+  const fetchOrders = () => {
+    dispatch(userorders({ ...filters, page: currentPage }))
       .then(() => {
         toast({
-          title: "Fectehd your order details successfully",
+          title: "Fetched your order details successfully",
         });
       })
       .catch((error) => {
@@ -42,9 +76,11 @@ export default function Orders() {
           title: error,
         });
       });
-  }, []);
-  const { Myorders, isLoading } = useAppSelector((state) => state.order);
-  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  };
+
+  const { Myorders, isLoading, pagination } = useAppSelector(
+    (state) => state.order
+  );
 
   const toggleOrderDetails = (orderId: string) => {
     setExpandedOrder(expandedOrder === orderId ? null : orderId);
@@ -64,12 +100,138 @@ export default function Orders() {
         return "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100";
     }
   };
+
+  const handleFilterChange = (
+    key: string,
+    value: Date | undefined | string
+  ) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+    setCurrentPage(1);
+  };
+  console.log("this is a filter data :", filters);
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
+
   if (isLoading) {
     return <Loader />;
   }
+
   return (
     <div className="container mx-auto p-4 min-h-screen bg-background">
       <h1 className="text-2xl font-semibold mb-6 text-foreground">My Orders</h1>
+
+      <div className="mb-6 flex flex-wrap gap-4 items-center">
+        <Input
+          placeholder="Search orders..."
+          value={searchTerm}
+          onChange={handleSearch}
+          className="max-w-xs"
+        />
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline">
+              <Filter className="mr-2 h-4 w-4" /> Filters
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80">
+            <div className="grid gap-4">
+              <div className="space-y-2">
+                <h4 className="font-medium leading-none">Filters</h4>
+                <p className="text-sm text-muted-foreground">
+                  Customize your order view
+                </p>
+              </div>
+              <div className="grid gap-2">
+                <div className="grid grid-cols-3 items-center gap-4">
+                  <Label htmlFor="orderStatus">Order Status</Label>
+                  <Select
+                    value={filters.orderStatus}
+                    onValueChange={(value) =>
+                      handleFilterChange("orderStatus", value)
+                    }
+                  >
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All</SelectItem>
+                      <SelectItem value="processing">Processing</SelectItem>
+                      <SelectItem value="shipped">Shipped</SelectItem>
+                      <SelectItem value="delivered">Delivered</SelectItem>
+                      <SelectItem value="cancelled">Cancelled</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-3 items-center gap-4">
+                  <Label htmlFor="paymentStatus">Payment Status</Label>
+                  <Select
+                    value={filters.paymentStatus}
+                    onValueChange={(value) =>
+                      handleFilterChange("paymentStatus", value)
+                    }
+                  >
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All</SelectItem>
+                      <SelectItem value="paid">Paid</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="failed">Failed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-3 items-center gap-4">
+                  <Label>Start Date</Label>
+                  <DatePicker
+                    selectedDate={filters.startDate}
+                    onSelect={(date: Date | undefined) =>
+                      handleFilterChange("startDate", date)
+                    }
+                  />
+                </div>
+                <div className="grid grid-cols-3 items-center gap-4">
+                  <Label>End Date</Label>
+                  <DatePicker
+                    selectedDate={filters.endDate}
+                    onSelect={(date: Date | undefined) =>
+                      handleFilterChange("endDate", date)
+                    }
+                  />
+                </div>
+                <div className="grid grid-cols-3 items-center gap-4">
+                  <Label htmlFor="minAmount">Min Amount</Label>
+                  <Input
+                    id="minAmount"
+                    value={filters.minTotalAmount}
+                    onChange={(e) =>
+                      handleFilterChange("minTotalAmount", e.target.value)
+                    }
+                    type="number"
+                    className="col-span-2 h-8"
+                  />
+                </div>
+                <div className="grid grid-cols-3 items-center gap-4">
+                  <Label htmlFor="maxAmount">Max Amount</Label>
+                  <Input
+                    id="maxAmount"
+                    value={filters.maxTotalAmount}
+                    onChange={(e) =>
+                      handleFilterChange("maxTotalAmount", e.target.value)
+                    }
+                    type="number"
+                    className="col-span-2 h-8"
+                  />
+                </div>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
+      </div>
+
       <div className="space-y-4">
         {Myorders.map((order) => (
           <Card key={order._id} className="border border-border">
@@ -129,43 +291,110 @@ export default function Orders() {
                   transition={{ duration: 0.2 }}
                 >
                   <CardContent>
-                    <ScrollArea className="h-[300px] w-full rounded-md border border-border p-4">
+                    <ScrollArea className="h-[400px] w-full rounded-md border border-border p-4">
                       <h4 className="font-medium mb-3 text-foreground">
                         Products
                       </h4>
-                      <div className="space-y-3">
+                      <div className="space-y-4">
                         {order.products.map((product, index) => (
                           <div
                             key={index}
-                            className="flex items-center space-x-3 pb-3 border-b border-border last:border-b-0"
+                            className="flex flex-col space-y-3 pb-4 border-b border-border last:border-b-0"
                           >
-                            <img
-                              src={
-                                product.productId.variants.find(
-                                  (v) => v._id === product.variantId
-                                )?.images[0]
-                              }
-                              // alt={product.name}
-                              className="w-16 h-16 object-cover rounded"
-                            />
-                            <div className="flex-1">
-                              <h5 className="font-medium text-foreground">
-                                {product.productId.name}
-                              </h5>
-                              <p className="text-xs text-muted-foreground">
-                                Size: {product.size}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                Quantity: {product.quantity}
-                              </p>
-                              <p className="text-xs font-medium text-foreground">
-                                Price: ${product.priceAtPurchase.toFixed(2)}
-                              </p>
+                            <div className="flex items-center space-x-3">
+                              <img
+                                src={
+                                  product.productId.variants.find(
+                                    (v) => v._id === product.variantId
+                                  )?.images[0]
+                                }
+                                alt={product.productId.name}
+                                className="w-16 h-16 object-cover rounded"
+                              />
+                              <div className="flex-1">
+                                <h5 className="font-medium text-foreground">
+                                  {product.productId.name}
+                                </h5>
+                                <p className="text-xs text-muted-foreground">
+                                  Size: {product.size}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  Quantity: {product.quantity}
+                                </p>
+                                <p className="text-xs font-medium text-foreground">
+                                  Price: ${product.priceAtPurchase.toFixed(2)}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="mt-2">
+                              <h6 className="font-medium text-sm mb-2 text-foreground">
+                                Refund and Replacement Policy
+                              </h6>
+                              <div className="space-y-2 text-xs text-muted-foreground">
+                                {product.productId.returnPolicy && (
+                                  <div className="flex items-start space-x-2">
+                                    <RefreshCw className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                                    <div>
+                                      <p className="font-medium">
+                                        Refund Policy
+                                      </p>
+                                      <p>
+                                        Eligible:{" "}
+                                        {product.productId.returnPolicy.eligible
+                                          ? "Yes"
+                                          : "No"}
+                                      </p>
+                                      <p>
+                                        Refund Days:{" "}
+                                        {
+                                          product.productId.returnPolicy
+                                            .refundDays
+                                        }
+                                      </p>
+                                      <p>
+                                        Terms:{" "}
+                                        {product.productId.returnPolicy.terms}
+                                      </p>
+                                    </div>
+                                  </div>
+                                )}
+                                {product.productId.replacementPolicy && (
+                                  <div className="flex items-start space-x-2">
+                                    <ArrowLeftRight className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                                    <div>
+                                      <p className="font-medium">
+                                        Replacement Policy
+                                      </p>
+                                      <p>
+                                        Eligible:{" "}
+                                        {product.productId.replacementPolicy
+                                          .elgible
+                                          ? "Yes"
+                                          : "No"}
+                                      </p>
+                                      <p>
+                                        Replacement Days:{" "}
+                                        {
+                                          product.productId.replacementPolicy
+                                            .replacementDays
+                                        }
+                                      </p>
+                                      <p>
+                                        Terms:{" "}
+                                        {
+                                          product.productId.replacementPolicy
+                                            .terms
+                                        }
+                                      </p>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           </div>
                         ))}
                       </div>
-                      <Separator className="my-3" />
+                      <Separator className="my-4" />
                       <h4 className="font-medium mb-2 text-foreground">
                         Shipping Address
                       </h4>
@@ -180,7 +409,7 @@ export default function Orders() {
                           </p>
                         </div>
                       </div>
-                      <Separator className="my-3" />
+                      <Separator className="my-4" />
                       <h4 className="font-medium mb-2 text-foreground">
                         Payment
                       </h4>
@@ -199,6 +428,32 @@ export default function Orders() {
           </Card>
         ))}
       </div>
+
+      {pagination && (
+        <div className="mt-6 flex justify-between items-center">
+          <div>
+            Showing {(currentPage - 1) * pagination.limit + 1} to{" "}
+            {Math.min(currentPage * pagination.limit, pagination.totalOrders)}{" "}
+            of {pagination.totalOrders} orders
+          </div>
+          <div className="flex space-x-2">
+            <Button
+              variant="outline"
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setCurrentPage((prev) => prev + 1)}
+              disabled={currentPage === pagination.totalPages}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
