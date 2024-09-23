@@ -2,6 +2,7 @@ export interface orderState {
   isLoading: boolean;
   orderinfo: IOrder | null;
   Myorders: IOrder[];
+  paginationInfo:paginationInfo | null;
 }
 export interface paginationInfo {
   totalOrders: number;
@@ -47,6 +48,7 @@ export interface orderDataType {
 }
 
 export interface IOrder {
+  _id:string;
   user: string;
   products: {
     productId: string;

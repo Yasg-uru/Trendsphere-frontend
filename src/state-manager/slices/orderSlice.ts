@@ -5,6 +5,7 @@ const initialState: orderState = {
   isLoading: false,
   orderinfo: null,
   Myorders: [],
+  paginationInfo: null,
 };
 export const createOrder = createAsyncThunk(
   "order/create",
@@ -39,11 +40,11 @@ export const verifyOrder = createAsyncThunk(
     }
   }
 );
-export const Myorders = createAsyncThunk(
+export const userorders = createAsyncThunk(
   "order/myorders",
   async (params, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get("/order", {
+      const response = await axiosInstance.get("/order/filter", {
         withCredentials: true,
         params,
       });
@@ -71,16 +72,15 @@ const orderSlice = createSlice({
       .addCase(createOrder.pending, (state) => {
         state.isLoading = true;
       });
-    builder.addCase(Myorders.fulfilled, (state,action) => {
-      state.Myorders=action.payload?.orders;
-      
-      state.isLoading = false;
-      
-    });
-    builder.addCase(Myorders.rejected, (state) => {
+    builder.addCase(userorders.fulfilled, (state, action) => {
+      state.Myorders = action.payload?.orders;
+      state.paginationInfo = action.payload?.pagination;
       state.isLoading = false;
     });
-    builder.addCase(Myorders.pending, (state) => {
+    builder.addCase(userorders.rejected, (state) => {
+      state.isLoading = false;
+    });
+    builder.addCase(userorders.pending, (state) => {
       state.isLoading = true;
     });
   },

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import {
   ChevronDown,
@@ -22,6 +22,10 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
+import { userorders } from "@/state-manager/slices/orderSlice";
+import { useToast } from "@/hooks/use-toast";
+import Loader from "@/helper/Loader";
 
 type Order = {
   _id: string;
@@ -119,6 +123,22 @@ const mockOrders: Order[] = [
 ];
 
 export default function Orders() {
+  const dispatch = useAppDispatch();
+  const { toast } = useToast();
+  useEffect(() => {
+    dispatch(userorders())
+      .then(() => {
+        toast({
+          title: "Fectehd your order details successfully",
+        });
+      })
+      .catch((error) => {
+        toast({
+          title: error,
+        });
+      });
+  }, []);
+  const { Myorders, isLoading } = useAppSelector((state) => state.order);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
 
   const toggleOrderDetails = (orderId: string) => {
@@ -139,12 +159,14 @@ export default function Orders() {
         return "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100";
     }
   };
-
+  if (isLoading) {
+    return <Loader />;
+  }
   return (
     <div className="container mx-auto p-4 min-h-screen bg-background">
       <h1 className="text-2xl font-semibold mb-6 text-foreground">My Orders</h1>
       <div className="space-y-4">
-        {mockOrders.map((order) => (
+        {Myorders.map((order) => (
           <Card key={order._id} className="border border-border">
             <CardHeader className="bg-muted">
               <div className="flex justify-between items-center">
@@ -213,13 +235,13 @@ export default function Orders() {
                             className="flex items-center space-x-3 pb-3 border-b border-border last:border-b-0"
                           >
                             <img
-                              src={product.image}
-                              alt={product.name}
+                              // src={product.image}
+                              // alt={product.name}
                               className="w-16 h-16 object-cover rounded"
                             />
                             <div className="flex-1">
                               <h5 className="font-medium text-foreground">
-                                {product.name}
+                                {/* {product.name} */}
                               </h5>
                               <p className="text-xs text-muted-foreground">
                                 Size: {product.size}
