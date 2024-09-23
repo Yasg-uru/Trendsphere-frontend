@@ -1,4 +1,5 @@
 import axiosInstance from "@/helper/axiosinstance";
+import { Filters } from "@/pages/order-pages/orders";
 import {
   FilterOrderParams,
   orderDataType,
@@ -62,7 +63,7 @@ export const searchOrders = createAsyncThunk(
 );
 export const userorders = createAsyncThunk(
   "order/myorders",
-  async (params: FilterOrderParams, { rejectWithValue }) => {
+  async (params: Filters, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get("/order/filter", {
         withCredentials: true,

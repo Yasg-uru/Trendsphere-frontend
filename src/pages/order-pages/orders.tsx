@@ -48,19 +48,20 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { Checkbox } from "@/components/ui/checkbox";
 
 // Define the types for filters
-interface Filters {
-  orderStatus: string[];
-  paymentStatus: string[];
-  productId: string;
-  variantId: string;
+export interface Filters {
+  orderStatus?: string[];
+  paymentStatus?: string[];
+  productId?: string;
+  variantId?: string;
   startDate?: Date;
   endDate?: Date;
-  couponCode: string;
-  isGiftOrder: boolean;
-  city: string;
-  country: string;
+  couponCode?: string;
+  isGiftOrder?: boolean;
+  city?: string;
+  country?: string;
   minTotalAmount?: number;
   maxTotalAmount?: number;
+  page?: number;
 }
 
 export default function Orders() {
@@ -92,17 +93,17 @@ export default function Orders() {
   }, [filters, currentPage]); // Added filters and currentPage as dependencies
 
   const fetchOrders = () => {
-    // dispatch(userorders({ ...filters, page: currentPage }))
-    //   .then(() => {
-    //     toast({
-    //       title: "Fetched your order details successfully",
-    //     });
-    //   })
-    //   .catch((error) => {
-    //     toast({
-    //       title: error.toString(),
-    //     });
-    //   });
+    dispatch(userorders({ ...filters, page: currentPage }))
+      .then(() => {
+        toast({
+          title: "Fetched your order details successfully",
+        });
+      })
+      .catch((error) => {
+        toast({
+          title: error.toString(),
+        });
+      });
   };
 
   const HandleSearch = () => {
@@ -165,24 +166,23 @@ export default function Orders() {
   const handleCheckboxChange = (key: keyof Filters, value: string) => {
     setFilters((prev) => {
       const currentFilter = prev[key];
-  
+
       // Ensure the current filter is an array (it should be for orderStatus and paymentStatus)
       if (!Array.isArray(currentFilter)) {
         return prev; // No changes if it's not an array
       }
-  
+
       // Toggle the checkbox value
       const updatedFilter = currentFilter.includes(value)
         ? currentFilter.filter((item) => item !== value)
         : [...currentFilter, value];
-  
+
       return {
         ...prev,
         [key]: updatedFilter,
       };
     });
   };
-  
 
   const clearFilters = () => {
     setFilters({
@@ -228,7 +228,7 @@ export default function Orders() {
               <Filter className="mr-2 h-4 w-4" /> Filters
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-96">
+          <PopoverContent className=" w-auto">
             <ScrollArea className="h-[50vh] pr-4">
               <div className="grid gap-4">
                 <div className="flex items-center justify-between">
@@ -252,7 +252,7 @@ export default function Orders() {
                       <div key={status} className="flex items-center space-x-2">
                         <Checkbox
                           id={`orderStatus-${status}`}
-                          checked={filters.orderStatus.includes(status)}
+                          checked={filters?.orderStatus?.includes(status)}
                           onCheckedChange={() =>
                             handleCheckboxChange("orderStatus", status)
                           }
@@ -275,7 +275,7 @@ export default function Orders() {
                         >
                           <Checkbox
                             id={`paymentStatus-${status}`}
-                            checked={filters.paymentStatus.includes(status)}
+                            checked={filters?.paymentStatus?.includes(status)}
                             onCheckedChange={() =>
                               handleCheckboxChange("paymentStatus", status)
                             }

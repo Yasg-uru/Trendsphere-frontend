@@ -120,7 +120,7 @@ export interface IOrder {
   giftMessage?: string;
 }
 export interface FilterOrderParams {
-  orderStatus?: string;
+  orderStatus?: string[];
   productId?: string;
   variantId?: string;
   paymentStatus?: string;
