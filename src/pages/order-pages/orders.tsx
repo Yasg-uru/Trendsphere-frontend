@@ -27,101 +27,6 @@ import { userorders } from "@/state-manager/slices/orderSlice";
 import { useToast } from "@/hooks/use-toast";
 import Loader from "@/helper/Loader";
 
-type Order = {
-  _id: string;
-  createdAt: string;
-  orderStatus: string;
-  finalAmount: number;
-  products: {
-    productId: string;
-    variantId: string;
-    quantity: number;
-    size: string;
-    priceAtPurchase: number;
-    name: string;
-    image: string;
-  }[];
-  address: {
-    name: string;
-    addressLine1: string;
-    city: string;
-    state: string;
-    postalCode: string;
-  };
-  payment: {
-    paymentStatus: string;
-    paymentMethod: string;
-  };
-};
-
-const mockOrders: Order[] = [
-  {
-    _id: "1",
-    createdAt: "2023-06-01T10:00:00Z",
-    orderStatus: "Processing",
-    finalAmount: 150.99,
-    products: [
-      {
-        productId: "p1",
-        variantId: "v1",
-        quantity: 2,
-        size: "M",
-        priceAtPurchase: 59.99,
-        name: "Classic T-Shirt",
-        image: "/placeholder.svg?height=100&width=100",
-      },
-      {
-        productId: "p2",
-        variantId: "v2",
-        quantity: 1,
-        size: "L",
-        priceAtPurchase: 31.01,
-        name: "Denim Jeans",
-        image: "/placeholder.svg?height=100&width=100",
-      },
-    ],
-    address: {
-      name: "John Doe",
-      addressLine1: "123 Main St",
-      city: "Anytown",
-      state: "CA",
-      postalCode: "12345",
-    },
-    payment: {
-      paymentStatus: "completed",
-      paymentMethod: "card",
-    },
-  },
-  {
-    _id: "2",
-    createdAt: "2023-06-15T14:30:00Z",
-    orderStatus: "Shipped",
-    finalAmount: 89.99,
-    products: [
-      {
-        productId: "p3",
-        variantId: "v3",
-        quantity: 1,
-        size: "S",
-        priceAtPurchase: 89.99,
-        name: "Designer Dress",
-        image: "/placeholder.svg?height=100&width=100",
-      },
-    ],
-    address: {
-      name: "Jane Smith",
-      addressLine1: "456 Elm St",
-      city: "Other City",
-      state: "NY",
-      postalCode: "67890",
-    },
-    payment: {
-      paymentStatus: "completed",
-      paymentMethod: "paypal",
-    },
-  },
-];
-
 export default function Orders() {
   const dispatch = useAppDispatch();
   const { toast } = useToast();
@@ -235,13 +140,17 @@ export default function Orders() {
                             className="flex items-center space-x-3 pb-3 border-b border-border last:border-b-0"
                           >
                             <img
-                              // src={product.image}
+                              src={
+                                product.productId.variants.find(
+                                  (v) => v._id === product.variantId
+                                )?.images[0]
+                              }
                               // alt={product.name}
                               className="w-16 h-16 object-cover rounded"
                             />
                             <div className="flex-1">
                               <h5 className="font-medium text-foreground">
-                                {/* {product.name} */}
+                                {product.productId.name}
                               </h5>
                               <p className="text-xs text-muted-foreground">
                                 Size: {product.size}
