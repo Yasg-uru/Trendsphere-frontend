@@ -46,6 +46,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useNavigate } from "react-router-dom";
 
 // Define the types for filters
 export interface Filters {
@@ -86,8 +87,9 @@ export default function Orders() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  
   const debouncedSearchTerm = useDebounce<string>(searchTerm, 500);
-
+  const navigate = useNavigate();
   useEffect(() => {
     fetchOrders();
   }, [filters, currentPage]); // Added filters and currentPage as dependencies
@@ -397,8 +399,11 @@ export default function Orders() {
 
       <div className="space-y-4">
         {Myorders.map((order) => (
-          <Card key={order._id} className="border border-border">
-            <CardHeader className="bg-muted">
+          <Card key={order._id} className="border border-border cursor-pointer">
+            <CardHeader
+              className="bg-muted"
+              onClick={() => navigate(`/u/order/details/${order._id}`)}
+            >
               <div className="flex justify-between items-center">
                 <CardTitle className="text-lg font-medium text-foreground">
                   Order #{order._id}

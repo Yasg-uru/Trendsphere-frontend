@@ -103,7 +103,7 @@ export interface orderDetails {
 export default function CreateOrder() {
   const { userInfo, isLoading } = useAppSelector((state) => state.auth);
   const [selectedAddress, setSelectedAddress] = useState(
-    userInfo?.address[0]._id
+    userInfo?.address[0]?._id || ""
   );
   const { orderinfo } = useAppSelector((state) => state.order);
   const [expressDelivery, setExpressDelivery] = useState(false);
