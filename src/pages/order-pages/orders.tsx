@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
+import { useDebounce } from "@uidotdev/usehooks";
 import {
   ChevronDown,
   ChevronUp,
@@ -11,6 +12,7 @@ import {
   ArrowLeftRight,
   Search,
   Filter,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,7 +27,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
-import { userorders } from "@/state-manager/slices/orderSlice";
+import { searchOrders, userorders } from "@/state-manager/slices/orderSlice";
 import { useToast } from "@/hooks/use-toast";
 import Loader from "@/helper/Loader";
 import { Input } from "@/components/ui/input";
@@ -43,37 +45,83 @@ import {
 } from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
 import { DatePicker } from "@/components/ui/date-picker";
+import { Checkbox } from "@/components/ui/checkbox";
+
+// Define the types for filters
+interface Filters {
+  orderStatus: string[];
+  paymentStatus: string[];
+  productId: string;
+  variantId: string;
+  startDate?: Date;
+  endDate?: Date;
+  couponCode: string;
+  isGiftOrder: boolean;
+  city: string;
+  country: string;
+  minTotalAmount?: number;
+  maxTotalAmount?: number;
+}
 
 export default function Orders() {
   const dispatch = useAppDispatch();
   const { toast } = useToast();
 
-  const [filters, setFilters] = useState({
-    orderStatus: "",
-    paymentStatus: "",
+  const [filters, setFilters] = useState<Filters>({
+    orderStatus: [],
+    paymentStatus: [],
+    productId: "",
+    variantId: "",
     startDate: undefined,
     endDate: undefined,
+    couponCode: "",
+    isGiftOrder: false,
+    city: "",
+    country: "",
     minTotalAmount: undefined,
     maxTotalAmount: undefined,
   });
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const debouncedSearchTerm = useDebounce<string>(searchTerm, 500);
 
   useEffect(() => {
     fetchOrders();
-  }, [dispatch, toast, searchTerm, currentPage]);
+  }, [filters, currentPage]); // Added filters and currentPage as dependencies
 
   const fetchOrders = () => {
-    dispatch(userorders({ ...filters, page: currentPage }))
+    // dispatch(userorders({ ...filters, page: currentPage }))
+    //   .then(() => {
+    //     toast({
+    //       title: "Fetched your order details successfully",
+    //     });
+    //   })
+    //   .catch((error) => {
+    //     toast({
+    //       title: error.toString(),
+    //     });
+    //   });
+  };
+
+  const HandleSearch = () => {
+    if (!searchTerm) {
+      toast({
+        title: "Please Enter Search Query",
+      });
+      return;
+    }
+    dispatch(searchOrders(searchTerm))
       .then(() => {
         toast({
-          title: "Fetched your order details successfully",
+          title: "Searched successfully with your search term",
         });
       })
       .catch((error) => {
         toast({
-          title: error,
+          title: error.toString(),
+          variant: "destructive",
         });
       });
   };
@@ -102,17 +150,56 @@ export default function Orders() {
   };
 
   const handleFilterChange = (
-    key: string,
+    key: keyof Filters,
     value: Date | undefined | string
   ) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
     setCurrentPage(1);
   };
-  console.log("this is a filter data :", filters);
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
     setCurrentPage(1);
+  };
+
+  const handleCheckboxChange = (key: keyof Filters, value: string) => {
+    setFilters((prev) => {
+      const currentFilter = prev[key];
+  
+      // Ensure the current filter is an array (it should be for orderStatus and paymentStatus)
+      if (!Array.isArray(currentFilter)) {
+        return prev; // No changes if it's not an array
+      }
+  
+      // Toggle the checkbox value
+      const updatedFilter = currentFilter.includes(value)
+        ? currentFilter.filter((item) => item !== value)
+        : [...currentFilter, value];
+  
+      return {
+        ...prev,
+        [key]: updatedFilter,
+      };
+    });
+  };
+  
+
+  const clearFilters = () => {
+    setFilters({
+      orderStatus: [],
+      paymentStatus: [],
+      productId: "",
+      variantId: "",
+      startDate: undefined,
+      endDate: undefined,
+      couponCode: "",
+      isGiftOrder: false,
+      city: "",
+      country: "",
+      minTotalAmount: undefined,
+      maxTotalAmount: undefined,
+    });
+    setIsOpen(false);
   };
 
   if (isLoading) {
@@ -124,110 +211,186 @@ export default function Orders() {
       <h1 className="text-2xl font-semibold mb-6 text-foreground">My Orders</h1>
 
       <div className="mb-6 flex flex-wrap gap-4 items-center">
-        <Input
-          placeholder="Search orders..."
-          value={searchTerm}
-          onChange={handleSearch}
-          className="max-w-xs"
-        />
-        <Popover>
+        <div className="flex gap-1 ">
+          <Input
+            placeholder="Search orders..."
+            value={searchTerm}
+            onChange={handleSearchInput}
+            className="max-w-xs"
+          />
+          <Button variant="outline" onClick={HandleSearch}>
+            <Search className="mr-2 h-4 w-4" /> Search
+          </Button>
+        </div>
+        <Popover open={isOpen} onOpenChange={setIsOpen}>
           <PopoverTrigger asChild>
             <Button variant="outline">
               <Filter className="mr-2 h-4 w-4" /> Filters
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-80">
-            <div className="grid gap-4">
-              <div className="space-y-2">
-                <h4 className="font-medium leading-none">Filters</h4>
-                <p className="text-sm text-muted-foreground">
-                  Customize your order view
-                </p>
-              </div>
-              <div className="grid gap-2">
-                <div className="grid grid-cols-3 items-center gap-4">
-                  <Label htmlFor="orderStatus">Order Status</Label>
-                  <Select
-                    value={filters.orderStatus}
-                    onValueChange={(value) =>
-                      handleFilterChange("orderStatus", value)
-                    }
-                  >
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All</SelectItem>
-                      <SelectItem value="processing">Processing</SelectItem>
-                      <SelectItem value="shipped">Shipped</SelectItem>
-                      <SelectItem value="delivered">Delivered</SelectItem>
-                      <SelectItem value="cancelled">Cancelled</SelectItem>
-                    </SelectContent>
-                  </Select>
+          <PopoverContent className="w-96">
+            <ScrollArea className="h-[50vh] pr-4">
+              <div className="grid gap-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium leading-none">Filters</h4>
+                  <Button variant="ghost" size="sm" onClick={clearFilters}>
+                    <X className="mr-2 h-4 w-4" />
+                    Clear all
+                  </Button>
                 </div>
-                <div className="grid grid-cols-3 items-center gap-4">
-                  <Label htmlFor="paymentStatus">Payment Status</Label>
-                  <Select
-                    value={filters.paymentStatus}
-                    onValueChange={(value) =>
-                      handleFilterChange("paymentStatus", value)
-                    }
-                  >
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All</SelectItem>
-                      <SelectItem value="paid">Paid</SelectItem>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="failed">Failed</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="grid gap-2">
+                  <Label>Order Status</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      "pending",
+                      "processing",
+                      "shipped",
+                      "delivered",
+                      "returned",
+                      "cancelled",
+                    ].map((status) => (
+                      <div key={status} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`orderStatus-${status}`}
+                          checked={filters.orderStatus.includes(status)}
+                          onCheckedChange={() =>
+                            handleCheckboxChange("orderStatus", status)
+                          }
+                        />
+                        <Label htmlFor={`orderStatus-${status}`}>
+                          {status.charAt(0).toUpperCase() + status.slice(1)}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="grid grid-cols-3 items-center gap-4">
-                  <Label>Start Date</Label>
-                  <DatePicker
-                    selectedDate={filters.startDate}
-                    onSelect={(date: Date | undefined) =>
-                      handleFilterChange("startDate", date)
-                    }
-                  />
+                <div className="grid gap-2">
+                  <Label>Payment Status</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {["pending", "completed", "failed", "refunded"].map(
+                      (status) => (
+                        <div
+                          key={status}
+                          className="flex items-center space-x-2"
+                        >
+                          <Checkbox
+                            id={`paymentStatus-${status}`}
+                            checked={filters.paymentStatus.includes(status)}
+                            onCheckedChange={() =>
+                              handleCheckboxChange("paymentStatus", status)
+                            }
+                          />
+                          <Label htmlFor={`paymentStatus-${status}`}>
+                            {status.charAt(0).toUpperCase() + status.slice(1)}
+                          </Label>
+                        </div>
+                      )
+                    )}
+                  </div>
                 </div>
-                <div className="grid grid-cols-3 items-center gap-4">
-                  <Label>End Date</Label>
-                  <DatePicker
-                    selectedDate={filters.endDate}
-                    onSelect={(date: Date | undefined) =>
-                      handleFilterChange("endDate", date)
-                    }
-                  />
-                </div>
-                <div className="grid grid-cols-3 items-center gap-4">
-                  <Label htmlFor="minAmount">Min Amount</Label>
+                <div className="grid gap-2">
+                  <Label htmlFor="productId">Product ID</Label>
                   <Input
-                    id="minAmount"
-                    value={filters.minTotalAmount}
+                    id="productId"
+                    value={filters.productId}
                     onChange={(e) =>
-                      handleFilterChange("minTotalAmount", e.target.value)
+                      handleFilterChange("productId", e.target.value)
                     }
-                    type="number"
-                    className="col-span-2 h-8"
+                    placeholder="Enter Product ID"
                   />
                 </div>
-                <div className="grid grid-cols-3 items-center gap-4">
-                  <Label htmlFor="maxAmount">Max Amount</Label>
+                <div className="grid gap-2">
+                  <Label htmlFor="variantId">Variant ID</Label>
                   <Input
-                    id="maxAmount"
-                    value={filters.maxTotalAmount}
+                    id="variantId"
+                    value={filters.variantId}
                     onChange={(e) =>
-                      handleFilterChange("maxTotalAmount", e.target.value)
+                      handleFilterChange("variantId", e.target.value)
                     }
-                    type="number"
-                    className="col-span-2 h-8"
+                    placeholder="Enter Variant ID"
                   />
+                </div>
+                <div className="grid gap-2">
+                  <Label>Date Range</Label>
+                  <div className="flex space-x-2">
+                    <DatePicker
+                      selectedDate={filters.startDate}
+                      onSelect={(date) => handleFilterChange("startDate", date)}
+                      // placeholder="Start Date"
+                    />
+                    <DatePicker
+                      selectedDate={filters.endDate}
+                      onSelect={(date) => handleFilterChange("endDate", date)}
+                      // placeholder="End Date"
+                    />
+                  </div>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="couponCode">Coupon Code</Label>
+                  <Input
+                    id="couponCode"
+                    value={filters.couponCode}
+                    onChange={(e) =>
+                      handleFilterChange("couponCode", e.target.value)
+                    }
+                    placeholder="Enter Coupon Code"
+                  />
+                </div>
+                {/* <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="isGiftOrder"
+                    checked={filters.isGiftOrder}
+                    onCheckedChange={(checked) =>
+                      handleFilterChange("isGiftOrder", checked)
+                    }
+                  />
+                  <Label htmlFor="isGiftOrder">Gift Order</Label>
+                </div> */}
+                <div className="grid gap-2">
+                  <Label htmlFor="city">City</Label>
+                  <Input
+                    id="city"
+                    value={filters.city}
+                    onChange={(e) => handleFilterChange("city", e.target.value)}
+                    placeholder="Enter City"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="country">Country</Label>
+                  <Input
+                    id="country"
+                    value={filters.country}
+                    onChange={(e) =>
+                      handleFilterChange("country", e.target.value)
+                    }
+                    placeholder="Enter Country"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label>Total Amount Range</Label>
+                  <div className="flex space-x-2">
+                    <Input
+                      id="minAmount"
+                      value={filters.minTotalAmount}
+                      onChange={(e) =>
+                        handleFilterChange("minTotalAmount", e.target.value)
+                      }
+                      type="number"
+                      placeholder="Min Amount"
+                    />
+                    <Input
+                      id="maxAmount"
+                      value={filters.maxTotalAmount}
+                      onChange={(e) =>
+                        handleFilterChange("maxTotalAmount", e.target.value)
+                      }
+                      type="number"
+                      placeholder="Max Amount"
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
+            </ScrollArea>
           </PopoverContent>
         </Popover>
       </div>

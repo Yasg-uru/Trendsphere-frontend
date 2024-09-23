@@ -44,6 +44,22 @@ export const verifyOrder = createAsyncThunk(
     }
   }
 );
+export const searchOrders = createAsyncThunk(
+  "/order/searchorders",
+  async (serachQuery: string, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(
+        `/order/search?searchQuery=${serachQuery}`,
+        {
+          withCredentials: true,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue("Sorry no Results found ");
+    }
+  }
+);
 export const userorders = createAsyncThunk(
   "order/myorders",
   async (params: FilterOrderParams, { rejectWithValue }) => {
@@ -86,6 +102,16 @@ const orderSlice = createSlice({
     });
     builder.addCase(userorders.pending, (state) => {
       state.isLoading = true;
+    });
+    builder.addCase(searchOrders.fulfilled, (state, action) => {
+      state.Myorders = action.payload?.orders;
+      state.isLoading = false;
+    });
+    builder.addCase(searchOrders.pending, (state) => {
+      state.isLoading = true;
+    });
+    builder.addCase(searchOrders.rejected, (state) => {
+      state.isLoading = false;
     });
   },
 });
