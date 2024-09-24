@@ -48,7 +48,15 @@ export interface orderDataType {
   giftMessage: string;
   deliveryType: string;
 }
-
+export interface RefundOrders {
+  productId: string;
+  variantId: string;
+  quantity: number;
+  size: string;
+  priceAtPurchase: number;
+  discount: number;
+  discountByCoupon: number;
+}
 export interface IOrder {
   _id: string;
   user: string;

@@ -77,6 +77,19 @@ export const cancelorder = createAsyncThunk(
     }
   }
 );
+export const refundOrder = createAsyncThunk(
+  "order/refund",
+  async (formdata, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post("/order/return", formdata, {
+        withCredentials: true,
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue("Failed to refund your order");
+    }
+  }
+);
 export const userorders = createAsyncThunk(
   "order/myorders",
   async (params: Filters, { rejectWithValue }) => {
@@ -138,6 +151,15 @@ const orderSlice = createSlice({
     });
     builder.addCase(cancelorder.pending, (state) => {
       state.isLoading = true;
+    });
+    builder.addCase(refundOrder.pending, (state) => {
+      state.isLoading = true;
+    });
+    builder.addCase(refundOrder.rejected, (state) => {
+      state.isLoading = false;
+    });
+    builder.addCase(refundOrder.fulfilled, (state) => {
+      state.isLoading = false;
     });
   },
 });
