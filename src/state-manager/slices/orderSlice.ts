@@ -4,6 +4,7 @@ import {
   FilterOrderParams,
   orderDataType,
   orderState,
+  RefundOrders,
 } from "@/types/ordertypes/initialState";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 const initialState: orderState = {
@@ -79,13 +80,17 @@ export const cancelorder = createAsyncThunk(
 );
 export const refundOrder = createAsyncThunk(
   "order/refund",
-  async (formdata, { rejectWithValue }) => {
+  async (
+    formdata: { returnItems: RefundOrders[]; orderId: string },
+    { rejectWithValue }
+  ) => {
     try {
       const response = await axiosInstance.post("/order/return", formdata, {
         withCredentials: true,
       });
       return response.data;
     } catch (error) {
+      console.log("error in refund is this ", error);
       return rejectWithValue("Failed to refund your order");
     }
   }

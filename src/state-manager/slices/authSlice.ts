@@ -16,6 +16,24 @@ const initialState: authState = {
 interface authError {
   error: string;
 }
+export const Logout = createAsyncThunk(
+  "auth/logout",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post(
+        "/user/logout",
+        {},
+        {
+          withCredentials: true,
+        }
+      );
+
+      return response.data;
+    } catch (error) {
+      return rejectWithValue("Failed to Logout");
+    }
+  }
+);
 export const AddnewAddress = createAsyncThunk(
   "auth/add-address",
   async (formData: ChangeAddressForm, { rejectWithValue }) => {

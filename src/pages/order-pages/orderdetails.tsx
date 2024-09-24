@@ -121,19 +121,6 @@ export default function OrderDetail() {
       </div>
     );
   }
-  const handlerefund = () => {
-    dispatch(refundOrder())
-      .then(() => {
-        toast({
-          title: "refund successfully in process",
-        });
-      })
-      .catch((error) => {
-        toast({
-          title: error,
-        });
-      });
-  };
 
   const handleCancel = () => {
     dispatch(cancelorder({ OrderId: order._id, cancelReason: reason }))
@@ -173,6 +160,23 @@ export default function OrderDetail() {
         ]);
       }
     }
+  };
+
+  const handleOrderRefund = () => {
+    dispatch(refundOrder({ orderId: order._id, returnItems: refundItems }))
+      .then(() => {
+        toast({
+          title: "Refunded successfully",
+        });
+        dispatch(userorders({}));
+        setIsRefunding(false);
+      })
+      .catch((error) => {
+        toast({
+          title: error,
+          variant: "destructive",
+        });
+      });
   };
   console.log("this is a data of the refund selected items :", refundItems);
 
@@ -379,7 +383,8 @@ export default function OrderDetail() {
               order.orderStatus === "cancelled" ||
               order.orderStatus === "returned" ||
               order.orderStatus === "processing" ||
-              order.orderStatus === "pending"
+              order.orderStatus === "pending" ||
+              order.payment.paymentStatus === "refunded"
             }
             onClick={() => setIsRefunding(true)}
           >
@@ -523,7 +528,9 @@ export default function OrderDetail() {
             </div>
           </div>
           <DialogFooter className="justify-end">
-            <Button type="submit">Submit Refund</Button>
+            <Button type="submit" onClick={handleOrderRefund}>
+              Submit Refund
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -26,6 +26,7 @@ import {
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 import { ApplyFilter } from "@/state-manager/slices/productSlice";
 import { useToast } from "@/hooks/use-toast";
+import { Logout } from "@/state-manager/slices/authSlice";
 export default function Navbar() {
   const { theme, setTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -267,7 +268,17 @@ export default function Navbar() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      dispatch(Logout())
+                        .then(() => {
+                          toast({ title: "Logged out successfully" });
+                        })
+                        .catch((error) => {
+                          toast({ title: error, variant: "destructive" });
+                        });
+                    }}
+                  >
                     <Link to="#" className="flex items-center gap-2">
                       <div className="h-4 w-4" />
                       <span>Logout</span>
