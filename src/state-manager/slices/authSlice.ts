@@ -16,6 +16,28 @@ const initialState: authState = {
 interface authError {
   error: string;
 }
+export const ResetuserPassword = createAsyncThunk(
+  "auth/reset-password",
+  async (
+    formData: { token: string; password: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await axiosInstance.post(
+        `/reset-password/${formData.token}`,
+        {
+          password: formData.password,
+        },
+        {
+          withCredentials: true,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue("Reset password failed");
+    }
+  }
+);
 export const Logout = createAsyncThunk(
   "auth/logout",
   async (_, { rejectWithValue }) => {
@@ -257,6 +279,15 @@ const authSlice = createSlice({
     });
     builder.addCase(ForgotPassword.pending, (state) => {
       state.isLoading = true;
+    });
+    builder.addCase(ResetuserPassword.pending, (state) => {
+      state.isLoading = true;
+    });
+    builder.addCase(ResetuserPassword.fulfilled, (state) => {
+      state.isLoading = false;
+    });
+    builder.addCase(ResetuserPassword.rejected, (state) => {
+      state.isLoading = false;
     });
   },
 });

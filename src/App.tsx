@@ -16,6 +16,7 @@ import CreateOrder from "./pages/order-pages/createorder";
 import Orders from "./pages/order-pages/orders";
 import OrderDetail from "./pages/order-pages/orderdetails";
 import ForgotPassword from "./pages/mainpages/authpages/forgotpassoword";
+import ResetPassword from "./pages/mainpages/authpages/resetpassword";
 const App: React.FunctionComponent = () => {
   const dispatch = useAppDispatch();
 
@@ -40,6 +41,7 @@ const App: React.FunctionComponent = () => {
         <Route path="/u/orders" element={<Orders />} />
         <Route path="/u/order/details/:orderId" element={<OrderDetail />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
       </Routes>
     </>
   );
