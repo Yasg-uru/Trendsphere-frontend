@@ -18,7 +18,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 import { Login } from "@/state-manager/slices/authSlice";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 export const signInSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
   password: z
@@ -134,12 +134,18 @@ export default function SignInForm() {
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="flex justify-center">
+        <CardFooter className="flex justify-center flex-col items-center">
           <p className="text-sm text-muted-foreground">
             Don&apos;t have an account?{" "}
-            <a href="/register" className="text-primary hover:underline">
+            <Link to="/register" className="text-primary hover:underline">
               Sign up
-            </a>
+            </Link>
+          </p>
+          <p className="text-sm text-muted-foreground mt-2">
+            Forgot your password?{" "}
+            <Link to="/forgot-password" className="text-primary hover:underline">
+              Reset here
+            </Link>
           </p>
         </CardFooter>
       </Card>

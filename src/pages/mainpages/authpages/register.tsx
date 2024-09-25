@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 import { Register } from "@/state-manager/slices/authSlice";
 
@@ -393,9 +393,9 @@ export default function SignUpForm() {
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">
             Already have an account?{" "}
-            <a href="#" className="text-primary hover:underline">
+            <Link to="/sign-in" className="text-primary hover:underline">
               Sign in
-            </a>
+            </Link>
           </p>
         </CardFooter>
       </Card>

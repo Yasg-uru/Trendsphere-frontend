@@ -147,6 +147,23 @@ export const removeCart = createAsyncThunk(
     }
   }
 );
+export const ForgotPassword = createAsyncThunk(
+  "auth/forgot-password",
+  async (formdata: { email: string }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post(
+        "/user/forgot-password",
+        formdata,
+        {
+          withCredentials: true,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue("Failed to forgot passoword");
+    }
+  }
+);
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -218,7 +235,28 @@ const authSlice = createSlice({
     });
     builder.addCase(UpdateAddress.fulfilled, (state, action) => {
       state.userInfo = action.payload?.user;
+
       state.isLoading = false;
+    });
+    builder.addCase(Logout.pending, (state) => {
+      state.isLoading = true;
+    });
+    builder.addCase(Logout.fulfilled, (state) => {
+      state.userInfo = null;
+      state.isAuthenticated = false;
+      state.isLoading = false;
+    });
+    builder.addCase(Logout.rejected, (state) => {
+      state.isLoading = false;
+    });
+    builder.addCase(ForgotPassword.rejected, (state) => {
+      state.isLoading = false;
+    });
+    builder.addCase(ForgotPassword.fulfilled, (state) => {
+      state.isLoading = false;
+    });
+    builder.addCase(ForgotPassword.pending, (state) => {
+      state.isLoading = true;
     });
   },
 });
