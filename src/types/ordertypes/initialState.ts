@@ -71,6 +71,8 @@ export interface IOrder {
     priceAtPurchase: number;
     discount: number;
     discountByCoupon: number;
+    isReplaceable: boolean;
+    isReturnable: boolean;
   }[];
   totalAmount: number;
   discountAmount?: number;
