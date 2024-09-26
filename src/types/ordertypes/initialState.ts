@@ -5,14 +5,16 @@ export interface orderState {
   orderinfo: IOrder | null;
   Myorders: IOrder[];
   pagination: paginationInfo | null;
+  ordersPagination: paginationInfo;
+  orders: IOrder[];
 }
 export interface paginationInfo {
   totalOrders: number;
   currentPage: number;
   totalPages: number;
   limit: number;
-  hasNextPage: boolean;
-  hasPrevPage: boolean;
+  hasNextPage?: boolean;
+  hasPrevPage?: boolean;
 }
 export interface selectProductsForOrder {
   productId: string;

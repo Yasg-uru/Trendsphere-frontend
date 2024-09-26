@@ -95,6 +95,19 @@ export const refundOrder = createAsyncThunk(
     }
   }
 );
+export const filtersOrders = createAsyncThunk(
+  "order/filters",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get("/order/filter-order", {
+        withCredentials: true,
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue("Failed to filter orders ");
+    }
+  }
+);
 export const userorders = createAsyncThunk(
   "order/myorders",
   async (params: Filters, { rejectWithValue }) => {
@@ -164,6 +177,17 @@ const orderSlice = createSlice({
       state.isLoading = false;
     });
     builder.addCase(refundOrder.fulfilled, (state) => {
+      state.isLoading = false;
+    });
+    builder.addCase(filtersOrders.fulfilled, (state, action) => {
+      state.orders = action.payload.orders;
+      state.ordersPagination = action.payload.pagination;
+      state.isLoading = false;
+    });
+    builder.addCase(filtersOrders.pending, (state) => {
+      state.isLoading = true;
+    });
+    builder.addCase(filtersOrders.rejected, (state) => {
       state.isLoading = false;
     });
   },
