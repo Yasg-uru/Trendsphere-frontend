@@ -135,9 +135,10 @@ export default function Details() {
     selectedProduct.variants[0];
 
   const discountedPrice = selectedProduct.discount
-    ? (selectedVariant.price * selectedProduct.discount.discountPercentage) /
-      100
-    : 0;
+    ? selectedVariant.price -
+      (selectedVariant.price * selectedProduct.discount.discountPercentage) /
+        100
+    : selectedVariant.price;
 
   const handleVariantChange = (variantId: string) => {
     setSelectedVariantId(variantId);

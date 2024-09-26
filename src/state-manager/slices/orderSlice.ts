@@ -5,6 +5,7 @@ import {
   orderDataType,
   OrderQueryParams,
   orderState,
+  ProcessReplcementData,
   RefundOrders,
   ReplacementFormData,
 } from "@/types/ordertypes/initialState";
@@ -131,7 +132,7 @@ export const userorders = createAsyncThunk(
 );
 export const replaceorders = createAsyncThunk(
   "order/replace-request",
-  async (formData:ReplacementFormData, { rejectWithValue }) => {
+  async (formData: ReplacementFormData, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.post(
         `/order/request-replace`,
@@ -148,7 +149,7 @@ export const replaceorders = createAsyncThunk(
 );
 export const processReplacement = createAsyncThunk(
   "order/process-replacement",
-  async (formdata, { rejectWithValue }) => {
+  async (formdata:ProcessReplcementData, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.post(
         "/order/process-replacement",

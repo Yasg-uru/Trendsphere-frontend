@@ -65,6 +65,11 @@ export interface ReplacementFormData {
   replaceItems: RefundOrders[];
   reason: string;
 }
+export interface ProcessReplcementData{
+  orderId:string ;
+  replacementItems:RefundOrders[],
+  status:string;
+}
 export interface IOrder {
   _id: string;
   user: string | User;

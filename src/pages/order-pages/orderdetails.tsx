@@ -84,6 +84,7 @@ export default function OrderDetail() {
   const [isOrderCanceling, setIsOrderCanceling] = useState<boolean>(false);
   const [isRefunding, setIsRefunding] = useState<boolean>(false);
   const [reason, setReason] = useState<string>("");
+  const role = "";
   const { orderId } = useParams();
   const form = useForm<ReplacementFormValues>({
     resolver: zodResolver(replacementSchema),
@@ -262,6 +263,20 @@ export default function OrderDetail() {
           variant: "destructive",
         });
       });
+  };
+  const processReplaceRequest = () => {
+    // dispatch(processReplacement())
+    //   .then(() => {
+    //     toast({
+    //       title: `${status} updated on order successfully`,
+    //     });
+    //   })
+    //   .catch((error) => {
+    //     toast({
+    //       title: error,
+    //       variant: "destructive",
+    //     });
+    //   });
   };
   return (
     <div className="flex justify-center items-center min-h-screen bg-background p-4">
