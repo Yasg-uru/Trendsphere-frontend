@@ -60,7 +60,7 @@ export interface RefundOrders {
   discount: number;
   discountByCoupon: number;
 }
-export interface replacementInterface {
+export interface ReplacementFormData {
   orderId: string;
   replaceItems: RefundOrders[];
   reason: string;

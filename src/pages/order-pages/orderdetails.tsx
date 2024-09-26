@@ -1,8 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { replace, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 import { IOrder, RefundOrders } from "@/types/ordertypes/initialState";
 import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import {
   Card,
   CardContent,
@@ -47,13 +56,22 @@ import { useToast } from "@/hooks/use-toast";
 import {
   cancelorder,
   refundOrder,
+  replaceorders,
   userorders,
 } from "@/state-manager/slices/orderSlice";
 import Loader from "@/helper/Loader";
 import { title } from "process";
 import { Checkbox } from "@/components/ui/checkbox";
 import { JSX } from "react/jsx-runtime";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+const replacementSchema = z.object({
+  items: z.array(z.string()).min(1, "Select at least one item for replacement"),
+  reason: z.string().min(10, "Reason must be at least 10 characters long"),
+});
 
+type ReplacementFormValues = z.infer<typeof replacementSchema>;
 export default function OrderDetail() {
   const dispatch = useAppDispatch();
   const { toast } = useToast();
@@ -67,7 +85,13 @@ export default function OrderDetail() {
   const [isRefunding, setIsRefunding] = useState<boolean>(false);
   const [reason, setReason] = useState<string>("");
   const { orderId } = useParams();
-
+  const form = useForm<ReplacementFormValues>({
+    resolver: zodResolver(replacementSchema),
+    defaultValues: {
+      items: [],
+      reason: "",
+    },
+  });
   useEffect(() => {
     if (Myorders.length > 0 && orderId) {
       const CurrentOrder = Myorders.find((order) => order._id === orderId);
@@ -205,7 +229,35 @@ export default function OrderDetail() {
       });
   };
   console.log("this is a data of the refund selected items :", refundItems);
+  const onReplacementSubmit = (data: ReplacementFormValues) => {
+    const replacementItems = order.products.filter((product) =>
+      data.items.includes(`${product.productId._id}-${product.variantId}`)
+    );
 
+    const replaceRequestData = {
+      orderId: order._id,
+      replaceItems: replacementItems.map((item) => ({
+        ...item,
+        productId: item.productId._id,
+      })),
+      reason: data.reason,
+    };
+
+    dispatch(replaceorders(replaceRequestData))
+      .then(() => {
+        toast({
+          title: "Replacement request created successfully",
+        });
+        setIsReplacing(false);
+        form.reset();
+      })
+      .catch((error) => {
+        toast({
+          title: error,
+          variant: "destructive",
+        });
+      });
+  };
   return (
     <div className="flex justify-center items-center min-h-screen bg-background p-4">
       <Card className="w-full max-w-4xl mx-auto shadow-lg">
@@ -597,74 +649,104 @@ export default function OrderDetail() {
       </Dialog>
       <Dialog open={isReplacing} onOpenChange={setIsReplacing}>
         <DialogContent className="sm:max-w-[600px]">
-          <div className="flex flex-col gap-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold">
-                Select Items for Replacement
-              </h2>
-            </div>
-            <div className="grid gap-4">
-              <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4 bg-muted/20 px-4 py-3 rounded-md">
-                <div className="font-medium">Product ID</div>
-                <div className="font-medium">Variant / Size / Qty / Price</div>
-                <div className="font-medium">Replacement</div>
-              </div>
-              {order.products.map((product, index) => {
-                return (
-                  product.isReplaceable && (
-                    <div
-                      key={index}
-                      className="grid grid-cols-[auto_1fr_auto] items-center gap-4 bg-muted/10 px-4 py-3 rounded-md shadow-lg"
-                    >
-                      <div>{product.productId._id}</div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <img
-                            width={50}
-                            height={50}
-                            className="rounded-md"
-                            src={
-                              product.productId.variants.find(
-                                (variant) => variant._id === product.variantId
-                              )?.images[0] || ""
-                            }
-                            alt=""
-                          />
-                          <div>Size: {product.size}</div>
-                          <div>Qty: {product.quantity}</div>
-                          <div>Price: ${product.priceAtPurchase}</div>
-                        </div>
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <div>Discount: ${product.discount}</div>
-                          <div>Coupon: ${product.discountByCoupon}</div>
-                        </div>
-                      </div>
-                      <div>
-                        <Checkbox
-                          checked={refundItems.some(
-                            (item) =>
-                              item.productId === product.productId._id &&
-                              item.variantId === product.variantId
-                          )}
-                          onCheckedChange={() =>
-                            handleRefundCheckBox(
-                              product.productId._id,
-                              product.variantId
-                            )
-                          }
-                        />
-                      </div>
+          <DialogHeader>
+            <DialogTitle>Request Replacement</DialogTitle>
+            <DialogDescription>
+              Select the items you want to replace and provide a reason.
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onReplacementSubmit)}
+              className="space-y-8"
+            >
+              <FormField
+                control={form.control}
+                name="items"
+                render={() => (
+                  <FormItem>
+                    <div className="mb-4">
+                      <FormLabel className="text-base">
+                        Replaceable Items
+                      </FormLabel>
+                      <FormDescription>
+                        Select the items you want to replace.
+                      </FormDescription>
                     </div>
-                  )
-                );
-              })}
-            </div>
-          </div>
-          <DialogFooter className="justify-end">
-            <Button type="submit" onClick={handleOrderRefund}>
-              Request Replacement
-            </Button>
-          </DialogFooter>
+                    {order.products.map(
+                      (product) =>
+                        product.isReplaceable && (
+                          <FormField
+                            key={`${product.productId._id}-${product.variantId}`}
+                            control={form.control}
+                            name="items"
+                            render={({ field }) => {
+                              return (
+                                <FormItem
+                                  key={`${product.productId._id}-${product.variantId}`}
+                                  className="flex flex-row items-start space-x-3 space-y-0"
+                                >
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={field.value?.includes(
+                                        `${product.productId._id}-${product.variantId}`
+                                      )}
+                                      onCheckedChange={(checked) => {
+                                        return checked
+                                          ? field.onChange([
+                                              ...field.value,
+                                              `${product.productId._id}-${product.variantId}`,
+                                            ])
+                                          : field.onChange(
+                                              field.value?.filter(
+                                                (value: string) =>
+                                                  value !==
+                                                  `${product.productId._id}-${product.variantId}`
+                                              )
+                                            );
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormLabel className="text-sm font-normal">
+                                    {product.productId.name} - {product.size} -
+                                    ${product.priceAtPurchase}
+                                  </FormLabel>
+                                </FormItem>
+                              );
+                            }}
+                          />
+                        )
+                    )}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="reason"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Reason for Replacement</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Please provide a reason for the replacement request"
+                        className="resize-none"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Explain why you're requesting a replacement for the
+                      selected items.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <DialogFooter>
+                <Button type="submit">Submit Replacement Request</Button>
+              </DialogFooter>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
     </div>

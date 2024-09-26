@@ -6,6 +6,7 @@ import {
   OrderQueryParams,
   orderState,
   RefundOrders,
+  ReplacementFormData,
 } from "@/types/ordertypes/initialState";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 const initialState: orderState = {
@@ -130,7 +131,7 @@ export const userorders = createAsyncThunk(
 );
 export const replaceorders = createAsyncThunk(
   "order/replace-request",
-  async (formData, { rejectWithValue }) => {
+  async (formData:ReplacementFormData, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.post(
         `/order/request-replace`,
