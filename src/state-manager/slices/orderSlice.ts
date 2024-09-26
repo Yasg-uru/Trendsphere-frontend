@@ -8,6 +8,7 @@ import {
   ProcessReplcementData,
   RefundOrders,
   ReplacementFormData,
+  updateStatus,
 } from "@/types/ordertypes/initialState";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 const initialState: orderState = {
@@ -149,7 +150,7 @@ export const replaceorders = createAsyncThunk(
 );
 export const processReplacement = createAsyncThunk(
   "order/process-replacement",
-  async (formdata:ProcessReplcementData, { rejectWithValue }) => {
+  async (formdata: ProcessReplcementData, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.post(
         "/order/process-replacement",
@@ -161,6 +162,19 @@ export const processReplacement = createAsyncThunk(
       return response.data;
     } catch (error) {
       return rejectWithValue("replacement process failed ");
+    }
+  }
+);
+export const updateOrderStatus = createAsyncThunk(
+  "order/update-status",
+  async (formdata: updateStatus, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.put("/order/update", formdata, {
+        withCredentials: true,
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue("Failed to update order status");
     }
   }
 );

@@ -185,3 +185,8 @@ export interface OrderQueryParams {
   limit?: number;
   searchTerm?: string;
 }
+export interface updateStatus{
+  orderId:string;
+  status:string;
+  cancelReason?:string;
+}

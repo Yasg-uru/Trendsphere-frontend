@@ -6,7 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -23,8 +25,35 @@ import {
 } from "lucide-react";
 import { IOrder } from "@/types/ordertypes/initialState";
 import { useParams } from "react-router-dom";
-import { useAppSelector } from "@/state-manager/hook";
+import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 import Loader from "@/helper/Loader";
+import {
+  filtersOrders,
+  updateOrderStatus,
+} from "@/state-manager/slices/orderSlice";
+import { useToast } from "@/hooks/use-toast";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Textarea } from "@/components/ui/textarea";
+
+const adminCancellationReasons = [
+  "Customer requested cancellation",
+  "Fraudulent order",
+  "Payment issues",
+  "Out of stock",
+  "Other",
+];
 
 export default function OrderDetailsPage() {
   const [order, setOrder] = useState<IOrder | null>(null); // Set the initial value explicitly as `null`
@@ -34,12 +63,17 @@ export default function OrderDetailsPage() {
   const [refundStatus, setRefundStatus] = useState<string>("Not Requested");
   const [replacementStatus, setReplacementStatus] =
     useState<string>("Not Requested");
+  const [selectedReason, setSelectedReason] = useState("");
+  const [otherReason, setOtherReason] = useState("");
+  const [isOrderCancelling, setIsOrderCancelling] = useState<boolean>(false);
+  const dispatch = useAppDispatch();
+  const { toast } = useToast();
   useEffect(() => {
     if (orderId) {
       const Order = orders.find((order) => order._id === orderId);
       if (Order) {
         setOrder(Order);
-        setOrderStatus(Order.orderStatus)
+        setOrderStatus(Order.orderStatus);
         if (Order.products[0].refund?.requested) {
           setRefundStatus("Requested");
         }
@@ -48,7 +82,7 @@ export default function OrderDetailsPage() {
         }
       }
     }
-  }, [orderId, orders]); // Ensure `orders` is added as a dependency
+  }, []); // Ensure `orders` is added as a dependency
 
   if (!order) {
     return <Loader />;
@@ -56,8 +90,22 @@ export default function OrderDetailsPage() {
 
   const handleStatusUpdate = (newStatus: string) => {
     setOrderStatus(newStatus);
-    // Here you would typically make an API call to update the status
-    console.log(`Order status updated to: ${newStatus}`);
+    if (newStatus === "cancelled") {
+      setIsOrderCancelling(true);
+    } else {
+      dispatch(updateOrderStatus({ orderId: order._id, status: orderStatus }))
+        .then(() => {
+          toast({
+            title: "status updated successfully",
+          });
+        })
+        .catch((error) => {
+          toast({
+            title: error,
+            variant: "destructive",
+          });
+        });
+    }
   };
 
   const handleRefundUpdate = (newStatus: string) => {
@@ -71,7 +119,31 @@ export default function OrderDetailsPage() {
     // Here you would typically make an API call to update the replacement status
     console.log(`Replacement status updated to: ${newStatus}`);
   };
-
+  const handleCancel = () => {
+    const finalReason =
+      selectedReason === "Other" ? otherReason : selectedReason;
+    //after this we need to dispatch the cancel order
+    dispatch(
+      updateOrderStatus({
+        orderId: order._id,
+        status: orderStatus,
+        cancelReason: finalReason,
+      })
+    )
+      .then(() => {
+        toast({
+          title: "cancelled order successfully",
+        });
+      })
+      .catch((error) => {
+        toast({
+          title: error,
+          variant: "destructive",
+        });
+      });
+      setIsOrderCancelling(false);
+      
+  };
   return (
     <div className="container mx-auto p-4 space-y-8">
       <Button variant="ghost" className="mb-4">
@@ -81,7 +153,7 @@ export default function OrderDetailsPage() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-2xl font-bold">
-            Order #{order.payment.paymentId}
+            Order {order.payment.paymentId}
           </CardTitle>
           <Badge
             variant={orderStatus === "completed" ? "outline" : "secondary"}
@@ -102,12 +174,16 @@ export default function OrderDetailsPage() {
                 <SelectValue placeholder="Update Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="processing">Processing</SelectItem>
-                <SelectItem value="shipped">Shipped</SelectItem>
-                <SelectItem value="delivered">Delivered</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
+                <SelectGroup>
+                  <SelectLabel>Status</SelectLabel>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="processing">Processing</SelectItem>
+                  <SelectItem value="shipped">Shipped</SelectItem>
+                  <SelectItem value="delivered">Delivered</SelectItem>
+                  <SelectItem value="replaced">Replaced</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                  <SelectItem value="returned">Returned</SelectItem>
+                </SelectGroup>
               </SelectContent>
             </Select>
           </div>
@@ -336,6 +412,67 @@ export default function OrderDetailsPage() {
           </div>
         </CardContent>
       </Card>
+      <Dialog open={isOrderCancelling} onOpenChange={setIsOrderCancelling}>
+        <DialogTrigger asChild>
+          <Button variant="destructive">
+            <AlertCircle className="mr-2 h-4 w-4" />
+            Cancel Order
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Admin Order Cancellation</DialogTitle>
+            <DialogDescription>
+              Please select a reason for cancelling order #{orderId}. This
+              action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            {/* Admin reason selection */}
+            <RadioGroup
+              value={selectedReason}
+              onValueChange={setSelectedReason}
+            >
+              {adminCancellationReasons.map((reason) => (
+                <div key={reason} className="flex items-center space-x-2">
+                  <RadioGroupItem value={reason} id={reason} />
+                  <Label htmlFor={reason}>{reason}</Label>
+                </div>
+              ))}
+            </RadioGroup>
+            {/* Conditional rendering for 'Other' reason input */}
+            {selectedReason === "Other" && (
+              <div className="grid w-full gap-1.5">
+                <Label htmlFor="other-reason">Please specify:</Label>
+                <Textarea
+                  id="other-reason"
+                  placeholder="Enter your reason here"
+                  value={otherReason}
+                  onChange={(e) => setOtherReason(e.target.value)}
+                />
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsOrderCancelling(false)}
+            >
+              Close
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleCancel}
+              disabled={
+                !selectedReason ||
+                (selectedReason === "Other" && !otherReason.trim())
+              }
+            >
+              Confirm Cancellation
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
