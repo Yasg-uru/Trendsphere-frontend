@@ -242,6 +242,11 @@ export default function OrderDetail() {
       })),
       reason: data.reason,
     };
+    // console.log(
+    //   "this is a replacement request data  for validation to check whether the data is correct or not :",
+    //   data
+    // );
+    // console.log("this is a replacement items ", replaceRequestData);
 
     dispatch(replaceorders(replaceRequestData))
       .then(() => {
@@ -692,6 +697,10 @@ export default function OrderDetail() {
                                         `${product.productId._id}-${product.variantId}`
                                       )}
                                       onCheckedChange={(checked) => {
+                                        handleReplacementCheckbox(
+                                          product.productId._id,
+                                          product.variantId
+                                        );
                                         return checked
                                           ? field.onChange([
                                               ...field.value,
