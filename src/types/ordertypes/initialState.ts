@@ -83,6 +83,20 @@ export interface IOrder {
     discountByCoupon: number;
     isReplaceable: boolean;
     isReturnable: boolean;
+    refund?: {
+      requested: boolean;
+      amount: number;
+      status: "pending" | "completed" | "failed";
+      requestDate?: Date;
+      completionDate?: Date;
+    };
+    replacement?: {
+      requested: boolean;
+      reason?: string;
+      status?: "pending" | "approved" | "rejected";
+      requestDate?: Date;
+      responseDate?: Date;
+    };
   }[];
   totalAmount: number;
   discountAmount?: number;

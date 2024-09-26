@@ -21,7 +21,7 @@ import { useToast } from "@/hooks/use-toast";
 import { filtersOrders } from "@/state-manager/slices/orderSlice";
 import { OrderQueryParams } from "@/types/ordertypes/initialState";
 import { useDebounce } from "@uidotdev/usehooks";
-import { useFetcher } from "react-router-dom";
+import { useFetcher, useNavigate } from "react-router-dom";
 import Loader from "@/helper/Loader";
 
 export default function OrdersAdmin() {
@@ -38,7 +38,7 @@ export default function OrdersAdmin() {
   });
   const [searchTerm, setSearchTerm] = useState<string>("");
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
-
+  const navigate=useNavigate();
   const dispatch = useAppDispatch();
   const { toast } = useToast();
 
@@ -78,6 +78,7 @@ export default function OrdersAdmin() {
   if (isLoading) {
     return <Loader />;
   }
+ 
   return (
     <div className="p-4 space-y-4">
       <h1 className="text-2xl font-bold">TrendSphere Orders</h1>
@@ -182,7 +183,7 @@ export default function OrdersAdmin() {
           Filtered Orders ({orders.length})
         </h2>
         {orders.map((order) => (
-          <div key={order._id} className="border p-4 rounded-lg shadow">
+          <div key={order._id} className="border p-4 rounded-lg shadow" onClick={()=>navigate(`/orders/details/${order._id}`)}>
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
               <div>
                 <h3 className="font-bold">Order #{order._id}</h3>
