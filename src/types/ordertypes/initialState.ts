@@ -159,5 +159,5 @@ export interface OrderQueryParams {
   productId?: string;
   page: number;
   limit?: number;
-  searchTerm?:string;
+  searchTerm?: string;
 }

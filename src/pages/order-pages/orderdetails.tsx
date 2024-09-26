@@ -280,18 +280,34 @@ export default function OrderDetail() {
                           {formatCurrency(product.priceAtPurchase)}
                         </TableCell>
                         <TableCell>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            disabled={order.orderStatus !== "delivered"}
-                            className={`transition-opacity ${
-                              order.orderStatus !== "delivered"
-                                ? "opacity-50 cursor-not-allowed"
-                                : ""
-                            }`}
-                          >
-                            Replace
-                          </Button>
+                          {product.isReplaceable && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={order.orderStatus !== "delivered"}
+                              className={`transition-opacity ${
+                                order.orderStatus !== "delivered"
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
+                              }`}
+                            >
+                              Replace
+                            </Button>
+                          )}
+                          {product.isReturnable && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={order.orderStatus !== "delivered"}
+                              className={`transition-opacity ${
+                                order.orderStatus !== "delivered"
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
+                              }`}
+                            >
+                              Return
+                            </Button>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -376,20 +392,22 @@ export default function OrderDetail() {
           </Tabs>
         </CardContent>
         <CardFooter className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 border-t pt-4">
-          <Button
-            variant="outline"
-            className="w-full sm:w-auto"
-            disabled={
-              order.orderStatus === "cancelled" ||
-              order.orderStatus === "returned" ||
-              order.orderStatus === "processing" ||
-              order.orderStatus === "pending" ||
-              order.payment.paymentStatus === "refunded"
-            }
-            onClick={() => setIsRefunding(true)}
-          >
-            Refund
-          </Button>
+          {
+            <Button
+              variant="outline"
+              className="w-full sm:w-auto"
+              disabled={
+                order.orderStatus === "cancelled" ||
+                order.orderStatus === "returned" ||
+                order.orderStatus === "processing" ||
+                order.orderStatus === "pending" ||
+                order.payment.paymentStatus === "refunded"
+              }
+              onClick={() => setIsRefunding(true)}
+            >
+              Refund
+            </Button>
+          }
           <Button
             variant="destructive"
             className="w-full sm:w-auto"
