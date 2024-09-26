@@ -128,6 +128,40 @@ export const userorders = createAsyncThunk(
     }
   }
 );
+export const replaceorders = createAsyncThunk(
+  "order/replace-request",
+  async (formData, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post(
+        `/order/request-replace`,
+        formData,
+        {
+          withCredentials: true,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue("replacement request failed ");
+    }
+  }
+);
+export const processReplacement = createAsyncThunk(
+  "order/process-replacement",
+  async (formdata, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post(
+        "/order/process-replacement",
+        formdata,
+        {
+          withCredentials: true,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue("replacement process failed ");
+    }
+  }
+);
 const orderSlice = createSlice({
   name: "order",
   initialState,
