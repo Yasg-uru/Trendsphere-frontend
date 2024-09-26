@@ -21,7 +21,7 @@ export interface cart {
   variantId: IProductVariantFrontend;
   _id: string;
 }
-interface User {
+export interface User {
   preferences: Preferences;
   _id: string;
   username: string;

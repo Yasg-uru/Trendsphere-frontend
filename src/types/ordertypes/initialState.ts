@@ -1,3 +1,4 @@
+import { User } from "../authState/initialState";
 import { IProductFrontend } from "../productState/product.type";
 
 export interface orderState {
@@ -5,7 +6,7 @@ export interface orderState {
   orderinfo: IOrder | null;
   Myorders: IOrder[];
   pagination: paginationInfo | null;
-  ordersPagination: paginationInfo;
+  ordersPagination: paginationInfo | null;
   orders: IOrder[];
 }
 export interface paginationInfo {
@@ -61,7 +62,7 @@ export interface RefundOrders {
 }
 export interface IOrder {
   _id: string;
-  user: string;
+  user: string | User;
   products: {
     productId: IProductFrontend;
     variantId: string;
@@ -146,4 +147,15 @@ export interface FilterOrderParams {
   limit?: number;
   sortBy?: string;
   order?: "asc" | "desc";
+}
+export interface OrderQueryParams {
+  deliveryType?: string;
+  orderStatus?: string;
+  userId?: string;
+  startDate?: string;
+  endDate?: string;
+  productId?: string;
+  page: number;
+  limit?: number;
+  searchTerm?:string;
 }

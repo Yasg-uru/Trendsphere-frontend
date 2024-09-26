@@ -3,6 +3,7 @@ import { Filters } from "@/pages/order-pages/orders";
 import {
   FilterOrderParams,
   orderDataType,
+  OrderQueryParams,
   orderState,
   RefundOrders,
 } from "@/types/ordertypes/initialState";
@@ -12,6 +13,8 @@ const initialState: orderState = {
   orderinfo: null,
   Myorders: [],
   pagination: null,
+  ordersPagination: null,
+  orders: [],
 };
 export const createOrder = createAsyncThunk(
   "order/create",
@@ -97,10 +100,11 @@ export const refundOrder = createAsyncThunk(
 );
 export const filtersOrders = createAsyncThunk(
   "order/filters",
-  async (_, { rejectWithValue }) => {
+  async (params: OrderQueryParams, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get("/order/filter-order", {
         withCredentials: true,
+        params,
       });
       return response.data;
     } catch (error) {
