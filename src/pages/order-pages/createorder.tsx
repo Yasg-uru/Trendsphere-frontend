@@ -241,7 +241,7 @@ export default function CreateOrder() {
       console.log("this is selected products :", selectedProducts);
       selectedProducts.forEach((product: selectProductsForOrder) => {
         discount +=
-          product.priceAtPurchase * product.quantity - product.discount;
+          product.discount * product.quantity;
         totalPrice += product.priceAtPurchase * product.quantity;
       });
       if (expressDelivery) {
