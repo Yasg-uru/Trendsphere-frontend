@@ -60,6 +60,9 @@ export default function OrderDetail() {
   const { Myorders, isLoading } = useAppSelector((state) => state.order);
   const [order, setOrder] = useState<IOrder | null>(null);
   const [refundItems, setRefundItems] = useState<RefundOrders[]>([]);
+  const [replacementItems, setReplacementItems] = useState<RefundOrders[]>([]);
+  const [isReplacing, setIsReplacing] = useState<boolean>(false);
+
   const [isOrderCanceling, setIsOrderCanceling] = useState<boolean>(false);
   const [isRefunding, setIsRefunding] = useState<boolean>(false);
   const [reason, setReason] = useState<string>("");
@@ -157,6 +160,29 @@ export default function OrderDetail() {
         setRefundItems((prevItems) => [
           ...prevItems,
           { ...item, productId: item.productId._id },
+        ]);
+      }
+    }
+  };
+  const handleReplacementCheckbox = (productId: string, variantId: string) => {
+    const isAlreadyExist = replacementItems.find(
+      (item) => item.productId === productId && item.variantId === variantId
+    );
+    if (isAlreadyExist) {
+      setReplacementItems((prevItems) =>
+        prevItems.filter(
+          (item) => item.productId === productId && item.variantId === variantId
+        )
+      );
+    } else {
+      const Item = order.products.find(
+        (product) =>
+          product.productId._id === productId && variantId === variantId
+      );
+      if (Item) {
+        setReplacementItems((prevItems) => [
+          ...prevItems,
+          { ...Item, productId: Item.productId._id },
         ]);
       }
     }
@@ -402,7 +428,21 @@ export default function OrderDetail() {
             //   order.orderStatus === "pending" ||
             //   order.payment.paymentStatus === "refunded"
             // }
-            onClick={() => setIsRefunding(true)}
+            onClick={() => setIsReplacing(true)}
+          >
+            Replace
+          </Button>
+          <Button
+            variant="outline"
+            className="w-full sm:w-auto"
+            disabled={
+              order.orderStatus === "cancelled" ||
+              order.orderStatus === "returned" ||
+              order.orderStatus === "processing" ||
+              order.orderStatus === "pending" ||
+              order.payment.paymentStatus === "refunded"
+            }
+            onClick={() => setIsReplacing(true)}
           >
             Refund
           </Button>
@@ -551,6 +591,78 @@ export default function OrderDetail() {
           <DialogFooter className="justify-end">
             <Button type="submit" onClick={handleOrderRefund}>
               Submit Refund
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={isReplacing} onOpenChange={setIsReplacing}>
+        <DialogContent className="sm:max-w-[600px]">
+          <div className="flex flex-col gap-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold">
+                Select Items for Replacement
+              </h2>
+            </div>
+            <div className="grid gap-4">
+              <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4 bg-muted/20 px-4 py-3 rounded-md">
+                <div className="font-medium">Product ID</div>
+                <div className="font-medium">Variant / Size / Qty / Price</div>
+                <div className="font-medium">Replacement</div>
+              </div>
+              {order.products.map((product, index) => {
+                return (
+                  product.isReplaceable && (
+                    <div
+                      key={index}
+                      className="grid grid-cols-[auto_1fr_auto] items-center gap-4 bg-muted/10 px-4 py-3 rounded-md shadow-lg"
+                    >
+                      <div>{product.productId._id}</div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <img
+                            width={50}
+                            height={50}
+                            className="rounded-md"
+                            src={
+                              product.productId.variants.find(
+                                (variant) => variant._id === product.variantId
+                              )?.images[0] || ""
+                            }
+                            alt=""
+                          />
+                          <div>Size: {product.size}</div>
+                          <div>Qty: {product.quantity}</div>
+                          <div>Price: ${product.priceAtPurchase}</div>
+                        </div>
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <div>Discount: ${product.discount}</div>
+                          <div>Coupon: ${product.discountByCoupon}</div>
+                        </div>
+                      </div>
+                      <div>
+                        <Checkbox
+                          checked={refundItems.some(
+                            (item) =>
+                              item.productId === product.productId._id &&
+                              item.variantId === product.variantId
+                          )}
+                          onCheckedChange={() =>
+                            handleRefundCheckBox(
+                              product.productId._id,
+                              product.variantId
+                            )
+                          }
+                        />
+                      </div>
+                    </div>
+                  )
+                );
+              })}
+            </div>
+          </div>
+          <DialogFooter className="justify-end">
+            <Button type="submit" onClick={handleOrderRefund}>
+              Request Replacement
             </Button>
           </DialogFooter>
         </DialogContent>
