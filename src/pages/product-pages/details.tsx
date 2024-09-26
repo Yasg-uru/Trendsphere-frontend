@@ -90,9 +90,8 @@ export default function Details() {
         : false;
       const discountedPrice =
         validDiscount && product.discount
-          ? initialVariant.price *
-            (1 - product.discount.discountPercentage / 100)
-          : initialVariant.price;
+          ? (initialVariant.price * product.discount.discountPercentage) / 100
+          : 0;
 
       // Set selected product details
       setSelectedProducts([
@@ -111,8 +110,8 @@ export default function Details() {
       const unSelectedVariants = remainingVariants.map((variant) => {
         const variantDiscountedPrice =
           validDiscount && product.discount
-            ? variant.price * (1 - product.discount.discountPercentage / 100)
-            : variant.price;
+            ? (variant.price * product.discount.discountPercentage) / 100
+            : 0;
 
         return {
           productId,
@@ -136,8 +135,8 @@ export default function Details() {
     selectedProduct.variants[0];
 
   const discountedPrice = selectedProduct.discount
-    ? selectedVariant.price *
-      (1 - selectedProduct.discount.discountPercentage / 100)
+    ? (selectedVariant.price * selectedProduct.discount.discountPercentage) /
+      100
     : 0;
 
   const handleVariantChange = (variantId: string) => {
@@ -147,12 +146,15 @@ export default function Details() {
       selectedProduct.variants[0];
     setSelectedSize(newVariant.size[0].size);
     setImage(newVariant.images[0]);
+    const discountPercentage =
+      selectedProduct?.discount?.discountPercentage ?? 0;
+    const discountAmount = (newVariant.price * discountPercentage) / 100;
     setSelectedProducts([
       {
         productId: selectedProductId,
         variantId,
         quantity: 1,
-        discount: (selectedProduct?.discount?.discountPercentage ?? 0) / 100,
+        discount: discountAmount,
         priceAtPurchase: newVariant.price,
         size: newVariant.size[0].size,
       },
@@ -167,7 +169,10 @@ export default function Details() {
           productId: selectedProductId,
           variantId: Item._id,
           quantity: 1,
-          discount: (selectedProduct?.discount?.discountPercentage ?? 0) / 100,
+          discount:
+            (Item.price *
+              (selectedProduct?.discount?.discountPercentage ?? 0)) /
+            100,
           priceAtPurchase: Item.price,
           size: Item.size[0].size,
         }))
@@ -508,7 +513,11 @@ export default function Details() {
                         )}
                       </div>
                       <div className="text-lg font-bold text-green-600">
-                        ${(product.discount * product.quantity).toFixed(2)}
+                        $
+                        {(
+                          (product.priceAtPurchase - product.discount) *
+                          product.quantity
+                        ).toFixed(2)}
                       </div>
                     </div>
                     <Button
