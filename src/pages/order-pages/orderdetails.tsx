@@ -392,22 +392,21 @@ export default function OrderDetail() {
           </Tabs>
         </CardContent>
         <CardFooter className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 border-t pt-4">
-          {
-            <Button
-              variant="outline"
-              className="w-full sm:w-auto"
-              disabled={
-                order.orderStatus === "cancelled" ||
-                order.orderStatus === "returned" ||
-                order.orderStatus === "processing" ||
-                order.orderStatus === "pending" ||
-                order.payment.paymentStatus === "refunded"
-              }
-              onClick={() => setIsRefunding(true)}
-            >
-              Refund
-            </Button>
-          }
+          <Button
+            variant="outline"
+            className="w-full sm:w-auto"
+            // disabled={
+            //   order.orderStatus === "cancelled" ||
+            //   order.orderStatus === "returned" ||
+            //   order.orderStatus === "processing" ||
+            //   order.orderStatus === "pending" ||
+            //   order.payment.paymentStatus === "refunded"
+            // }
+            onClick={() => setIsRefunding(true)}
+          >
+            Refund
+          </Button>
+
           <Button
             variant="destructive"
             className="w-full sm:w-auto"
@@ -498,51 +497,55 @@ export default function OrderDetail() {
                 <div className="font-medium">Variant / Size / Qty / Price</div>
                 <div className="font-medium">Refund</div>
               </div>
-              {order.products.map((product, index) => (
-                <div
-                  key={index}
-                  className="grid grid-cols-[auto_1fr_auto] items-center gap-4 bg-muted/10 px-4 py-3 rounded-md shadow-lg"
-                >
-                  <div>{product.productId._id}</div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <img
-                        width={50}
-                        height={50}
-                        className="rounded-md"
-                        src={
-                          product.productId.variants.find(
-                            (variant) => variant._id === product.variantId
-                          )?.images[0] || ""
-                        }
-                        alt=""
-                      />
-                      <div>Size: {product.size}</div>
-                      <div>Qty: {product.quantity}</div>
-                      <div>Price: ${product.priceAtPurchase}</div>
+              {order.products.map((product, index) => {
+                return (
+                  product.isReturnable && (
+                    <div
+                      key={index}
+                      className="grid grid-cols-[auto_1fr_auto] items-center gap-4 bg-muted/10 px-4 py-3 rounded-md shadow-lg"
+                    >
+                      <div>{product.productId._id}</div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <img
+                            width={50}
+                            height={50}
+                            className="rounded-md"
+                            src={
+                              product.productId.variants.find(
+                                (variant) => variant._id === product.variantId
+                              )?.images[0] || ""
+                            }
+                            alt=""
+                          />
+                          <div>Size: {product.size}</div>
+                          <div>Qty: {product.quantity}</div>
+                          <div>Price: ${product.priceAtPurchase}</div>
+                        </div>
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <div>Discount: ${product.discount}</div>
+                          <div>Coupon: ${product.discountByCoupon}</div>
+                        </div>
+                      </div>
+                      <div>
+                        <Checkbox
+                          checked={refundItems.some(
+                            (item) =>
+                              item.productId === product.productId._id &&
+                              item.variantId === product.variantId
+                          )}
+                          onCheckedChange={() =>
+                            handleRefundCheckBox(
+                              product.productId._id,
+                              product.variantId
+                            )
+                          }
+                        />
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <div>Discount: ${product.discount}</div>
-                      <div>Coupon: ${product.discountByCoupon}</div>
-                    </div>
-                  </div>
-                  <div>
-                    <Checkbox
-                      checked={refundItems.some(
-                        (item) =>
-                          item.productId === product.productId._id &&
-                          item.variantId === product.variantId
-                      )}
-                      onCheckedChange={() =>
-                        handleRefundCheckBox(
-                          product.productId._id,
-                          product.variantId
-                        )
-                      }
-                    />
-                  </div>
-                </div>
-              ))}
+                  )
+                );
+              })}
             </div>
           </div>
           <DialogFooter className="justify-end">
