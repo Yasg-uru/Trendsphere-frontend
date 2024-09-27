@@ -4,6 +4,7 @@ export interface ProductState {
   isLoading: boolean;
   categories: Category[];
   products: IProductFrontend[];
+  searchedProducts:IProductFrontend[];
 }
 interface Subcategory {
   subcategory: string;

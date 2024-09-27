@@ -550,7 +550,6 @@ export default function ProductsPage() {
                 </Card>
               ))}
             </div>
-            
           </section>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { Moon, Sun, Menu, X, Search, ShoppingCart, LogIn } from "lucide-react";
@@ -24,9 +24,14 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
-import { ApplyFilter } from "@/state-manager/slices/productSlice";
+import {
+  ApplyFilter,
+  searchProducts,
+} from "@/state-manager/slices/productSlice";
 import { useToast } from "@/hooks/use-toast";
 import { Logout } from "@/state-manager/slices/authSlice";
+import { useDebounce } from "@uidotdev/usehooks";
+import { SearchResults } from "../product-pages/searchbar";
 export default function Navbar() {
   const { theme, setTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -38,6 +43,24 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const debouncedsearchQuery = useDebounce(searchQuery, 500);
+
+  useEffect(() => {
+    if (debouncedsearchQuery) {
+      dispatch(searchProducts(searchQuery))
+        .then(() => {
+          toast({
+            title: "Searched successfully",
+          });
+        })
+        .catch((error) => {
+          toast({
+            title: error,
+          });
+        });
+    }
+  }, [debouncedsearchQuery]);
   const handleClick = () => {
     const params = {
       category: currentCategory,
@@ -185,6 +208,8 @@ export default function Navbar() {
                 type="search"
                 placeholder="Search..."
                 className="pl-8 w-64"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
             <Link to="/mycarts">
@@ -315,6 +340,8 @@ export default function Navbar() {
                   type="search"
                   placeholder="Search..."
                   className="pl-8 w-full"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
               <Link to="/mycarts">
@@ -351,6 +378,7 @@ export default function Navbar() {
           </div>
         </div>
       )}
+      <SearchResults />
     </nav>
   );
 }

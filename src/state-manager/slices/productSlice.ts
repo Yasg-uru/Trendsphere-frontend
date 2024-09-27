@@ -31,6 +31,7 @@ const initialState: ProductState = {
   isLoading: false,
   categories: [],
   products: [],
+  searchedProducts: [],
 };
 
 export const getUniqueCategories = createAsyncThunk(
@@ -133,6 +134,22 @@ export const GiveReview = createAsyncThunk(
     }
   }
 );
+export const searchProducts = createAsyncThunk(
+  "product/search",
+  async (searchQuery: string, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(
+        `/product/search?searchQuery=${searchQuery}`,
+        {
+          withCredentials: true,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue("Failed to search ");
+    }
+  }
+);
 
 const productSlice = createSlice({
   name: "product",
@@ -159,6 +176,16 @@ const productSlice = createSlice({
       .addCase(ApplyFilter.fulfilled, (state, action) => {
         state.isLoading = false;
         state.products = action.payload?.products;
+      })
+      .addCase(searchProducts.fulfilled, (state, action) => {
+        state.searchedProducts = action.payload?.products;
+        state.isLoading = false;
+      })
+      .addCase(searchProducts.rejected, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(searchProducts.pending, (state) => {
+        state.isLoading = true;
       });
   },
 });
