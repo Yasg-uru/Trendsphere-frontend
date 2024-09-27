@@ -32,6 +32,7 @@ const initialState: ProductState = {
   categories: [],
   products: [],
   searchedProducts: [],
+  singleProduct: null
 };
 
 export const getUniqueCategories = createAsyncThunk(
@@ -150,7 +151,17 @@ export const searchProducts = createAsyncThunk(
     }
   }
 );
-
+export const getsingleProduct = createAsyncThunk(
+  "product/single",
+  async (productId: string, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(`/product/single/${productId}`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue("failed to get single  order");
+    }
+  }
+);
 const productSlice = createSlice({
   name: "product",
   initialState,
@@ -186,6 +197,16 @@ const productSlice = createSlice({
       })
       .addCase(searchProducts.pending, (state) => {
         state.isLoading = true;
+      })
+      .addCase(getsingleProduct.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(getsingleProduct.rejected, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(getsingleProduct.fulfilled, (state,action) => {
+        state.singleProduct=action.payload?.product;
+        state.isLoading = false;
       });
   },
 });

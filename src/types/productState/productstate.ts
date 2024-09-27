@@ -5,6 +5,7 @@ export interface ProductState {
   categories: Category[];
   products: IProductFrontend[];
   searchedProducts:IProductFrontend[];
+  singleProduct:IProductFrontend | null;
 }
 interface Subcategory {
   subcategory: string;

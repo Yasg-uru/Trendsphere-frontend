@@ -25,16 +25,18 @@ import { SVGProps } from "react";
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 // import { IProductFrontend } from "@/types/productState/product.type";
 import { useLocation, useNavigate } from "react-router-dom";
-import { addcart } from "@/state-manager/slices/productSlice";
+import { addcart, getsingleProduct } from "@/state-manager/slices/productSlice";
 import { useToast } from "@/hooks/use-toast";
 import { CheckIcon, MinusIcon, PlusIcon, TrashIcon } from "lucide-react";
 import { selectProductsForOrder } from "@/types/ordertypes/initialState";
 import { Input } from "@/components/ui/input";
+import Loader from "@/helper/Loader";
 
 export default function Details() {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { products } = useAppSelector((state) => state.product);
+  const dispatch = useAppDispatch();
+  const { singleProduct, isLoading } = useAppSelector((state) => state.product);
   const location = useLocation();
   const [selectedProductId, setSelectedProductId] = useState<string | null>(
     null
@@ -61,75 +63,81 @@ export default function Details() {
   };
 
   useEffect(() => {
-    const productId = location.state?.id || products[0]._id;
-    setSelectedProductId(productId);
-    const product = products.find((p) => p._id === productId);
+    if (location.state && location.state.id) {
+      dispatch(getsingleProduct(location.state.id))
+        .unwrap()
+        .then(() => {
+          toast({
+            title: "Successfully fetched product details",
+          });
+        })
+        .catch((error) => {
+          toast({
+            title: error,
+            variant: "destructive",
+          });
+        });
+    }
+  }, [location.state?.id]);
 
-    if (product) {
-      // Set initial selected variant details
-      const initialVariant = product.variants[0];
+  useEffect(() => {
+    if (singleProduct) {
+      setSelectedProductId(singleProduct._id);
+      const initialVariant = singleProduct.variants[0];
       setSelectedVariantId(initialVariant._id);
       setImage(initialVariant.images[0]);
       setSelectedSize(initialVariant.size[0].size);
 
-      // Function to check if the discount is valid
-      const isDiscountValid = (validFrom: string, validUntil: string) => {
-        const currentDate = new Date();
-        return (
-          currentDate >= new Date(validFrom) &&
-          currentDate <= new Date(validUntil)
-        );
-      };
-
-      // Calculate the discount for the selected variant
-      const validDiscount = product.discount
+      // Check for a valid discount
+      const validDiscount = singleProduct.discount
         ? isDiscountValid(
-            product.discount.validFrom,
-            product.discount.validUntil
+            singleProduct.discount.validFrom,
+            singleProduct.discount.validUntil
           )
         : false;
-      const discountedPrice =
-        validDiscount && product.discount
-          ? (initialVariant.price * product.discount.discountPercentage) / 100
-          : 0;
 
-      // Set selected product details
+      const discountedPrice = validDiscount
+        ? (initialVariant.price *
+            (singleProduct?.discount?.discountPercentage ?? 0)) /
+          100
+        : 0;
+
       setSelectedProducts([
         {
-          productId,
+          productId: singleProduct._id,
           variantId: initialVariant._id,
           quantity: 1,
           priceAtPurchase: initialVariant.price,
-          discount: discountedPrice, // Set discounted price here
+          discount: discountedPrice,
           size: initialVariant.size[0].size,
         },
       ]);
 
-      // Set unselected products' variants
-      const remainingVariants = product.variants.slice(1);
-      const unSelectedVariants = remainingVariants.map((variant) => {
-        const variantDiscountedPrice =
-          validDiscount && product.discount
-            ? (variant.price * product.discount.discountPercentage) / 100
-            : 0;
+      const remainingVariants = singleProduct.variants.slice(1);
+      const unselectedVariants = remainingVariants.map((variant) => {
+        const variantDiscountedPrice = validDiscount
+          ? (variant.price *
+              (singleProduct?.discount?.discountPercentage ?? 0)) /
+            100
+          : 0;
 
         return {
-          productId,
+          productId: singleProduct._id,
           variantId: variant._id,
           quantity: 1,
           priceAtPurchase: variant.price,
-          discount: variantDiscountedPrice, // Use discounted price for unselected products too
+          discount: variantDiscountedPrice,
           size: variant.size[0].size,
         };
       });
-      setUnselectedProducts(unSelectedVariants);
+
+      setUnselectedProducts(unselectedVariants);
     }
-  }, [location.state?.id, products]);
+  }, [singleProduct]);
 
-  if (!selectedProductId) return <p>Loading...</p>;
+  if (isLoading || !singleProduct || !selectedProductId) return <Loader />;
 
-  const selectedProduct =
-    products.find((p) => p._id === selectedProductId) || products[0];
+  const selectedProduct = singleProduct;
   const selectedVariant =
     selectedProduct.variants.find((v) => v._id === selectedVariantId) ||
     selectedProduct.variants[0];
@@ -164,7 +172,7 @@ export default function Details() {
       selectedProduct.variants
         .filter(
           (variant) =>
-            !selectedProducts.some((p) => p.variantId !== variant._id)
+            !selectedProducts.some((p) => p.variantId === variant._id)
         )
         .map((Item) => ({
           productId: selectedProductId,
@@ -179,10 +187,11 @@ export default function Details() {
         }))
     );
   };
+
   const handleImageChange = (image: string) => {
     setImage(image);
   };
-  const dispatch = useAppDispatch();
+
   const handleCart = () => {
     if (selectedVariantId) {
       if (!selectedSize) {
