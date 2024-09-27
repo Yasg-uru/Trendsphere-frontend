@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import Loader from "@/helper/Loader";
 import { useToast } from "@/hooks/use-toast";
@@ -6,13 +5,14 @@ import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 import { GetCarts, removeCart } from "@/state-manager/slices/authSlice";
 import { updateCartQuantity } from "@/state-manager/slices/productSlice";
 import { SVGProps, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { JSX } from "react/jsx-runtime";
 
 export default function Carts() {
   const { carts = [], isLoading } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
   const { toast } = useToast();
-
+  const navigate = useNavigate();
   useEffect(() => {
     dispatch(GetCarts())
       .then(() => {
@@ -63,7 +63,7 @@ export default function Carts() {
 
   const isAvailable = (stock: number) => stock > 0;
 
- const isDiscountValid = (validFrom: string, validUntil: string) => {
+  const isDiscountValid = (validFrom: string, validUntil: string) => {
     const currentDate = new Date();
     return (
       currentDate >= new Date(validFrom) && currentDate <= new Date(validUntil)
@@ -259,7 +259,11 @@ export default function Carts() {
             </div>
           </div>
           <div className="grid gap-4">
-            <Button variant="outline" className="w-full">
+            <Button
+              onClick={() => navigate(-1)}
+              variant="outline"
+              className="w-full"
+            >
               Continue Shopping
             </Button>
             <Button className="w-full">Proceed to Checkout</Button>

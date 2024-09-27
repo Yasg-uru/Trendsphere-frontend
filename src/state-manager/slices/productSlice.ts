@@ -32,7 +32,7 @@ const initialState: ProductState = {
   categories: [],
   products: [],
   searchedProducts: [],
-  singleProduct: null
+  singleProduct: null,
 };
 
 export const getUniqueCategories = createAsyncThunk(
@@ -204,8 +204,8 @@ const productSlice = createSlice({
       .addCase(getsingleProduct.rejected, (state) => {
         state.isLoading = false;
       })
-      .addCase(getsingleProduct.fulfilled, (state,action) => {
-        state.singleProduct=action.payload?.product;
+      .addCase(getsingleProduct.fulfilled, (state, action) => {
+        state.singleProduct = action.payload?.product;
         state.isLoading = false;
       });
   },
