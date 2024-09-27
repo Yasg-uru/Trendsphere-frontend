@@ -437,77 +437,92 @@ export default function OrderDetailsPage() {
           <CardTitle>Replacement Requestes</CardTitle>
         </CardHeader>
         <CardContent>
-          {order.products.map(
-            (product, index) =>
-              product.replacement?.requested && (
-                <div key={index} className="flex items-start space-x-4 py-4">
-                  <Checkbox
-                    checked={replaceItems.some(
-                      (p) =>
-                        p.productId === product.productId._id &&
-                        p.variantId === product.variantId
-                    )}
-                    onCheckedChange={() =>
-                      handleReplacementRequestCheckbox(product)
-                    }
-                  />
-                  <img
-                    src={product.productId.defaultImage}
-                    alt={product.productId.name}
-                    width={100}
-                    height={100}
-                    className="rounded-md"
-                  />
-                  <div className="flex-1">
-                    <h3 className="font-semibold">{product.productId.name}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Size: {product.size}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Quantity: {product.quantity}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Price: ${product.priceAtPurchase.toFixed(2)}
-                    </p>
-                    {product.discount > 0 && (
-                      <p className="text-sm text-green-600">
-                        Discount: ${product.discount.toFixed(2)}
+          {order.orderStatus === "replaced" ? (
+            <div className="flex justify-center items-center">
+              <p className="text-xl font-bold">Replacement Completed</p>
+            </div>
+          ) : (
+            order.products.map(
+              (product, index) =>
+                product.replacement?.requested && (
+                  <div key={index} className="flex items-start space-x-4 py-4">
+                    <Checkbox
+                      checked={replaceItems.some(
+                        (p) =>
+                          p.productId === product.productId._id &&
+                          p.variantId === product.variantId
+                      )}
+                      onCheckedChange={() =>
+                        handleReplacementRequestCheckbox(product)
+                      }
+                    />
+                    <img
+                      src={product.productId.defaultImage}
+                      alt={product.productId.name}
+                      width={100}
+                      height={100}
+                      className="rounded-md"
+                    />
+                    <div className="flex-1">
+                      <h3 className="font-semibold">
+                        {product.productId.name}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        Size: {product.size}
                       </p>
-                    )}
-                    {product.discountByCoupon > 0 && (
-                      <p className="text-sm text-green-600">
-                        Coupon Discount: ${product.discountByCoupon.toFixed(2)}
+                      <p className="text-sm text-muted-foreground">
+                        Quantity: {product.quantity}
                       </p>
-                    )}
-                  </div>
+                      <p className="text-sm text-muted-foreground">
+                        Price: ${product.priceAtPurchase.toFixed(2)}
+                      </p>
+                      {product.discount > 0 && (
+                        <p className="text-sm text-green-600">
+                          Discount: ${product.discount.toFixed(2)}
+                        </p>
+                      )}
+                      {product.discountByCoupon > 0 && (
+                        <p className="text-sm text-green-600">
+                          Coupon Discount: $
+                          {product.discountByCoupon.toFixed(2)}
+                        </p>
+                      )}
+                    </div>
 
-                  <div className="space-y-2">
-                    <Badge
-                      variant={product.isReplaceable ? "secondary" : "outline"}
-                    >
-                      {product.isReplaceable
-                        ? "Replaceable"
-                        : "Non-replaceable"}
-                    </Badge>
-                    <Badge
-                      variant={product.isReturnable ? "secondary" : "outline"}
-                    >
-                      {product.isReturnable ? "Returnable" : "Non-returnable"}
-                    </Badge>
+                    <div className="space-y-2">
+                      <Badge
+                        variant={
+                          product.isReplaceable ? "secondary" : "outline"
+                        }
+                      >
+                        {product.isReplaceable
+                          ? "Replaceable"
+                          : "Non-replaceable"}
+                      </Badge>
+                      <Badge
+                        variant={product.isReturnable ? "secondary" : "outline"}
+                      >
+                        {product.isReturnable ? "Returnable" : "Non-returnable"}
+                      </Badge>
+                    </div>
                   </div>
-                </div>
-              )
+                )
+            )
           )}
         </CardContent>
         <CardFooter>
-          <Button
-            variant="outline"
-            className={replaceItems.length === 0 ? `opacity-50` : "opacity-100"} // Reduced opacity when disabled
-            disabled={replaceItems.length === 0} // Button is disabled when no items to replace
-            onClick={() => setIsOrderReplacing(true)}
-          >
-            Replace
-          </Button>
+          {order.orderStatus === "replacement_requested" && (
+            <Button
+              variant="outline"
+              className={
+                replaceItems.length === 0 ? `opacity-50` : "opacity-100"
+              } // Reduced opacity when disabled
+              disabled={replaceItems.length === 0} // Button is disabled when no items to replace
+              onClick={() => setIsOrderReplacing(true)}
+            >
+              Replace
+            </Button>
+          )}
         </CardFooter>
       </Card>
       <Card>
