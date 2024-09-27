@@ -62,42 +62,68 @@ export interface RefundOrders {
 }
 export interface ReplacementFormData {
   orderId: string;
-  replaceItems: RefundOrders[];
+  replaceItems: orderproduct[];
   reason: string;
 }
-export interface ProcessReplcementData{
-  orderId:string ;
-  replacementItems:RefundOrders[],
-  status:string;
+export interface ProcessReplcementData {
+  orderId: string;
+  replacementItems: orderproduct[];
+  status: string;
+}
+export interface orderproduct {
+  productId: string;
+  variantId: string;
+  quantity: number;
+  size: string;
+  priceAtPurchase: number;
+  discount: number;
+  discountByCoupon: number;
+  isReplaceable: boolean;
+  isReturnable: boolean;
+  refund?: {
+    requested: boolean;
+    amount: number;
+    status: "pending" | "completed" | "failed";
+    requestDate?: Date;
+    completionDate?: Date;
+  };
+  replacement?: {
+    requested: boolean;
+    reason?: string;
+    status?: "pending" | "approved" | "rejected";
+    requestDate?: Date;
+    responseDate?: Date;
+  };
+}
+export interface OrderProductWithProduct {
+  productId: IProductFrontend;
+  variantId: string;
+  quantity: number;
+  size: string;
+  priceAtPurchase: number;
+  discount: number;
+  discountByCoupon: number;
+  isReplaceable: boolean;
+  isReturnable: boolean;
+  refund?: {
+    requested: boolean;
+    amount: number;
+    status: "pending" | "completed" | "failed";
+    requestDate?: Date;
+    completionDate?: Date;
+  };
+  replacement?: {
+    requested: boolean;
+    reason?: string;
+    status?: "pending" | "approved" | "rejected";
+    requestDate?: Date;
+    responseDate?: Date;
+  };
 }
 export interface IOrder {
   _id: string;
   user: string | User;
-  products: {
-    productId: IProductFrontend;
-    variantId: string;
-    quantity: number;
-    size: string;
-    priceAtPurchase: number;
-    discount: number;
-    discountByCoupon: number;
-    isReplaceable: boolean;
-    isReturnable: boolean;
-    refund?: {
-      requested: boolean;
-      amount: number;
-      status: "pending" | "completed" | "failed";
-      requestDate?: Date;
-      completionDate?: Date;
-    };
-    replacement?: {
-      requested: boolean;
-      reason?: string;
-      status?: "pending" | "approved" | "rejected";
-      requestDate?: Date;
-      responseDate?: Date;
-    };
-  }[];
+  products: OrderProductWithProduct[];
   totalAmount: number;
   discountAmount?: number;
   couponCode?: string;
@@ -185,8 +211,8 @@ export interface OrderQueryParams {
   limit?: number;
   searchTerm?: string;
 }
-export interface updateStatus{
-  orderId:string;
-  status:string;
-  cancelReason?:string;
+export interface updateStatus {
+  orderId: string;
+  status: string;
+  cancelReason?: string;
 }

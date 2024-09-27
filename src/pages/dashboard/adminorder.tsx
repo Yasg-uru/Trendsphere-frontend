@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -23,12 +29,17 @@ import {
   RefreshCcw,
   ArrowLeft,
 } from "lucide-react";
-import { IOrder } from "@/types/ordertypes/initialState";
-import { useParams } from "react-router-dom";
+import {
+  IOrder,
+  orderproduct,
+  OrderProductWithProduct,
+} from "@/types/ordertypes/initialState";
+import { replace, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 import Loader from "@/helper/Loader";
 import {
   filtersOrders,
+  processReplacement,
   updateOrderStatus,
 } from "@/state-manager/slices/orderSlice";
 import { useToast } from "@/hooks/use-toast";
@@ -46,6 +57,10 @@ import {
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 
 const adminCancellationReasons = [
   "Customer requested cancellation",
@@ -54,6 +69,10 @@ const adminCancellationReasons = [
   "Out of stock",
   "Other",
 ];
+const statusSchema = z.object({
+  status: z.enum(["approved", "pending", "rejected"]),
+});
+type FormData = z.infer<typeof statusSchema>;
 
 export default function OrderDetailsPage() {
   const [order, setOrder] = useState<IOrder | null>(null); // Set the initial value explicitly as `null`
@@ -66,8 +85,20 @@ export default function OrderDetailsPage() {
   const [selectedReason, setSelectedReason] = useState("");
   const [otherReason, setOtherReason] = useState("");
   const [isOrderCancelling, setIsOrderCancelling] = useState<boolean>(false);
+  const [isOrderReplacing, setIsOrderReplacing] = useState<boolean>(false);
+  const [isOrderReturning, setIsOrderReturning] = useState<boolean>(false);
+  const [replaceItems, setReplaceItems] = useState<orderproduct[]>([]);
+  const [returnItems, setReturnItems] = useState<orderproduct[]>([]);
+
   const dispatch = useAppDispatch();
   const { toast } = useToast();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>({
+    resolver: zodResolver(statusSchema),
+  });
   useEffect(() => {
     if (orderId) {
       const Order = orders.find((order) => order._id === orderId);
@@ -77,6 +108,10 @@ export default function OrderDetailsPage() {
         if (Order.products[0].refund?.requested) {
           setRefundStatus("Requested");
         }
+        console.log(
+          "this is a order for checking whether variant is exist or not :",
+          Order
+        );
         if (Order.products[0].replacement?.requested) {
           setReplacementStatus("Requested");
         }
@@ -107,18 +142,55 @@ export default function OrderDetailsPage() {
         });
     }
   };
+  const handleReplacementRequestCheckbox = (
+    product: OrderProductWithProduct
+  ) => {
+    const isAlreadyExist = replaceItems.find(
+      (p) =>
+        p.productId === product.productId._id && // Using _id for string comparison
+        p.variantId === product.variantId
+    );
 
-  const handleRefundUpdate = (newStatus: string) => {
-    setRefundStatus(newStatus);
-    // Here you would typically make an API call to update the refund status
-    console.log(`Refund status updated to: ${newStatus}`);
+    if (isAlreadyExist) {
+      setReplaceItems((prevItems) =>
+        prevItems.filter(
+          (p) =>
+            p.productId !== product.productId._id && // Fix the filter condition
+            p.variantId !== product.variantId
+        )
+      );
+    } else {
+      setReplaceItems((prevItems) => [
+        ...prevItems,
+        {
+          productId: product.productId._id, // Extract _id from IProductFrontend
+          variantId: product.variantId,
+          quantity: product.quantity,
+          size: product.size,
+          priceAtPurchase: product.priceAtPurchase,
+          discount: product.discount,
+          discountByCoupon: product.discountByCoupon,
+          isReplaceable: product.isReplaceable,
+          isReturnable: product.isReturnable,
+          refund: {
+            requested: product.refund?.requested ?? false, // Provide default value
+            amount: product.refund?.amount ?? 0,
+            status: product.refund?.status ?? "pending",
+            requestDate: product.refund?.requestDate,
+            completionDate: product.refund?.completionDate,
+          },
+          replacement: {
+            requested: product.replacement?.requested ?? false, // Provide default value
+            reason: product.replacement?.reason ?? "",
+            status: product.replacement?.status ?? "pending",
+            requestDate: product.replacement?.requestDate,
+            responseDate: product.replacement?.responseDate,
+          },
+        },
+      ]);
+    }
   };
 
-  const handleReplacementUpdate = (newStatus: string) => {
-    setReplacementStatus(newStatus);
-    // Here you would typically make an API call to update the replacement status
-    console.log(`Replacement status updated to: ${newStatus}`);
-  };
   const handleCancel = () => {
     const finalReason =
       selectedReason === "Other" ? otherReason : selectedReason;
@@ -141,8 +213,27 @@ export default function OrderDetailsPage() {
           variant: "destructive",
         });
       });
-      setIsOrderCancelling(false);
-      
+    setIsOrderCancelling(false);
+  };
+  const handleReplaceItems = (data: FormData) => {
+    const formdata = {
+      orderId: order._id,
+      replacementItems: replaceItems,
+      status: data.status,
+    };
+    console.log("this is replacement items :", formdata);
+    dispatch(processReplacement(formdata))
+      .then(() => {
+        toast({
+          title: "replacement items status updated successfully",
+        });
+      })
+      .catch((error) => {
+        toast({
+          title: error,
+          variant: "destructive",
+        });
+      });
   };
   return (
     <div className="container mx-auto p-4 space-y-8">
@@ -343,50 +434,142 @@ export default function OrderDetailsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Refund and Replacement</CardTitle>
+          <CardTitle>Replacement Requestes</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <h3 className="font-semibold mb-2">Refund Status</h3>
-              <Select
-                onValueChange={handleRefundUpdate}
-                defaultValue={refundStatus}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Update Refund Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Not Requested">Not Requested</SelectItem>
-                  <SelectItem value="Requested">Requested</SelectItem>
-                  <SelectItem value="Approved">Approved</SelectItem>
-                  <SelectItem value="Rejected">Rejected</SelectItem>
-                  <SelectItem value="Processed">Processed</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-2">Replacement Status</h3>
-              <Select
-                onValueChange={handleReplacementUpdate}
-                defaultValue={replacementStatus}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Update Replacement Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Not Requested">Not Requested</SelectItem>
-                  <SelectItem value="Requested">Requested</SelectItem>
-                  <SelectItem value="Approved">Approved</SelectItem>
-                  <SelectItem value="Rejected">Rejected</SelectItem>
-                  <SelectItem value="Processed">Processed</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          {order.products.map(
+            (product, index) =>
+              product.replacement?.requested && (
+                <div key={index} className="flex items-start space-x-4 py-4">
+                  <Checkbox
+                    checked={replaceItems.some(
+                      (p) =>
+                        p.productId === product.productId._id &&
+                        p.variantId === product.variantId
+                    )}
+                    onCheckedChange={() =>
+                      handleReplacementRequestCheckbox(product)
+                    }
+                  />
+                  <img
+                    src={product.productId.defaultImage}
+                    alt={product.productId.name}
+                    width={100}
+                    height={100}
+                    className="rounded-md"
+                  />
+                  <div className="flex-1">
+                    <h3 className="font-semibold">{product.productId.name}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Size: {product.size}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Quantity: {product.quantity}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Price: ${product.priceAtPurchase.toFixed(2)}
+                    </p>
+                    {product.discount > 0 && (
+                      <p className="text-sm text-green-600">
+                        Discount: ${product.discount.toFixed(2)}
+                      </p>
+                    )}
+                    {product.discountByCoupon > 0 && (
+                      <p className="text-sm text-green-600">
+                        Coupon Discount: ${product.discountByCoupon.toFixed(2)}
+                      </p>
+                    )}
+                  </div>
 
+                  <div className="space-y-2">
+                    <Badge
+                      variant={product.isReplaceable ? "secondary" : "outline"}
+                    >
+                      {product.isReplaceable
+                        ? "Replaceable"
+                        : "Non-replaceable"}
+                    </Badge>
+                    <Badge
+                      variant={product.isReturnable ? "secondary" : "outline"}
+                    >
+                      {product.isReturnable ? "Returnable" : "Non-returnable"}
+                    </Badge>
+                  </div>
+                </div>
+              )
+          )}
+        </CardContent>
+        <CardFooter>
+          <Button
+            variant="outline"
+            className={replaceItems.length === 0 ? `opacity-50` : "opacity-100"} // Reduced opacity when disabled
+            disabled={replaceItems.length === 0} // Button is disabled when no items to replace
+            onClick={() => setIsOrderReplacing(true)}
+          >
+            Replace
+          </Button>
+        </CardFooter>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Return Requestes</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {order.products.map(
+            (product, index) =>
+              product.refund?.requested && (
+                <div key={index} className="flex items-start space-x-4 py-4">
+                  <img
+                    src={product.productId.defaultImage}
+                    alt={product.productId.name}
+                    width={100}
+                    height={100}
+                    className="rounded-md"
+                  />
+                  <div className="flex-1">
+                    <h3 className="font-semibold">{product.productId.name}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Size: {product.size}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Quantity: {product.quantity}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Price: ${product.priceAtPurchase.toFixed(2)}
+                    </p>
+                    {product.discount > 0 && (
+                      <p className="text-sm text-green-600">
+                        Discount: ${product.discount.toFixed(2)}
+                      </p>
+                    )}
+                    {product.discountByCoupon > 0 && (
+                      <p className="text-sm text-green-600">
+                        Coupon Discount: ${product.discountByCoupon.toFixed(2)}
+                      </p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Badge
+                      variant={product.isReplaceable ? "secondary" : "outline"}
+                    >
+                      {product.isReplaceable
+                        ? "Replaceable"
+                        : "Non-replaceable"}
+                    </Badge>
+                    <Badge
+                      variant={product.isReturnable ? "secondary" : "outline"}
+                    >
+                      {product.isReturnable ? "Returnable" : "Non-returnable"}
+                    </Badge>
+                  </div>
+                </div>
+              )
+          )}
+        </CardContent>
+        <CardFooter>
+          <Button variant={"outline"}>Return</Button>
+        </CardFooter>
+      </Card>
       <Card>
         <CardHeader>
           <CardTitle>Order Timeline</CardTitle>
@@ -413,12 +596,6 @@ export default function OrderDetailsPage() {
         </CardContent>
       </Card>
       <Dialog open={isOrderCancelling} onOpenChange={setIsOrderCancelling}>
-        <DialogTrigger asChild>
-          <Button variant="destructive">
-            <AlertCircle className="mr-2 h-4 w-4" />
-            Cancel Order
-          </Button>
-        </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Admin Order Cancellation</DialogTitle>
@@ -471,6 +648,53 @@ export default function OrderDetailsPage() {
               Confirm Cancellation
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={isOrderReplacing} onOpenChange={setIsOrderReplacing}>
+        <DialogTrigger asChild>
+          <Button variant="outline">Select Status</Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Status</DialogTitle>
+            <DialogDescription>
+              Select a status for the user. Click save when you're done.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSubmit(handleReplaceItems)}>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Status</Label>
+                <div className="col-span-3">
+                  <RadioGroup {...register("status")} defaultValue="pending">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="approved" id="approved" />
+                      <Label htmlFor="approved">Approved</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="pending" id="pending" />
+                      <Label htmlFor="pending">Pending</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="rejected" id="rejected" />
+                      <Label htmlFor="rejected">Rejected</Label>
+                    </div>
+                  </RadioGroup>
+
+                  {errors.status && (
+                    <p className="text-red-500 text-sm mt-2 italic">
+                      {errors.status.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button type="submit">Save changes</Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </div>

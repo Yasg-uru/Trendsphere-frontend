@@ -38,14 +38,17 @@ export default function OrdersAdmin() {
   });
   const [searchTerm, setSearchTerm] = useState<string>("");
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
-  const navigate=useNavigate();
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { toast } = useToast();
 
   const { orders, ordersPagination, isLoading } = useAppSelector(
     (state) => state.order
   );
-
+  console.log(
+    "this is a orders in for checking whether varianid is exist or not :",
+    orders
+  );
   useEffect(() => {
     fetchOrders();
   }, [filters]);
@@ -78,7 +81,7 @@ export default function OrdersAdmin() {
   if (isLoading) {
     return <Loader />;
   }
- 
+
   return (
     <div className="p-4 space-y-4">
       <h1 className="text-2xl font-bold">TrendSphere Orders</h1>
@@ -183,7 +186,11 @@ export default function OrdersAdmin() {
           Filtered Orders ({orders.length})
         </h2>
         {orders.map((order) => (
-          <div key={order._id} className="border p-4 rounded-lg shadow" onClick={()=>navigate(`/orders/details/${order._id}`)}>
+          <div
+            key={order._id}
+            className="border p-4 rounded-lg shadow"
+            onClick={() => navigate(`/orders/details/${order._id}`)}
+          >
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
               <div>
                 <h3 className="font-bold">Order #{order._id}</h3>
