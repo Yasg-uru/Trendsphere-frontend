@@ -31,6 +31,7 @@ import { CheckIcon, MinusIcon, PlusIcon, TrashIcon } from "lucide-react";
 import { selectProductsForOrder } from "@/types/ordertypes/initialState";
 import { Input } from "@/components/ui/input";
 import Loader from "@/helper/Loader";
+import { useProductSelection } from "@/custom-hooks/select-unselect";
 
 export default function Details() {
   const { toast } = useToast();
@@ -45,16 +46,25 @@ export default function Details() {
     null
   );
 
-  const [selectedProducts, setSelectedProducts] = useState<
-    selectProductsForOrder[]
-  >([]);
-  const [unSelectedProducts, setUnselectedProducts] = useState<
-    selectProductsForOrder[]
-  >([]);
+  // const [selectedProducts, setSelectedProducts] = useState<
+  //   selectProductsForOrder[]
+  // >([]);
+  // const [unSelectedProducts, setUnselectedProducts] = useState<
+  //   selectProductsForOrder[]
+  // >([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [image, setImage] = useState<string>("");
-
+  const {
+    selectedProducts,
+    setSelectedProducts,
+    setUnselectedProducts,
+    unSelectedProducts,
+    handleAddToSelected,
+    handleRemoveProduct,
+    handleSizeChange,
+    handleQuantityChange,
+  } = useProductSelection();
   const isDiscountValid = (validFrom: string, validUntil: string) => {
     const currentDate = new Date();
     return (
@@ -102,17 +112,15 @@ export default function Details() {
           100
         : 0;
 
-      setSelectedProducts([
-        {
-          productId: singleProduct._id,
-          variantId: initialVariant._id,
-          quantity: 1,
-          priceAtPurchase: initialVariant.price,
-          discount: discountedPrice,
-          size: initialVariant.size[0].size,
-        },
-      ]);
-
+      const initialProduct = {
+        productId: singleProduct._id,
+        variantId: singleProduct.variants[0]._id,
+        quantity: 1,
+        priceAtPurchase: singleProduct.variants[0].price,
+        discount: 0,
+        size: singleProduct.variants[0].size[0].size,
+      };
+      setSelectedProducts([initialProduct]);
       const remainingVariants = singleProduct.variants.slice(1);
       const unselectedVariants = remainingVariants.map((variant) => {
         const variantDiscountedPrice = validDiscount
@@ -239,47 +247,7 @@ export default function Details() {
       state: { selectedProductId, selectedProducts },
     });
   };
-  const handleQuantityChange = (index: number, Quantity: number) => {
-    if (Quantity < 1) {
-      return;
-    }
-    setSelectedProducts((prevProducts) =>
-      prevProducts.map((product, i) =>
-        i === index ? { ...product, quantity: Quantity } : product
-      )
-    );
-  };
-  const handleRemoveProduct = (index: number) => {
-    const productToBeRemove = selectedProducts.find((_, i) => i === index);
-    setSelectedProducts((prevProducts) =>
-      prevProducts.filter((_, i) => i !== index)
-    );
 
-    //if user remove the product from the select product variants then we need to push it into the unselect product variants
-    if (productToBeRemove) {
-      setUnselectedProducts([...unSelectedProducts, productToBeRemove]);
-    }
-    toast({
-      title: "Removed successfully product ",
-    });
-  };
-  const handleAddToSelected = (
-    variant: selectProductsForOrder,
-    index: number
-  ) => {
-    // we need to push the product and remove from the unselected product variants
-    setSelectedProducts([...selectedProducts, variant]);
-    setUnselectedProducts((prevProducts) =>
-      prevProducts.filter((_, i) => i !== index).map((product) => product)
-    );
-  };
-  const handleSizeChange = (index: number, newSize: string) => {
-    setSelectedProducts((prevProducts) =>
-      prevProducts.map((product, i) =>
-        i === index ? { ...product, size: newSize } : product
-      )
-    );
-  };
   return (
     <div className="grid md:grid-cols-2 gap-6 lg:gap-12 items-start max-w-6xl px-4 mx-auto py-6">
       <div className="grid gap-4">

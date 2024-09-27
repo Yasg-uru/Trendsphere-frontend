@@ -69,5 +69,7 @@ export function useProductSelection() {
     handleRemoveProduct,
     handleSizeChange,
     handleQuantityChange,
+    setSelectedProducts,
+    setUnselectedProducts
   };
 }
