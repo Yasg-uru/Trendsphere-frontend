@@ -514,7 +514,7 @@ export default function OrderDetail() {
               order.orderStatus === "pending" ||
               order.payment.paymentStatus === "refunded"
             }
-            onClick={() => setIsReplacing(true)}
+            onClick={() => setIsRefunding(true)}
           >
             Refund
           </Button>

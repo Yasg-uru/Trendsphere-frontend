@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { SVGProps, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -37,9 +37,11 @@ import {
 import { replace, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 import Loader from "@/helper/Loader";
-import {
+import orderSlice, {
   filtersOrders,
+  GetSingleOrder,
   processReplacement,
+  processReturnItems,
   updateOrderStatus,
 } from "@/state-manager/slices/orderSlice";
 import { useToast } from "@/hooks/use-toast";
@@ -61,6 +63,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { JSX } from "react/jsx-runtime";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
 
 const adminCancellationReasons = [
   "Customer requested cancellation",
@@ -73,12 +83,28 @@ const statusSchema = z.object({
   status: z.enum(["approved", "pending", "rejected"]),
 });
 type FormData = z.infer<typeof statusSchema>;
-
+const orderstatusSchema = z.object({
+  status: z.enum(
+    [
+      "pending",
+      "processing",
+      "shipped",
+      "delivered",
+      "replaced",
+      "cancelled",
+      "returned",
+    ],
+    {
+      required_error: "You need to select an order status.",
+    }
+  ),
+});
+type StatusFormValues = z.infer<typeof orderstatusSchema>;
 export default function OrderDetailsPage() {
   const [order, setOrder] = useState<IOrder | null>(null); // Set the initial value explicitly as `null`
-  const { orders } = useAppSelector((state) => state.order);
-  const { orderId } = useParams();
-  const [orderStatus, setOrderStatus] = useState("pending");
+
+  const { orderId } = useParams<{ orderId: string }>();
+  const [orderStatus, setOrderStatus] = useState<string>("pending");
   const [refundStatus, setRefundStatus] = useState<string>("Not Requested");
   const [replacementStatus, setReplacementStatus] =
     useState<string>("Not Requested");
@@ -89,9 +115,11 @@ export default function OrderDetailsPage() {
   const [isOrderReturning, setIsOrderReturning] = useState<boolean>(false);
   const [replaceItems, setReplaceItems] = useState<orderproduct[]>([]);
   const [returnItems, setReturnItems] = useState<orderproduct[]>([]);
-
+  const [isUpdatingOrderStatus, setIsUpdatingOrderStatus] =
+    useState<boolean>(false);
   const dispatch = useAppDispatch();
   const { toast } = useToast();
+  const { singleOrder, isLoading } = useAppSelector((state) => state.order);
   const {
     register,
     handleSubmit,
@@ -99,36 +127,53 @@ export default function OrderDetailsPage() {
   } = useForm<FormData>({
     resolver: zodResolver(statusSchema),
   });
+
   useEffect(() => {
+    // Ensure Order exists and has required properties before accessing
     if (orderId) {
-      const Order = orders.find((order) => order._id === orderId);
-      if (Order) {
-        setOrder(Order);
-        setOrderStatus(Order.orderStatus);
-        if (Order.products[0].refund?.requested) {
-          setRefundStatus("Requested");
-        }
-        console.log(
-          "this is a order for checking whether variant is exist or not :",
-          Order
-        );
-        if (Order.products[0].replacement?.requested) {
-          setReplacementStatus("Requested");
-        }
+      dispatch(GetSingleOrder(orderId))
+        .then(() => {
+          toast({
+            title: "successfully fetched  order details ",
+          });
+        })
+        .catch((error) => {
+          toast({
+            title: error,
+            variant: "destructive",
+          });
+        });
+    }
+  }, [orderId]);
+  useEffect(() => {
+    if (singleOrder) {
+      setOrder(singleOrder);
+      setOrderStatus(singleOrder.orderStatus ?? "pending");
+
+      if (singleOrder.products?.[0]?.refund?.requested) {
+        setRefundStatus("Requested");
+      }
+
+      if (singleOrder.products?.[0]?.replacement?.requested) {
+        setReplacementStatus("Requested");
       }
     }
-  }, []); // Ensure `orders` is added as a dependency
-
-  if (!order) {
+  }, [singleOrder]);
+  const form = useForm<StatusFormValues>({
+    resolver: zodResolver(orderstatusSchema),
+    defaultValues: {
+      status: "pending",
+    },
+  });
+  if (isLoading || !order) {
     return <Loader />;
   }
-
-  const handleStatusUpdate = (newStatus: string) => {
-    setOrderStatus(newStatus);
-    if (newStatus === "cancelled") {
+  const handleStatusUpdate = (data: StatusFormValues) => {
+    setOrderStatus(data.status);
+    if (data.status === "cancelled") {
       setIsOrderCancelling(true);
     } else {
-      dispatch(updateOrderStatus({ orderId: order._id, status: orderStatus }))
+      dispatch(updateOrderStatus({ orderId: order._id, status: data.status }))
         .then(() => {
           toast({
             title: "status updated successfully",
@@ -142,6 +187,7 @@ export default function OrderDetailsPage() {
         });
     }
   };
+
   const handleReplacementRequestCheckbox = (
     product: OrderProductWithProduct
   ) => {
@@ -190,7 +236,52 @@ export default function OrderDetailsPage() {
       ]);
     }
   };
+  const handleReturnRequestCheckbox = (product: OrderProductWithProduct) => {
+    const isAlreadyExist = returnItems.find(
+      (p) =>
+        p.productId === product.productId._id && // Using _id for string comparison
+        p.variantId === product.variantId
+    );
 
+    if (isAlreadyExist) {
+      setReturnItems((prevItems) =>
+        prevItems.filter(
+          (p) =>
+            p.productId !== product.productId._id && // Fix the filter condition
+            p.variantId !== product.variantId
+        )
+      );
+    } else {
+      setReturnItems((prevItems) => [
+        ...prevItems,
+        {
+          productId: product.productId._id, // Extract _id from IProductFrontend
+          variantId: product.variantId,
+          quantity: product.quantity,
+          size: product.size,
+          priceAtPurchase: product.priceAtPurchase,
+          discount: product.discount,
+          discountByCoupon: product.discountByCoupon,
+          isReplaceable: product.isReplaceable,
+          isReturnable: product.isReturnable,
+          refund: {
+            requested: product.refund?.requested ?? false, // Provide default value
+            amount: product.refund?.amount ?? 0,
+            status: product.refund?.status ?? "pending",
+            requestDate: product.refund?.requestDate,
+            completionDate: product.refund?.completionDate,
+          },
+          replacement: {
+            requested: product.replacement?.requested ?? false, // Provide default value
+            reason: product.replacement?.reason ?? "",
+            status: product.replacement?.status ?? "pending",
+            requestDate: product.replacement?.requestDate,
+            responseDate: product.replacement?.responseDate,
+          },
+        },
+      ]);
+    }
+  };
   const handleCancel = () => {
     const finalReason =
       selectedReason === "Other" ? otherReason : selectedReason;
@@ -227,11 +318,25 @@ export default function OrderDetailsPage() {
         toast({
           title: "replacement items status updated successfully",
         });
+        setIsOrderReplacing(false);
       })
       .catch((error) => {
         toast({
           title: error,
           variant: "destructive",
+        });
+      });
+  };
+  const handelReturnItems = () => {
+    dispatch(processReturnItems({ orderId: order._id, returnItems }))
+      .then(() => {
+        toast({
+          title: "refund completed Successfully ",
+        });
+      })
+      .catch((error) => {
+        toast({
+          title: error,
         });
       });
   };
@@ -257,26 +362,12 @@ export default function OrderDetailsPage() {
             <p className="text-sm text-muted-foreground">
               Ordered on {new Date(order.createdAt).toLocaleDateString()}
             </p>
-            <Select
-              onValueChange={handleStatusUpdate}
-              defaultValue={orderStatus}
+            <Button
+              onClick={() => setIsUpdatingOrderStatus(true)}
+              variant={"outline"}
             >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Update Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Status</SelectLabel>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="processing">Processing</SelectItem>
-                  <SelectItem value="shipped">Shipped</SelectItem>
-                  <SelectItem value="delivered">Delivered</SelectItem>
-                  <SelectItem value="replaced">Replaced</SelectItem>
-                  <SelectItem value="cancelled">Cancelled</SelectItem>
-                  <SelectItem value="returned">Returned</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+              Update Status
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -534,6 +625,14 @@ export default function OrderDetailsPage() {
             (product, index) =>
               product.refund?.requested && (
                 <div key={index} className="flex items-start space-x-4 py-4">
+                  <Checkbox
+                    checked={returnItems.some(
+                      (p) =>
+                        p.productId === product.productId._id &&
+                        p.variantId === product.variantId
+                    )}
+                    onCheckedChange={() => handleReturnRequestCheckbox(product)}
+                  />
                   <img
                     src={product.productId.defaultImage}
                     alt={product.productId.name}
@@ -582,7 +681,18 @@ export default function OrderDetailsPage() {
           )}
         </CardContent>
         <CardFooter>
-          <Button variant={"outline"}>Return</Button>
+          {order.orderStatus === "return_requested" && (
+            <Button
+              variant="outline"
+              className={
+                returnItems.length === 0 ? `opacity-50` : "opacity-100"
+              } // Reduced opacity when disabled
+              disabled={returnItems.length === 0} // Button is disabled when no items to replace
+              onClick={() => setIsOrderReturning(true)}
+            >
+              Return
+            </Button>
+          )}
         </CardFooter>
       </Card>
       <Card>
@@ -712,6 +822,119 @@ export default function OrderDetailsPage() {
           </form>
         </DialogContent>
       </Dialog>
+      <Dialog open={isOrderReturning} onOpenChange={setIsOrderReturning}>
+        <DialogTrigger asChild>
+          <Button variant="outline">Confirm Order Return</Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px]">
+          <div className="flex flex-col items-center justify-center gap-4 py-8">
+            <MessageCircleQuestionIcon className="size-12 text-primary" />
+            <div className="space-y-2 text-center">
+              <DialogTitle>Is the order return complete?</DialogTitle>
+              <DialogDescription>
+                Please confirm if the customer's order return is fully
+                processed.
+              </DialogDescription>
+            </div>
+          </div>
+          <DialogFooter className="flex justify-between">
+            <div>
+              <Button
+                variant="outline"
+                onClick={() => setIsOrderReturning(false)}
+              >
+                No, return is not complete
+              </Button>
+            </div>
+            <div>
+              <Button onClick={handelReturnItems}>
+                Yes, return is complete
+              </Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog
+        open={isUpdatingOrderStatus}
+        onOpenChange={setIsUpdatingOrderStatus}
+      >
+        <DialogTrigger asChild>
+          <Button variant="outline">Update Status</Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Update Order Status</DialogTitle>
+          </DialogHeader>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(handleStatusUpdate)}
+              className="space-y-8"
+            >
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem className="space-y-3">
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        className="flex flex-col space-y-1"
+                      >
+                        {[
+                          "pending",
+                          "processing",
+                          "shipped",
+                          "delivered",
+                          "replaced",
+                          "cancelled",
+                          "returned",
+                        ].map((status) => (
+                          <FormItem
+                            className="flex items-center space-x-3 space-y-0"
+                            key={status}
+                          >
+                            <FormControl>
+                              <RadioGroupItem value={status} />
+                            </FormControl>
+                            <Label className="font-normal capitalize">
+                              {status}
+                            </Label>
+                          </FormItem>
+                        ))}
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit">Update Status</Button>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
+  );
+}
+function MessageCircleQuestionIcon(
+  props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>
+) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
+      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+      <path d="M12 17h.01" />
+    </svg>
   );
 }

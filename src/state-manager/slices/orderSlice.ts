@@ -3,6 +3,7 @@ import { Filters } from "@/pages/order-pages/orders";
 import {
   FilterOrderParams,
   orderDataType,
+  orderproduct,
   OrderQueryParams,
   orderState,
   ProcessReplcementData,
@@ -18,6 +19,7 @@ const initialState: orderState = {
   pagination: null,
   ordersPagination: null,
   orders: [],
+  singleOrder: null,
 };
 export const createOrder = createAsyncThunk(
   "order/create",
@@ -165,6 +167,39 @@ export const processReplacement = createAsyncThunk(
     }
   }
 );
+export const processReturnItems = createAsyncThunk(
+  "order/process-return",
+  async (
+    formData: { orderId: string; returnItems: orderproduct[] },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await axiosInstance.post(
+        "/order/process-return",
+        formData,
+        {
+          withCredentials: true,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue("Failed to process the return items ");
+    }
+  }
+);
+export const GetSingleOrder = createAsyncThunk(
+  "order/getsingle",
+  async (orderId: string, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(`/order/single/${orderId}`,{
+        withCredentials:true
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue("Order not found ");
+    }
+  }
+);
 export const updateOrderStatus = createAsyncThunk(
   "order/update-status",
   async (formdata: updateStatus, { rejectWithValue }) => {
@@ -242,6 +277,16 @@ const orderSlice = createSlice({
       state.isLoading = true;
     });
     builder.addCase(filtersOrders.rejected, (state) => {
+      state.isLoading = false;
+    });
+    builder.addCase(GetSingleOrder.fulfilled, (state, action) => {
+      state.singleOrder = action.payload?.order;
+      state.isLoading = false;
+    });
+    builder.addCase(GetSingleOrder.pending, (state) => {
+      state.isLoading = true;
+    });
+    builder.addCase(GetSingleOrder.rejected, (state) => {
       state.isLoading = false;
     });
   },

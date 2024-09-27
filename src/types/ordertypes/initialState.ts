@@ -8,6 +8,8 @@ export interface orderState {
   pagination: paginationInfo | null;
   ordersPagination: paginationInfo | null;
   orders: IOrder[];
+  singleOrder:IOrder | null ;
+
 }
 export interface paginationInfo {
   totalOrders: number;

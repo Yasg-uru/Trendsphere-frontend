@@ -42,8 +42,8 @@ const App: React.FunctionComponent = () => {
         <Route path="/mycarts" element={<Carts />} />
         <Route path="/review" element={<AddReview />} />
         <Route path="/order" element={<CreateOrder />} />
-        <Route path="/dashboard" element={<Dashboard/>} />
-        <Route path="/create-product" element={<AddProduct/>} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/create-product" element={<AddProduct />} />
         <Route path="/u/orders" element={<Orders />} />
         <Route path="/u/order/details/:orderId" element={<OrderDetail />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
