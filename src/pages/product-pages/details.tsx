@@ -32,12 +32,14 @@ import { selectProductsForOrder } from "@/types/ordertypes/initialState";
 import { Input } from "@/components/ui/input";
 import Loader from "@/helper/Loader";
 import { useProductSelection } from "@/custom-hooks/select-unselect";
+import { GetCarts } from "@/state-manager/slices/authSlice";
 
 export default function Details() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { singleProduct, isLoading } = useAppSelector((state) => state.product);
+  const { carts } = useAppSelector((state) => state.auth);
   const location = useLocation();
   const [selectedProductId, setSelectedProductId] = useState<string | null>(
     null
@@ -46,12 +48,6 @@ export default function Details() {
     null
   );
 
-  // const [selectedProducts, setSelectedProducts] = useState<
-  //   selectProductsForOrder[]
-  // >([]);
-  // const [unSelectedProducts, setUnselectedProducts] = useState<
-  //   selectProductsForOrder[]
-  // >([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [image, setImage] = useState<string>("");
@@ -71,9 +67,32 @@ export default function Details() {
       currentDate >= new Date(validFrom) && currentDate <= new Date(validUntil)
     );
   };
+  const isAlreadyExistInCart = () => {
+    let isAlreadyExist = false;
+    if (carts.length > 0) {
+      isAlreadyExist = carts.some(
+        (cart) =>
+          cart.productId === selectedProductId &&
+          cart.variantId === selectedVariantId
+      );
+    }
+    return isAlreadyExist;
+  };
 
   useEffect(() => {
     if (location.state && location.state.id) {
+      dispatch(GetCarts())
+        .then(() => {
+          toast({
+            title: "Fetched successfully carts",
+          });
+        })
+        .catch((error) => {
+          toast({
+            title: error,
+            variant: "destructive",
+          });
+        });
       dispatch(getsingleProduct(location.state.id))
         .unwrap()
         .then(() => {
@@ -218,6 +237,7 @@ export default function Details() {
       dispatch(addcart(formData))
         .unwrap()
         .then(() => {
+          dispatch(GetCarts());
           toast({
             title: "Cart Added Successfully",
           });
@@ -376,9 +396,15 @@ export default function Details() {
           </div>
 
           <div className="flex gap-1 w-full">
-            <Button size="lg" onClick={handleCart}>
-              Add to Cart
-            </Button>
+            {isAlreadyExistInCart() ? (
+              <Button size="lg" onClick={() => navigate("/mycarts")}>
+                Go To Carts
+              </Button>
+            ) : (
+              <Button size="lg" onClick={handleCart}>
+                Add to Cart
+              </Button>
+            )}
             <Button size="lg" onClick={handleOrder}>
               Buy Now
             </Button>

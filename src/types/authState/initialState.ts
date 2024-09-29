@@ -5,7 +5,7 @@ import {
 
 export interface authState {
   isLoading: boolean;
-  isAuthenticated:boolean;
+  isAuthenticated: boolean;
   userInfo: User | null;
   carts: CartItem[];
 }
@@ -50,7 +50,7 @@ export interface User {
     country: string;
     phone: string;
     type: "Home" | "University" | "Work" | "Hotel";
-    _id:string;
+    _id: string;
   }[];
   __v: number;
 }

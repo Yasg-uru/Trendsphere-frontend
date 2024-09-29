@@ -4,15 +4,23 @@ import { useToast } from "@/hooks/use-toast";
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 import { GetCarts, removeCart } from "@/state-manager/slices/authSlice";
 import { updateCartQuantity } from "@/state-manager/slices/productSlice";
-import { SVGProps, useEffect } from "react";
+import { selectProductsForOrder } from "@/types/ordertypes/initialState";
+import { SVGProps, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { JSX } from "react/jsx-runtime";
+import { ConfirmationModal } from "./confirmation-modal";
 
 export default function Carts() {
   const { carts = [], isLoading } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [isPlacingOrder, setIsPlacingOrder] = useState<boolean>(false);
+  const [showConfirmationModal, setShowConfirmationModal] =
+    useState<boolean>(false);
+  const [unAvailableProducts, setUnAvailableProducts] = useState<
+    selectProductsForOrder[]
+  >([]);
   useEffect(() => {
     dispatch(GetCarts())
       .then(() => {
@@ -43,7 +51,43 @@ export default function Carts() {
         toast({ title: error.message });
       });
   };
-
+  const handlePlaceOrder = () => {
+    const unavailable = carts.filter((item) => !isAvailable(item.stocks));
+    if (unavailable.length > 0) {
+      //   productId: string;
+      // variantId: string;
+      // quantity: number;
+      // priceAtPurchase: number;
+      // discount: number;
+      // size: string;
+      setUnAvailableProducts(
+        unavailable.map((product) => ({
+          productId: product.productId,
+          variantId: product.variantId,
+          quantity: product.quantity,
+          priceAtPurchase: product.price,
+          discount: (product.price * product.discount.discountPercentage) / 100,
+          size: product.size,
+        }))
+      );
+      setShowConfirmationModal(true);
+    } else {
+      //directly we can place order
+      placeWithOrder(
+        carts.map((product) => ({
+          productId: product.productId,
+          variantId: product.variantId,
+          quantity: product.quantity,
+          priceAtPurchase: product.price,
+          discount: (product.price * product.discount.discountPercentage) / 100,
+          size: product.size,
+        }))
+      );
+    }
+  };
+  const placeWithOrder = (selectedItems: selectProductsForOrder[]) => {
+    setIsPlacingOrder(true);
+  };
   const handleQuantityChange = (
     productId: string,
     variantId: string,
@@ -266,10 +310,22 @@ export default function Carts() {
             >
               Continue Shopping
             </Button>
-            <Button className="w-full">Proceed to Checkout</Button>
+            <Button
+              className="w-full"
+              onClick={handlePlaceOrder}
+              disabled={isPlacingOrder}
+            >
+              {isPlacingOrder ? "Placing Order..." : "Place Order"}
+            </Button>
           </div>
         </div>
       </div>
+      <ConfirmationModal
+        isOpen={showConfirmationModal}
+        onClose={() => setShowConfirmationModal(false)}
+        unavailableProducts={unAvailableProducts}
+        onConfirm={placeWithOrder}
+      />
     </div>
   );
 }

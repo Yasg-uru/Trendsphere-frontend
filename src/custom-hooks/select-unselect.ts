@@ -70,6 +70,6 @@ export function useProductSelection() {
     handleSizeChange,
     handleQuantityChange,
     setSelectedProducts,
-    setUnselectedProducts
+    setUnselectedProducts,
   };
 }
