@@ -27,7 +27,13 @@ import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 import { useLocation, useNavigate } from "react-router-dom";
 import { addcart, getsingleProduct } from "@/state-manager/slices/productSlice";
 import { useToast } from "@/hooks/use-toast";
-import { CheckIcon, MinusIcon, PlusIcon, TrashIcon } from "lucide-react";
+import {
+  CheckIcon,
+  MinusIcon,
+  PlusIcon,
+  ThumbsUp,
+  TrashIcon,
+} from "lucide-react";
 import { selectProductsForOrder } from "@/types/ordertypes/initialState";
 import { Input } from "@/components/ui/input";
 import Loader from "@/helper/Loader";
@@ -432,6 +438,80 @@ export default function Details() {
             <p>Origin: {selectedProduct.productDetails.Origin}</p>
           </div>
         </div>
+      </div>
+      <div className="col-span-2">
+        <Separator className="my-6" />
+        <h2 className="text-2xl font-bold mb-4">Customer Reviews</h2>
+        <div className="flex items-center gap-4 mb-6">
+          <div className="flex items-center">
+            {[1, 2, 3, 4, 5].map((val) => (
+              <StarIcon
+                key={val}
+                className={`w-6 h-6 ${
+                  val <= selectedProduct.rating
+                    ? "fill-primary"
+                    : "fill-muted stroke-muted-foreground"
+                }`}
+              />
+            ))}
+          </div>
+          <span className="text-2xl font-semibold">
+            {selectedProduct.rating.toFixed(1)}
+          </span>
+          <span className="text-muted-foreground">
+            ({selectedProduct.reviews.length}{" "}
+            {selectedProduct.reviews.length === 1 ? "review" : "reviews"})
+          </span>
+        </div>
+
+        {selectedProduct.reviews.map((review, index) => (
+          <div
+            key={index}
+            className="border-b border-gray-200 pb-4 mb-4 last:border-b-0"
+          >
+            <div className="flex items-center gap-2 mb-2">
+              {[1, 2, 3, 4, 5].map((val) => (
+                <StarIcon
+                  key={val}
+                  className={`w-4 h-4 ${
+                    val <= review.rating
+                      ? "fill-primary"
+                      : "fill-muted stroke-muted-foreground"
+                  }`}
+                />
+              ))}
+              <span className="text-sm text-muted-foreground">
+                {new Date(review.createdAt).toLocaleDateString()}
+              </span>
+            </div>
+            <p className="mb-2">{review.comment}</p>
+            <div className="flex items-center gap-4">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1"
+              >
+                <ThumbsUp className="w-4 h-4" />
+                Helpful ({review.helpfulCount})
+              </Button>
+              {review.isVerifiedPurchase && (
+                <Badge variant="secondary">Verified Purchase</Badge>
+              )}
+            </div>
+            {review.images && review.images.length > 0 && (
+              <div className="flex gap-2 mt-2">
+                {review.images.map((image, imgIndex) => (
+                  <img
+                    key={imgIndex}
+                    src={image.url}
+                    alt={image.description}
+                    className="w-16 h-16 object-cover rounded"
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
       </div>
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="sm:max-w-[425px]">

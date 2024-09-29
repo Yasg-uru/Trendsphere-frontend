@@ -21,6 +21,7 @@ import Dashboard from "./pages/dashboard/dashboard";
 import { AddProduct } from "./pages/dashboard/addproduct";
 import OrdersAdmin from "./pages/dashboard/orders";
 import OrderDetailsPage from "./pages/dashboard/adminorder";
+import ReviewForm from "./pages/review-pages/create-review";
 const App: React.FunctionComponent = () => {
   const dispatch = useAppDispatch();
 
@@ -50,6 +51,7 @@ const App: React.FunctionComponent = () => {
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/orders" element={<OrdersAdmin />} />
         <Route path="/orders/details/:orderId" element={<OrderDetailsPage />} />
+        <Route path="/review/:productId" element={<ReviewForm />} />
       </Routes>
     </>
   );

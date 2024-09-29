@@ -96,17 +96,34 @@ export const getProductByIds = createAsyncThunk(
       const response = await axiosInstance.post(
         "/product/products",
         {
-          productsIds
+          productsIds,
         },
-        
+
         {
           withCredentials: true,
-        
         }
       );
       return response.data;
     } catch (error) {
       return rejectWithValue("failed to fetch the products with their ids ");
+    }
+  }
+);
+export const uplaodReview = createAsyncThunk(
+  "product/review",
+  async (data:{formData:FormData,productId:string}, { rejectWithValue }) => {
+    try {
+      const {formData,productId}=data;
+      const response = await axiosInstance.post(
+        `/product/review/${productId}`,
+        formData,
+        {
+          withCredentials: true,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue("Failed to uplaod Review");
     }
   }
 );
