@@ -88,11 +88,22 @@ export default function Carts() {
       );
       setShowConfirmationModal(true);
     } else {
-      //directly we can place order
-      placeWithOrder(selectedProducts);
+      placeWithOrder(
+        AvailableProducts.map((product) => ({
+          productId: product.productId,
+          variantId: product.variantId,
+          quantity: product.quantity,
+          priceAtPurchase: product.price,
+          discount:
+            (product.price * (product?.discount?.discountPercentage ?? 0)) /
+            100,
+          size: product.size,
+        }))
+      );
     }
   };
   const placeWithOrder = (selectedProducts: selectProductsForOrder[]) => {
+    console.log("this is a selected products :", selectedProducts);
     setIsPlacingOrder(true);
     const productIds = selectedProducts.map((product) => product.productId);
     navigate("/order", {
