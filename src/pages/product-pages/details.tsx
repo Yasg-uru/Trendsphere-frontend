@@ -136,7 +136,11 @@ export default function Details() {
         variantId: singleProduct.variants[0]._id,
         quantity: 1,
         priceAtPurchase: singleProduct.variants[0].price,
-        discount: 0,
+        discount: validDiscount
+          ? (singleProduct.variants[0].price *
+              (singleProduct?.discount?.discountPercentage ?? 0)) /
+            100
+          : 0,
         size: singleProduct.variants[0].size[0].size,
       };
       setSelectedProducts([initialProduct]);

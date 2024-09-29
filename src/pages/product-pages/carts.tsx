@@ -58,58 +58,96 @@ export default function Carts() {
         toast({ title: error.message });
       });
   };
+
   const handlePlaceOrder = () => {
     const unavailable = carts.filter((item) => !isAvailable(item.stocks));
     const AvailableProducts = carts.filter((item) => isAvailable(item.stocks));
     if (AvailableProducts.length > 0) {
       setSelectedProducts(
-        AvailableProducts.map((product) => ({
-          productId: product.productId,
-          variantId: product.variantId,
-          quantity: product.quantity,
-          priceAtPurchase: product.price,
-          discount:
-            (product.price * product?.discount?.discountPercentage ?? 0) / 100,
-          size: product.size,
-        }))
+        AvailableProducts.map((product) => {
+          const isValidDiscount = product.discount
+            ? isDiscountValid(
+                product.discount.validFrom,
+                product.discount.validUntil
+              )
+            : false;
+          return {
+            productId: product.productId,
+            variantId: product.variantId,
+            quantity: product.quantity,
+            priceAtPurchase: product.price,
+            discount: isValidDiscount
+              ? (product.price * (product?.discount?.discountPercentage ?? 0)) /
+                100
+              : 0,
+            size: product.size,
+          };
+        })
       );
     }
     if (unavailable.length > 0) {
       setUnselectedProducts(
-        unavailable.map((product) => ({
-          productId: product.productId,
-          variantId: product.variantId,
-          quantity: product.quantity,
-          priceAtPurchase: product.price,
-          discount:
-            (product.price * product?.discount?.discountPercentage ?? 0) / 100,
-          size: product.size,
-        }))
+        unavailable.map((product) => {
+          const isValidDiscount = product.discount
+            ? isDiscountValid(
+                product.discount.validFrom,
+                product.discount.validUntil
+              )
+            : false;
+          return {
+            productId: product.productId,
+            variantId: product.variantId,
+            quantity: product.quantity,
+            priceAtPurchase: product.price,
+            discount: isValidDiscount
+              ? (product.price * (product?.discount?.discountPercentage ?? 0)) /
+                100
+              : 0,
+            size: product.size,
+          };
+        })
       );
       setShowConfirmationModal(true);
     } else {
-      placeWithOrder(
-        AvailableProducts.map((product) => ({
+      const Products = AvailableProducts.map((product) => {
+        const isValidDiscount = product.discount
+          ? isDiscountValid(
+              product.discount.validFrom,
+              product.discount.validUntil
+            )
+          : false;
+        return {
           productId: product.productId,
           variantId: product.variantId,
           quantity: product.quantity,
           priceAtPurchase: product.price,
-          discount:
-            (product.price * (product?.discount?.discountPercentage ?? 0)) /
-            100,
+          discount: isValidDiscount
+            ? (product.price * (product?.discount?.discountPercentage ?? 0)) /
+              100
+            : 0,
           size: product.size,
-        }))
+        };
+      });
+      console.log(
+        "this is a selected available products of the carts :",
+        Products
       );
+      placeWithOrder(Products);
     }
   };
-  const placeWithOrder = (selectedProducts: selectProductsForOrder[]) => {
-    console.log("this is a selected products :", selectedProducts);
+  const placeWithOrder = (selecteds: selectProductsForOrder[]) => {
+    console.log(
+      "this is a selected products for testing the information is comming or not :",
+      selecteds
+    );
+
     setIsPlacingOrder(true);
-    const productIds = selectedProducts.map((product) => product.productId);
+    const productIds = selecteds.map((product) => product.productId);
+    console.log("this is a product ids which is unique :", productIds);
     navigate("/order", {
       state: {
-        selectedProducts,
-        selectedProductIds: Array.from(new Set(productIds)),
+        selectedProducts: selecteds,
+        selectedProductIds: productIds,
       },
     });
   };
@@ -349,7 +387,7 @@ export default function Carts() {
         isOpen={showConfirmationModal}
         onClose={() => setShowConfirmationModal(false)}
         unavailableProducts={unSelectedProducts}
-        selectproducts={selectedProducts}
+        selected={selectedProducts}
         onConfirm={placeWithOrder}
       />
     </div>

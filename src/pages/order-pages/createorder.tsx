@@ -118,7 +118,7 @@ export default function CreateOrder() {
   const { productsByIds } = useAppSelector((state) => state.product);
   const ProductsLoading = useAppSelector((state) => state.product.isLoading);
   const { selectedProductIds, selectedProducts } = location.state;
-  const [product, setProduct] = useState<IProductFrontend | null>(null);
+
   const [orderSummaryDetails, setOrderSummayDetails] = useState<orderDetails[]>(
     []
   );
@@ -126,6 +126,7 @@ export default function CreateOrder() {
   const [TotalPrice, SetTotalPrice] = useState<number>(0);
   const [finalPrice, setFinalPrice] = useState<number>(0);
   const [discountPrice, setDiscountPrice] = useState<number>(0);
+  const [isLoadingProduct, setIsLoadingProduct] = useState<boolean>(true);
   console.log(
     "this is a vlaue of the selected address after change ",
     selectedAddress
@@ -213,22 +214,33 @@ export default function CreateOrder() {
       paymentVerify();
     }
   }, [orderinfo]);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+
   useEffect(() => {
     if (selectedProductIds.length > 0) {
+      setIsLoadingProducts(true);
       dispatch(getProductByIds(selectedProductIds))
         .then(() => {
           toast({
             title: "Fetched all the information of the products by their ids",
           });
+          console.log(
+            "this is selected products ids for testing because price is not calculatinf  :",
+            productsByIds
+          );
         })
         .catch((error) => {
           toast({
             title: error,
             variant: "destructive",
           });
+        })
+        .finally(() => {
+          setIsLoadingProducts(false);
         });
     }
   }, [selectedProductIds]);
+
   // useEffect(() => {
   //   if (selectedProductIds && Array.isArray(selectedProductIds)) {
   //     const selectedProductDetails = selectedProductIds.map((selected:selectProductsForOrder)=>{
@@ -261,55 +273,42 @@ export default function CreateOrder() {
   //   }
   // }, [expressDelivery, selectedProducts, product, selectedAddress]);
   useEffect(() => {
-    const calculatePrice = () => {
-      if (selectedProducts.length > 0) {
-        let discount = 0;
-        let totalPrice = 0;
-        selectedProducts.forEach((product: selectProductsForOrder) => {
-          discount += product.discount * product.quantity;
-          totalPrice += product.priceAtPurchase * product.quantity;
+    if (selectedProducts.length > 0) {
+      calculatePrice();
+      const address = userInfo?.address.find(
+        (address) => address._id === selectedAddress
+      );
+      if (address) {
+        setOrderData({
+          products: selectedProducts,
+          address,
+          couponCode,
+          loyaltyPointsUsed: 0,
+          isGiftOrder: false,
+          giftMessage: "",
+          deliveryType: expressDelivery ? "express" : "standard",
         });
-
-        setFinalPrice(totalPrice - discount + (expressDelivery ? 10 : 0));
-        SetTotalPrice(totalPrice);
-        setDiscountPrice(discount);
-
-        const address = userInfo?.address.find(
-          (address) => address._id === selectedAddress
-        );
-        if (address) {
-          setOrderData({
-            products: selectedProducts,
-            address,
-            couponCode,
-            loyaltyPointsUsed: 0,
-            isGiftOrder: false,
-            giftMessage: "",
-            deliveryType: expressDelivery ? "express" : "standard",
-          });
-        }
       }
-    };
-
-    calculatePrice();
+    }
   }, [expressDelivery, selectedProducts, selectedAddress]);
   const calculatePrice = () => {
-    if (product) {
-      let discount = 0;
-      let totalPrice = 0;
-      console.log("this is selected products :", selectedProducts);
-      selectedProducts.forEach((product: selectProductsForOrder) => {
-        discount += product.discount * product.quantity;
-        totalPrice += product.priceAtPurchase * product.quantity;
-      });
-      if (expressDelivery) {
-        setFinalPrice(totalPrice - discount + 10);
-      } else {
-        setFinalPrice(totalPrice - discount);
-      }
-      SetTotalPrice(totalPrice);
-      setDiscountPrice(discount);
+    let discount = 0;
+    let totalPrice = 0;
+    console.log("this is selected products :", selectedProducts);
+    selectedProducts.forEach((product: selectProductsForOrder) => {
+      discount += product.discount * product.quantity;
+      totalPrice += product.priceAtPurchase * product.quantity;
+    });
+    if (expressDelivery) {
+      setFinalPrice(totalPrice - discount + 10);
+    } else {
+      setFinalPrice(totalPrice - discount);
     }
+    SetTotalPrice(totalPrice);
+    setDiscountPrice(discount);
+    // console.log("this is a discount price after calculation :",discount)
+    console.log("this is a total price after calculation :", totalPrice);
+    console.log("this is a final price after calculation :", discount);
   };
 
   const onSubmit = (data: ChangeAddressForm) => {
@@ -414,7 +413,7 @@ export default function CreateOrder() {
     GetSelectedVariantinfo();
   }, []);
   const navigate = useNavigate();
-  if (isLoading || ProductsLoading) {
+  if (isLoading || ProductsLoading || isLoadingProducts) {
     return <Loader />;
   }
   return (

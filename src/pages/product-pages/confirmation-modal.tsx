@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 interface ConfirmationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  selectproducts: selectProductsForOrder[];
+  selected: selectProductsForOrder[];
   unavailableProducts: selectProductsForOrder[];
   onConfirm: (selectedProducts: selectProductsForOrder[]) => void;
 }
@@ -27,7 +27,7 @@ export function ConfirmationModal({
   isOpen,
   onClose,
   unavailableProducts,
-  selectproducts,
+  selected,
   onConfirm,
 }: ConfirmationModalProps) {
   const {
@@ -43,7 +43,7 @@ export function ConfirmationModal({
 
   useEffect(() => {
     setUnselectedProducts(unavailableProducts);
-    setSelectedProducts(selectproducts);
+    setSelectedProducts(selected);
   }, [unavailableProducts, setUnselectedProducts]);
 
   const handleConfirm = () => {
