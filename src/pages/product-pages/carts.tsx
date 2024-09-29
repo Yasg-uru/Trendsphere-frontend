@@ -9,6 +9,7 @@ import { SVGProps, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { JSX } from "react/jsx-runtime";
 import { ConfirmationModal } from "./confirmation-modal";
+import { useProductSelection } from "@/custom-hooks/select-unselect";
 
 export default function Carts() {
   const { carts = [], isLoading } = useAppSelector((state) => state.auth);
@@ -18,9 +19,15 @@ export default function Carts() {
   const [isPlacingOrder, setIsPlacingOrder] = useState<boolean>(false);
   const [showConfirmationModal, setShowConfirmationModal] =
     useState<boolean>(false);
-  const [unAvailableProducts, setUnAvailableProducts] = useState<
-    selectProductsForOrder[]
-  >([]);
+  const {
+    selectedProducts,
+    unSelectedProducts,
+    handleAddToSelected,
+    handleRemoveProduct,
+    setSelectedProducts,
+    setUnselectedProducts,
+  } = useProductSelection();
+
   useEffect(() => {
     dispatch(GetCarts())
       .then(() => {
@@ -53,40 +60,47 @@ export default function Carts() {
   };
   const handlePlaceOrder = () => {
     const unavailable = carts.filter((item) => !isAvailable(item.stocks));
+    const AvailableProducts = carts.filter((item) => isAvailable(item.stocks));
+    if (AvailableProducts.length > 0) {
+      setSelectedProducts(
+        AvailableProducts.map((product) => ({
+          productId: product.productId,
+          variantId: product.variantId,
+          quantity: product.quantity,
+          priceAtPurchase: product.price,
+          discount:
+            (product.price * product?.discount?.discountPercentage ?? 0) / 100,
+          size: product.size,
+        }))
+      );
+    }
     if (unavailable.length > 0) {
-      //   productId: string;
-      // variantId: string;
-      // quantity: number;
-      // priceAtPurchase: number;
-      // discount: number;
-      // size: string;
-      setUnAvailableProducts(
+      setUnselectedProducts(
         unavailable.map((product) => ({
           productId: product.productId,
           variantId: product.variantId,
           quantity: product.quantity,
           priceAtPurchase: product.price,
-          discount: (product.price * product.discount.discountPercentage) / 100,
+          discount:
+            (product.price * product?.discount?.discountPercentage ?? 0) / 100,
           size: product.size,
         }))
       );
       setShowConfirmationModal(true);
     } else {
       //directly we can place order
-      placeWithOrder(
-        carts.map((product) => ({
-          productId: product.productId,
-          variantId: product.variantId,
-          quantity: product.quantity,
-          priceAtPurchase: product.price,
-          discount: (product.price * product.discount.discountPercentage) / 100,
-          size: product.size,
-        }))
-      );
+      placeWithOrder(selectedProducts);
     }
   };
-  const placeWithOrder = (selectedItems: selectProductsForOrder[]) => {
+  const placeWithOrder = (selectedProducts: selectProductsForOrder[]) => {
     setIsPlacingOrder(true);
+    const productIds = selectedProducts.map((product) => product.productId);
+    navigate("/order", {
+      state: {
+        selectedProducts,
+        selectedProductIds: Array.from(new Set(productIds)),
+      },
+    });
   };
   const handleQuantityChange = (
     productId: string,
@@ -323,7 +337,8 @@ export default function Carts() {
       <ConfirmationModal
         isOpen={showConfirmationModal}
         onClose={() => setShowConfirmationModal(false)}
-        unavailableProducts={unAvailableProducts}
+        unavailableProducts={unSelectedProducts}
+        selectproducts={selectedProducts}
         onConfirm={placeWithOrder}
       />
     </div>

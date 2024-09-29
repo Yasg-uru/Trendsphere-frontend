@@ -264,7 +264,7 @@ export default function Details() {
 
   const confirmAndBuyOrder = () => {
     navigate("/order", {
-      state: { selectedProductId, selectedProducts },
+      state: { selectedProductIds: [selectedProductId], selectedProducts },
     });
   };
 

@@ -71,6 +71,7 @@ import {
 } from "@/types/ordertypes/initialState";
 import { IProductFrontend } from "@/types/productState/product.type";
 import { createOrder, verifyOrder } from "@/state-manager/slices/orderSlice";
+import { getProductByIds } from "@/state-manager/slices/productSlice";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -114,8 +115,9 @@ export default function CreateOrder() {
   const dispatch = useAppDispatch();
   const { toast } = useToast();
   const location = useLocation();
-  const { products } = useAppSelector((state) => state.product);
-  const { selectedProductId, selectedProducts } = location.state;
+  const { productsByIds } = useAppSelector((state) => state.product);
+  const ProductsLoading = useAppSelector((state) => state.product.isLoading);
+  const { selectedProductIds, selectedProducts } = location.state;
   const [product, setProduct] = useState<IProductFrontend | null>(null);
   const [orderSummaryDetails, setOrderSummayDetails] = useState<orderDetails[]>(
     []
@@ -128,6 +130,7 @@ export default function CreateOrder() {
     "this is a vlaue of the selected address after change ",
     selectedAddress
   );
+  console.log("this is a selected ids array :", selectedProductIds);
   const handleCreateOrder = () => {
     console.log(
       "This is the order data inside the handleCreateOrder function:",
@@ -210,30 +213,86 @@ export default function CreateOrder() {
       paymentVerify();
     }
   }, [orderinfo]);
-
   useEffect(() => {
-    const Product = products.find((p) => p._id === selectedProductId);
-    if (Product) {
-      setProduct(Product);
-      calculatePrice();
-      const address = userInfo?.address.find(
-        (address) => address._id === selectedAddress
-      );
-      if (address) {
-        setOrderData({
-          products: selectedProducts,
-          address,
-          couponCode,
-          loyaltyPointsUsed: 0,
-          isGiftOrder: false,
-          giftMessage: "",
-          deliveryType: expressDelivery ? "express" : "standard",
+    if (selectedProductIds.length > 0) {
+      dispatch(getProductByIds(selectedProductIds))
+        .then(() => {
+          toast({
+            title: "Fetched all the information of the products by their ids",
+          });
+        })
+        .catch((error) => {
+          toast({
+            title: error,
+            variant: "destructive",
+          });
         });
-        console.log("this is a order data :", orderData);
-      }
     }
-  }, [expressDelivery, selectedProducts, product, selectedAddress]);
+  }, [selectedProductIds]);
+  // useEffect(() => {
+  //   if (selectedProductIds && Array.isArray(selectedProductIds)) {
+  //     const selectedProductDetails = selectedProductIds.map((selected:selectProductsForOrder)=>{
+  //       const product=productsByIds.find(product=>product._id===selected.productId);
+  //       if(product){
+  //         const variant=product.variants.find(v=>v._id===selected.variantId);
 
+  //       }
+  //     })
+  //   }
+  //   const Product = products.find((p) => p._id === selectedProductId);
+  //   if (Product) {
+  //     setProduct(Product);
+  //     calculatePrice();
+  //     const address = userInfo?.address.find(
+  //       (address) => address._id === selectedAddress
+  //     );
+  //     if (address) {
+  //       setOrderData({
+  //         products: selectedProducts,
+  //         address,
+  //         couponCode,
+  //         loyaltyPointsUsed: 0,
+  //         isGiftOrder: false,
+  //         giftMessage: "",
+  //         deliveryType: expressDelivery ? "express" : "standard",
+  //       });
+  //       console.log("this is a order data :", orderData);
+  //     }
+  //   }
+  // }, [expressDelivery, selectedProducts, product, selectedAddress]);
+  useEffect(() => {
+    const calculatePrice = () => {
+      if (selectedProducts.length > 0) {
+        let discount = 0;
+        let totalPrice = 0;
+        selectedProducts.forEach((product: selectProductsForOrder) => {
+          discount += product.discount * product.quantity;
+          totalPrice += product.priceAtPurchase * product.quantity;
+        });
+
+        setFinalPrice(totalPrice - discount + (expressDelivery ? 10 : 0));
+        SetTotalPrice(totalPrice);
+        setDiscountPrice(discount);
+
+        const address = userInfo?.address.find(
+          (address) => address._id === selectedAddress
+        );
+        if (address) {
+          setOrderData({
+            products: selectedProducts,
+            address,
+            couponCode,
+            loyaltyPointsUsed: 0,
+            isGiftOrder: false,
+            giftMessage: "",
+            deliveryType: expressDelivery ? "express" : "standard",
+          });
+        }
+      }
+    };
+
+    calculatePrice();
+  }, [expressDelivery, selectedProducts, selectedAddress]);
   const calculatePrice = () => {
     if (product) {
       let discount = 0;
@@ -329,7 +388,7 @@ export default function CreateOrder() {
     const GetSelectedVariantinfo = () => {
       const orderSummary = selectedProducts.map(
         (selected: selectProductsForOrder) => {
-          const product = products.find(
+          const product = productsByIds.find(
             (product) => product._id === selected.productId
           );
           if (product) {
@@ -355,7 +414,7 @@ export default function CreateOrder() {
     GetSelectedVariantinfo();
   }, []);
   const navigate = useNavigate();
-  if (isLoading) {
+  if (isLoading || ProductsLoading) {
     return <Loader />;
   }
   return (
@@ -600,7 +659,7 @@ export default function CreateOrder() {
                     className="flex items-center justify-between gap-4 p-4"
                   >
                     <img
-                      src={item.firstImage}
+                      src={item?.firstImage || ""}
                       alt=""
                       width={64}
                       height={64}

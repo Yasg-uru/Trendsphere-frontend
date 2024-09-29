@@ -33,6 +33,7 @@ const initialState: ProductState = {
   products: [],
   searchedProducts: [],
   singleProduct: null,
+  productsByIds: [],
 };
 
 export const getUniqueCategories = createAsyncThunk(
@@ -85,6 +86,27 @@ export const updateCartQuantity = createAsyncThunk(
       return response.data;
     } catch (error) {
       return rejectWithValue("Failed to update cart quantity");
+    }
+  }
+);
+export const getProductByIds = createAsyncThunk(
+  "product/getproductbyids",
+  async (productsIds: string[], { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post(
+        "/product/products",
+        {
+          productsIds
+        },
+        
+        {
+          withCredentials: true,
+        
+        }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue("failed to fetch the products with their ids ");
     }
   }
 );
@@ -207,6 +229,16 @@ const productSlice = createSlice({
       .addCase(getsingleProduct.fulfilled, (state, action) => {
         state.singleProduct = action.payload?.product;
         state.isLoading = false;
+      })
+      .addCase(getProductByIds.fulfilled, (state, action) => {
+        state.productsByIds = action.payload?.products;
+        state.isLoading = false;
+      })
+      .addCase(getProductByIds.rejected, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(getProductByIds.pending, (state) => {
+        state.isLoading = true;
       });
   },
 });

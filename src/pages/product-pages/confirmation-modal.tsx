@@ -17,14 +17,17 @@ import { Label } from "@/components/ui/label";
 interface ConfirmationModalProps {
   isOpen: boolean;
   onClose: () => void;
+  selectproducts: selectProductsForOrder[];
   unavailableProducts: selectProductsForOrder[];
   onConfirm: (selectedProducts: selectProductsForOrder[]) => void;
 }
-
+// availableProducts={availableProducts}
+// setavailableProducts={setAvailableProducts}
 export function ConfirmationModal({
   isOpen,
   onClose,
   unavailableProducts,
+  selectproducts,
   onConfirm,
 }: ConfirmationModalProps) {
   const {
@@ -40,9 +43,11 @@ export function ConfirmationModal({
 
   useEffect(() => {
     setUnselectedProducts(unavailableProducts);
+    setSelectedProducts(selectproducts);
   }, [unavailableProducts, setUnselectedProducts]);
 
   const handleConfirm = () => {
+    console.log("this is a selected products ", selectedProducts);
     onConfirm(selectedProducts);
     onClose();
   };
