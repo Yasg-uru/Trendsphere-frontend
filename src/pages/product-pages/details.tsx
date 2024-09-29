@@ -25,7 +25,11 @@ import { SVGProps } from "react";
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 // import { IProductFrontend } from "@/types/productState/product.type";
 import { useLocation, useNavigate } from "react-router-dom";
-import { addcart, getsingleProduct } from "@/state-manager/slices/productSlice";
+import {
+  addcart,
+  getsingleProduct,
+  helpfulcount,
+} from "@/state-manager/slices/productSlice";
 import { useToast } from "@/hooks/use-toast";
 import {
   CheckIcon,
@@ -45,7 +49,7 @@ export default function Details() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { singleProduct, isLoading } = useAppSelector((state) => state.product);
-  const { carts } = useAppSelector((state) => state.auth);
+  const { carts, userInfo } = useAppSelector((state) => state.auth);
   const location = useLocation();
   const [selectedProductId, setSelectedProductId] = useState<string | null>(
     null
@@ -83,6 +87,9 @@ export default function Details() {
       );
     }
     return isAlreadyExist;
+  };
+  const isOwnHelpfullCount = (helpfulCountGivenBy: string[]): boolean => {
+    return helpfulCountGivenBy.includes(userInfo?._id as string);
   };
 
   useEffect(() => {
@@ -277,7 +284,20 @@ export default function Details() {
       state: { selectedProductIds: [selectedProductId], selectedProducts },
     });
   };
-
+  const handleHelpFullCount = (reviewId: string) => {
+    dispatch(helpfulcount({ productId: selectedProductId, reviewId }))
+      .then(() => {
+        toast({
+          title: "Added your helpfull count ",
+        });
+        dispatch(getsingleProduct(selectedProductId));
+      })
+      .catch((error) => {
+        toast({
+          title: error,
+        });
+      });
+  };
   return (
     <div className="grid md:grid-cols-2 gap-6 lg:gap-12 items-start max-w-6xl px-4 mx-auto py-6">
       <div className="grid gap-4">
@@ -487,11 +507,16 @@ export default function Details() {
             <p className="mb-2">{review.comment}</p>
             <div className="flex items-center gap-4">
               <Button
+                onClick={() => handleHelpFullCount(review._id)}
                 variant="outline"
                 size="sm"
                 className="flex items-center gap-1"
               >
-                <ThumbsUp className="w-4 h-4" />
+                {isOwnHelpfullCount(review.helpfulcountgivenBy) ? (
+                  <ThumbsUp className="w-4 h-4 text-green-600" />
+                ) : (
+                  <ThumbsUp className="w-4 h-4" />
+                )}
                 Helpful ({review.helpfulCount})
               </Button>
               {review.isVerifiedPurchase && (

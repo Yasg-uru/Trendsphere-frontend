@@ -111,9 +111,12 @@ export const getProductByIds = createAsyncThunk(
 );
 export const uplaodReview = createAsyncThunk(
   "product/review",
-  async (data:{formData:FormData,productId:string}, { rejectWithValue }) => {
+  async (
+    data: { formData: FormData; productId: string },
+    { rejectWithValue }
+  ) => {
     try {
-      const {formData,productId}=data;
+      const { formData, productId } = data;
       const response = await axiosInstance.post(
         `/product/review/${productId}`,
         formData,
@@ -124,6 +127,26 @@ export const uplaodReview = createAsyncThunk(
       return response.data;
     } catch (error) {
       return rejectWithValue("Failed to uplaod Review");
+    }
+  }
+);
+export const helpfulcount = createAsyncThunk(
+  "/product/helpfullcount",
+  async (
+    data: { productId: string; reviewId: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await axiosInstance.post(
+        `/product/helpfullcount/${data.productId}/${data.reviewId}`,
+        {},
+        {
+          withCredentials: true,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue("failed to add your helpcount ");
     }
   }
 );

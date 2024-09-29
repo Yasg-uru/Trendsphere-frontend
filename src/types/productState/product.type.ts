@@ -20,6 +20,8 @@ export interface IProductVariantFrontend {
     helpfulCount: number;
     isVerifiedPurchase: boolean;
     images: IReviewImageFrontend[]; // Array of review images
+    helpfulcountgivenBy:string[];
+    _id:string;
   }
   
   // Interface for review images on the frontend
