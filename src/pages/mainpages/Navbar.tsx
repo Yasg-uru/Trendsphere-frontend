@@ -32,8 +32,10 @@ import { useToast } from "@/hooks/use-toast";
 import { Logout } from "@/state-manager/slices/authSlice";
 import { useDebounce } from "@uidotdev/usehooks";
 import { SearchResults } from "../product-pages/searchbar";
+import Loader from "@/helper/Loader";
 export default function Navbar() {
   const { theme, setTheme } = useTheme();
+  const { isLoading } = useAppSelector((state) => state.product);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [currentCategory, setCurrentCategory] = useState<string>("");
   const [currentSubCategory, setCurrentSubCategory] = useState<string>("");
@@ -125,6 +127,9 @@ export default function Navbar() {
     handleClick();
   };
   const { carts } = useAppSelector((state) => state.auth);
+  if (isLoading) {
+    return <Loader />;
+  }
   return (
     <nav className="bg-background border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -139,63 +144,68 @@ export default function Navbar() {
               <div className="container px-4 md:px-6 py-4">
                 <NavigationMenu>
                   <NavigationMenuList>
-                    {categories.map((categoryItem, index) => (
-                      <NavigationMenuItem
-                        key={index}
-                        onMouseEnter={() => {
-                          handleCategoryHover(categoryItem.category);
-                        }}
-                        onClick={handleClick}
-                      >
-                        <NavigationMenuTrigger>
-                          {categoryItem.category}
-                        </NavigationMenuTrigger>
-                        <NavigationMenuContent className="cursor-pointer">
-                          <div className="grid w-[400px] p-2">
-                            {categoryItem.subcategories.map(
-                              (subcat, subIndex) => (
-                                <div key={subIndex}>
-                                  <NavigationMenuLink
-                                    asChild
-                                    onMouseEnter={() =>
-                                      handleSubcategoryHover(subcat.subcategory)
-                                    }
-                                    onClick={handleClick}
-                                  >
-                                    <Link
-                                      to="#"
-                                      className="group grid h-auto w-full items-center justify-start gap-1 rounded-md bg-background p-4 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+                    {categories.length > 0 &&
+                      categories.map((categoryItem, index) => (
+                        <NavigationMenuItem
+                          key={index}
+                          onMouseEnter={() => {
+                            handleCategoryHover(categoryItem.category);
+                          }}
+                          onClick={handleClick}
+                        >
+                          <NavigationMenuTrigger>
+                            {categoryItem.category}
+                          </NavigationMenuTrigger>
+                          <NavigationMenuContent className="cursor-pointer">
+                            <div className="grid w-[400px] p-2">
+                              {categoryItem.subcategories.map(
+                                (subcat, subIndex) => (
+                                  <div key={subIndex}>
+                                    <NavigationMenuLink
+                                      asChild
+                                      onMouseEnter={() =>
+                                        handleSubcategoryHover(
+                                          subcat.subcategory
+                                        )
+                                      }
+                                      onClick={handleClick}
                                     >
-                                      <div className="text-sm font-medium leading-none group-hover:underline">
-                                        {subcat.subcategory}
-                                      </div>
-                                    </Link>
-                                  </NavigationMenuLink>
-                                  {subcat.childcategories &&
-                                    subcat.childcategories.length > 0 && (
-                                      <div className="ml-4  flex flex-col ">
-                                        {subcat.childcategories.map(
-                                          (child, childIndex) => (
-                                            <span
-                                              onClick={() =>
-                                                handleChildCategoryClick(child)
-                                              }
-                                              key={childIndex}
-                                              className="text-sm text-muted-foreground"
-                                            >
-                                              {child}
-                                            </span>
-                                          )
-                                        )}
-                                      </div>
-                                    )}
-                                </div>
-                              )
-                            )}
-                          </div>
-                        </NavigationMenuContent>
-                      </NavigationMenuItem>
-                    ))}
+                                      <Link
+                                        to="#"
+                                        className="group grid h-auto w-full items-center justify-start gap-1 rounded-md bg-background p-4 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+                                      >
+                                        <div className="text-sm font-medium leading-none group-hover:underline">
+                                          {subcat.subcategory}
+                                        </div>
+                                      </Link>
+                                    </NavigationMenuLink>
+                                    {subcat.childcategories &&
+                                      subcat.childcategories.length > 0 && (
+                                        <div className="ml-4  flex flex-col ">
+                                          {subcat.childcategories.map(
+                                            (child, childIndex) => (
+                                              <span
+                                                onClick={() =>
+                                                  handleChildCategoryClick(
+                                                    child
+                                                  )
+                                                }
+                                                key={childIndex}
+                                                className="text-sm text-muted-foreground"
+                                              >
+                                                {child}
+                                              </span>
+                                            )
+                                          )}
+                                        </div>
+                                      )}
+                                  </div>
+                                )
+                              )}
+                            </div>
+                          </NavigationMenuContent>
+                        </NavigationMenuItem>
+                      ))}
                   </NavigationMenuList>
                 </NavigationMenu>
               </div>

@@ -1,4 +1,5 @@
 import axiosInstance from "@/helper/axiosinstance";
+import { ProductFormValues } from "@/pages/dashboard/addproduct";
 import { FormValues } from "@/pages/product-pages/Review";
 import { ProductState } from "@/types/productState/productstate";
 
@@ -224,6 +225,19 @@ export const getsingleProduct = createAsyncThunk(
     }
   }
 );
+export const createProduct = createAsyncThunk(
+  "product/create",
+  async (formdata: ProductFormValues, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post(`/product/create`, formdata, {
+        withCredentials: true,
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue("failed to create product ");
+    }
+  }
+);
 const productSlice = createSlice({
   name: "product",
   initialState,
@@ -279,6 +293,15 @@ const productSlice = createSlice({
       })
       .addCase(getProductByIds.pending, (state) => {
         state.isLoading = true;
+      })
+      .addCase(createProduct.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(createProduct.rejected, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(createProduct.fulfilled, (state) => {
+        state.isLoading = false;
       });
   },
 });

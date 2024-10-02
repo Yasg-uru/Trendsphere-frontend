@@ -17,11 +17,13 @@ import Orders from "./pages/order-pages/orders";
 import OrderDetail from "./pages/order-pages/orderdetails";
 import ForgotPassword from "./pages/mainpages/authpages/forgotpassoword";
 import ResetPassword from "./pages/mainpages/authpages/resetpassword";
-import Dashboard from "./pages/dashboard/dashboard";
+import Dashboard from "./pages/dashboard/admin-dashboard";
 import { AddProduct } from "./pages/dashboard/addproduct";
 import OrdersAdmin from "./pages/dashboard/orders";
 import OrderDetailsPage from "./pages/dashboard/adminorder";
 import ReviewForm from "./pages/review-pages/create-review";
+import Loader from "./helper/Loader";
+import DeliveryBoyDashboard from "./pages/dashboard/delivery-boy-dashboard";
 const App: React.FunctionComponent = () => {
   const dispatch = useAppDispatch();
 
@@ -44,6 +46,7 @@ const App: React.FunctionComponent = () => {
         <Route path="/review" element={<AddReview />} />
         <Route path="/order" element={<CreateOrder />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/delivery-dashboard" element={<DeliveryBoyDashboard />} />
         <Route path="/create-product" element={<AddProduct />} />
         <Route path="/u/orders" element={<Orders />} />
         <Route path="/u/order/details/:orderId" element={<OrderDetail />} />
