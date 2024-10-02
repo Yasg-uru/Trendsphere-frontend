@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -47,6 +47,14 @@ import {
   Menu,
   ChevronRight,
 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
+import {
+  GetMyDeliveries,
+  getWeeklyDeliveryReport,
+} from "@/state-manager/slices/deliverySlice";
+import { useToast } from "@/hooks/use-toast";
+import Loader from "@/helper/Loader";
 
 ChartJS.register(
   CategoryScale,
@@ -58,19 +66,48 @@ ChartJS.register(
 );
 
 export default function DeliveryBoyDashboard() {
-  const deliveryData = {
-    labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-    datasets: [
-      {
-        label: "Deliveries Completed",
-        data: [12, 19, 15, 22, 18, 25, 20],
-        backgroundColor: "rgba(75, 192, 192, 0.6)",
-        borderColor: "rgba(75, 192, 192, 1)",
-        borderWidth: 1,
-      },
-    ],
-  };
+  const dispatch = useAppDispatch();
+  const {
+    isLoading,
+    mydeliveries: {
+      pendingOrders,
+      deliveryCounts: { completed, pending },
+    },
+    weeklyDataLoading,
+    WeeklyData,
+  } = useAppSelector((state) => state.delivery);
+  const { toast } = useToast();
 
+  useEffect(() => {
+    dispatch(GetMyDeliveries())
+      .unwrap()
+      .then(() => {
+        toast({
+          title: "Fetched your deliveries successfully",
+        });
+      })
+      .catch((error) => {
+        toast({
+          title: error,
+        });
+      });
+    dispatch(getWeeklyDeliveryReport())
+      .unwrap()
+      .then(() => {
+        toast({
+          title: "Fetched successfully weekly details",
+        });
+      })
+      .catch((error) => {
+        toast({
+          title: error,
+        });
+      });
+  }, []);
+
+  if (isLoading) {
+    return <Loader />;
+  }
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
@@ -86,13 +123,13 @@ export default function DeliveryBoyDashboard() {
             <Activity className="mr-3 h-5 w-5" />
             Dashboard
           </a>
-          <a
+          <Link
             className="flex items-center mt-2 py-2 px-4 text-gray-600 hover:bg-gray-200"
-            href="#"
+            to="/orders"
           >
             <Package className="mr-3 h-5 w-5" />
             My Deliveries
-          </a>
+          </Link>
           <a
             className="flex items-center mt-2 py-2 px-4 text-gray-600 hover:bg-gray-200"
             href="#"
@@ -166,9 +203,9 @@ export default function DeliveryBoyDashboard() {
                 <Package className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">12</div>
+                <div className="text-2xl font-bold">{completed + pending}</div>
                 <p className="text-xs text-muted-foreground">
-                  3 pending, 9 completed
+                  {pending} pending, {completed} completed
                 </p>
               </CardContent>
             </Card>
@@ -220,7 +257,7 @@ export default function DeliveryBoyDashboard() {
               <CardTitle>Weekly Delivery Performance</CardTitle>
             </CardHeader>
             <CardContent>
-              <Bar data={deliveryData} />
+              {!weeklyDataLoading && <Bar data={WeeklyData} />}
             </CardContent>
           </Card>
 
@@ -228,7 +265,9 @@ export default function DeliveryBoyDashboard() {
           <Card className="mt-5">
             <CardHeader>
               <CardTitle>Upcoming Deliveries</CardTitle>
-              <CardDescription>You have 3 pending deliveries.</CardDescription>
+              <CardDescription>
+                You have {pending} pending deliveries.
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
@@ -242,45 +281,26 @@ export default function DeliveryBoyDashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  <TableRow>
-                    <TableCell className="font-medium">#12345</TableCell>
-                    <TableCell>John Doe</TableCell>
-                    <TableCell>123 Main St, City</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">Pending</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Button variant="outline" size="sm">
-                        Start Delivery
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">#12346</TableCell>
-                    <TableCell>Jane Smith</TableCell>
-                    <TableCell>456 Elm St, Town</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">In Transit</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Button variant="outline" size="sm">
-                        Mark as Delivered
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">#12347</TableCell>
-                    <TableCell>Bob Johnson</TableCell>
-                    <TableCell>789 Oak St, Village</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">Pending</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Button variant="outline" size="sm">
-                        Start Delivery
-                      </Button>
-                    </TableCell>
-                  </TableRow>
+                  {pendingOrders.map((order) => (
+                    <TableRow key={order._id}>
+                      <TableCell className="font-medium">{order._id}</TableCell>
+                      <TableCell>{order.address.name}</TableCell>
+                      <TableCell>
+                        {`${order.address.addressLine1}, ${order.address.city}, ${order.address.state}, ${order.address.country}`}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">
+                          {order.orderStatus.charAt(0).toUpperCase() +
+                            order.orderStatus.slice(1)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Button variant="outline" size="sm">
+                          Start Delivery
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </CardContent>

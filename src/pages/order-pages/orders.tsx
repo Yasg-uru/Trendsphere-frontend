@@ -87,7 +87,7 @@ export default function Orders() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
-  
+
   const debouncedSearchTerm = useDebounce<string>(searchTerm, 500);
   const navigate = useNavigate();
   useEffect(() => {
