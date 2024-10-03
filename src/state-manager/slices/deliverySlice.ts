@@ -15,6 +15,7 @@ const initialState: deliveryState = {
     datasets: [],
   },
   weeklyDataLoading: false,
+  deliveryPerformanceData: null
 };
 export const createDeliveryBoy = createAsyncThunk(
   "delivery/createboy",
@@ -28,6 +29,19 @@ export const createDeliveryBoy = createAsyncThunk(
       return response.data;
     } catch (error) {
       return rejectWithValue("failed to create delivery boy");
+    }
+  }
+);
+export const getdeliveryOntimeRate = createAsyncThunk(
+  "delivery/ontimeperformance",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get("/delivery/on-time-rating", {
+        withCredentials: true,
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue("Failed to get the ontime percentage");
     }
   }
 );
@@ -82,6 +96,16 @@ const deliverySlice = createSlice({
     builder.addCase(getWeeklyDeliveryReport.rejected, (state) => {
       state.weeklyDataLoading = false;
     });
+    builder.addCase(getdeliveryOntimeRate.fulfilled, (state, action) => {
+      state.deliveryPerformanceData = action.payload?.data;
+      // state.isLoading = false;
+    });
+    // builder.addCase(getdeliveryOntimeRate.rejected, (state) => {
+    //   state.isLoading = false;
+    // });
+    // builder.addCase(getdeliveryOntimeRate.pending, (state) => {
+    //   state.isLoading = true;
+    // });
   },
 });
 export const {} = deliverySlice.actions;

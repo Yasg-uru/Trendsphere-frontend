@@ -3,6 +3,15 @@ export interface deliveryState {
   mydeliveries: OrderData;
   WeeklyData: WeeklyData;
   weeklyDataLoading: boolean;
+  deliveryPerformanceData: DeliveryPerformanceData | null;
+}
+export interface DeliveryPerformanceData {
+  totalDeliveries: number;
+  onTimeDeliveries: number;
+  onTimePercentage: number;
+  lastWeekPercentage: number;
+  performanceDifference: string;
+  message: string;
 }
 interface Address {
   name: string;

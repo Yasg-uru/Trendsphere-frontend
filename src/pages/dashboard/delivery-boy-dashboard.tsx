@@ -50,6 +50,7 @@ import {
 import { Link } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 import {
+  getdeliveryOntimeRate,
   GetMyDeliveries,
   getWeeklyDeliveryReport,
 } from "@/state-manager/slices/deliverySlice";
@@ -75,6 +76,7 @@ export default function DeliveryBoyDashboard() {
     },
     weeklyDataLoading,
     WeeklyData,
+    deliveryPerformanceData
   } = useAppSelector((state) => state.delivery);
   const { toast } = useToast();
 
@@ -103,42 +105,51 @@ export default function DeliveryBoyDashboard() {
           title: error,
         });
       });
+    dispatch(getdeliveryOntimeRate())
+      .unwrap()
+      .then(() => {
+        toast({
+          title: "successfully fetched delivery on time rates ",
+        });
+      })
+      .catch((error) => {
+        toast({
+          title: error,
+        });
+      });
   }, []);
 
   if (isLoading) {
     return <Loader />;
   }
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-background">
       {/* Sidebar */}
-      <aside className="w-64 bg-white shadow-md">
+      <aside className="w-64 bg-background shadow-md">
         <div className="p-4">
-          <h1 className="text-2xl font-bold text-gray-800">TrendSphere</h1>
+          <h1 className="text-2xl font-bold ">Delivery Dashboard</h1>
         </div>
         <nav className="mt-6">
-          <a
-            className="flex items-center py-2 px-4 bg-gray-200 text-gray-700"
-            href="#"
-          >
+          <a className="flex items-center py-2 px-4 bg-background " href="#">
             <Activity className="mr-3 h-5 w-5" />
             Dashboard
           </a>
           <Link
-            className="flex items-center mt-2 py-2 px-4 text-gray-600 hover:bg-gray-200"
+            className="flex items-center mt-2 py-2 px-4  hover:bg-background"
             to="/orders"
           >
             <Package className="mr-3 h-5 w-5" />
             My Deliveries
           </Link>
           <a
-            className="flex items-center mt-2 py-2 px-4 text-gray-600 hover:bg-gray-200"
+            className="flex items-center mt-2 py-2 px-4  hover:bg-background"
             href="#"
           >
             <MapPin className="mr-3 h-5 w-5" />
             Route Planner
           </a>
           <a
-            className="flex items-center mt-2 py-2 px-4 text-gray-600 hover:bg-gray-200"
+            className="flex items-center mt-2 py-2 px-4  hover:bg-background"
             href="#"
           >
             <TrendingUp className="mr-3 h-5 w-5" />
@@ -149,48 +160,6 @@ export default function DeliveryBoyDashboard() {
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto">
-        {/* Header */}
-        <header className="bg-white shadow-sm">
-          <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-            <h2 className="font-semibold text-xl text-gray-800">
-              Delivery Dashboard
-            </h2>
-            <div className="flex items-center">
-              <div className="relative mr-4">
-                <Input
-                  type="text"
-                  placeholder="Search..."
-                  className="pl-10 pr-4 py-2 rounded-full"
-                />
-                <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-              </div>
-              <Button variant="outline" size="icon" className="mr-2">
-                <Bell className="h-5 w-5" />
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="icon">
-                    <Avatar>
-                      <AvatarImage
-                        src="/placeholder-avatar.jpg"
-                        alt="Delivery Boy"
-                      />
-                      <AvatarFallback>DB</AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>Profile</DropdownMenuItem>
-                  <DropdownMenuItem>Settings</DropdownMenuItem>
-                  <DropdownMenuItem>Logout</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-        </header>
-
         {/* Dashboard Content */}
         <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
           {/* Stats Overview */}
@@ -209,7 +178,7 @@ export default function DeliveryBoyDashboard() {
                 </p>
               </CardContent>
             </Card>
-            <Card>
+           {  deliveryPerformanceData && <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   On-Time Rate
@@ -217,12 +186,13 @@ export default function DeliveryBoyDashboard() {
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">98%</div>
+                <div className="text-2xl font-bold">{deliveryPerformanceData.onTimePercentage}%</div>
                 <p className="text-xs text-muted-foreground">
-                  +2% from last week
+                {deliveryPerformanceData.message}
                 </p>
               </CardContent>
             </Card>
+}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
