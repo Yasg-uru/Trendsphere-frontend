@@ -241,7 +241,11 @@ export const createProduct = createAsyncThunk(
 const productSlice = createSlice({
   name: "product",
   initialState,
-  reducers: {},
+  reducers: {
+    clearSearchedProducts(state){
+state.searchedProducts=[];
+    }
+  },
   extraReducers(builder) {
     builder
       .addCase(getUniqueCategories.fulfilled, (state, action) => {
@@ -305,5 +309,6 @@ const productSlice = createSlice({
       });
   },
 });
+export const {clearSearchedProducts}=productSlice.actions
 export default productSlice.reducer;
 export const {} = productSlice.actions;

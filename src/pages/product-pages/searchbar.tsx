@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { useAppSelector } from "@/state-manager/hook";
+import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { IProductFrontend } from "@/types/productState/product.type";
+import { clearSearchedProducts } from "@/state-manager/slices/productSlice";
 
 export function SearchResults() {
+  const dispatch = useAppDispatch(); // Initialize dispatch
   const { searchedProducts, isLoading } = useAppSelector(
     (state) => state.product
   );
@@ -19,14 +21,37 @@ export function SearchResults() {
     const handleClickOutside = (event: MouseEvent) => {
       if (ref.current && !ref.current.contains(event.target as Node)) {
         setIsVisible(false);
+        dispatch(clearSearchedProducts()); // Clear searched products when clicking outside
       }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
+
+    // Cleanup on unmount
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [searchedProducts]);
+  }, [searchedProducts, dispatch]); // Added dispatch to the dependency array
+
+  // Clear searched products when the component is unmounted (e.g., page refresh)
+  useEffect(() => {
+    return () => {
+      dispatch(clearSearchedProducts());
+    };
+  }, [dispatch]);
+
+  // Clear searched products on navigation
+  useEffect(() => {
+    const handleNavigation = () => {
+      dispatch(clearSearchedProducts());
+    };
+
+    window.addEventListener("beforeunload", handleNavigation);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleNavigation);
+    };
+  }, [dispatch]);
 
   if (!isVisible) return null;
 

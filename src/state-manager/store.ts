@@ -17,7 +17,7 @@ const tokenValidationMiddleware: Middleware = (store) => (next) => (action) => {
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["auth", "product"],
+  whitelist: ["auth", "product", "delivery"],
 };
 
 const rootReducer = combineReducers({
@@ -35,8 +35,7 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,
-    }),
-  // .concat(tokenValidationMiddleware),
+    }).concat(tokenValidationMiddleware),
 });
 
 export const persistor = persistStore(store);

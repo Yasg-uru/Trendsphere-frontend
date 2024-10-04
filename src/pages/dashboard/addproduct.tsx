@@ -96,7 +96,7 @@ const productSchema = z.object({
   rating: z.number().min(0).max(5).optional(),
 });
 
-type ProductFormValues = z.infer<typeof productSchema>;
+export type ProductFormValues = z.infer<typeof productSchema>;
 
 export function AddProduct() {
   const dispatch = useAppDispatch();
