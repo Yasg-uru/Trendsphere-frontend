@@ -666,7 +666,7 @@ export default function CreateOrder() {
                       style={{ aspectRatio: "64/64", objectFit: "cover" }}
                     />
                     <div className="flex-1 grid gap-1">
-                      <div className="font-medium">{item.variantInfo}</div>
+                      <div className="font-medium">{item?.variantInfo}</div>
                       <div className="text-sm text-muted-foreground">
                         Quantity: {item.quantity}
                       </div>
