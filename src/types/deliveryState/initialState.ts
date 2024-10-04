@@ -5,10 +5,15 @@ export interface deliveryState {
   weeklyDataLoading: boolean;
   deliveryPerformanceData: DeliveryPerformanceData | null;
   Ratings:deliveryBoyRating | null;
+  Earnings:deliveryEarnings | null;
 }
 export interface deliveryBoyRating{
   averageRating:number ;
   totalReviews:number;
+}
+export interface deliveryEarnings{
+  TotalEarnings:number ;
+  yesterdayEarnings:number ;
 }
 export interface DeliveryPerformanceData {
   totalDeliveries: number;

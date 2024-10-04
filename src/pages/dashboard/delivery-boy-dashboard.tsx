@@ -52,6 +52,7 @@ import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 import {
   getdeliveryOntimeRate,
   GetMyDeliveries,
+  getMyEarnings,
   getRatings,
   getWeeklyDeliveryReport,
 } from "@/state-manager/slices/deliverySlice";
@@ -78,7 +79,8 @@ export default function DeliveryBoyDashboard() {
     weeklyDataLoading,
     WeeklyData,
     deliveryPerformanceData,
-    Ratings
+    Ratings,
+    Earnings,
   } = useAppSelector((state) => state.delivery);
   const { toast } = useToast();
 
@@ -119,7 +121,8 @@ export default function DeliveryBoyDashboard() {
           title: error,
         });
       });
-      dispatch(getRatings())
+    dispatch(getRatings());
+    dispatch(getMyEarnings());
   }, []);
 
   if (isLoading) {
@@ -199,32 +202,45 @@ export default function DeliveryBoyDashboard() {
                 </CardContent>
               </Card>
             )}
-           { Ratings && <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Customer Rating
-                </CardTitle>
-                <Activity className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{Ratings.averageRating}/5</div>
-                <p className="text-xs text-muted-foreground">
-                  Based on {Ratings.totalReviews} reviews
-                </p>
-              </CardContent>
-            </Card>}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Earnings</CardTitle>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">$120.50</div>
-                <p className="text-xs text-muted-foreground">
-                  +$22.50 from yesterday
-                </p>
-              </CardContent>
-            </Card>
+            {Ratings && (
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Customer Rating
+                  </CardTitle>
+                  <Activity className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {Ratings.averageRating}/5
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Based on {Ratings.totalReviews} reviews
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+            {Earnings && (
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Earnings
+                  </CardTitle>
+                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    ${Earnings.TotalEarnings}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {Earnings.yesterdayEarnings >= 0
+                      ? `+${Earnings.yesterdayEarnings} `
+                      : `-${Earnings.yesterdayEarnings} `}
+                    from yesterday
+                  </p>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* Delivery Performance Chart */}
