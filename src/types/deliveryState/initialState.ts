@@ -4,6 +4,11 @@ export interface deliveryState {
   WeeklyData: WeeklyData;
   weeklyDataLoading: boolean;
   deliveryPerformanceData: DeliveryPerformanceData | null;
+  Ratings:deliveryBoyRating | null;
+}
+export interface deliveryBoyRating{
+  averageRating:number ;
+  totalReviews:number;
 }
 export interface DeliveryPerformanceData {
   totalDeliveries: number;

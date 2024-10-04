@@ -15,8 +15,22 @@ const initialState: deliveryState = {
     datasets: [],
   },
   weeklyDataLoading: false,
-  deliveryPerformanceData: null
+  deliveryPerformanceData: null,
+  Ratings: null
 };
+export const getRatings = createAsyncThunk(
+  "delivery/ratings",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get("/delivery/ratings", {
+        withCredentials: true,
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue("Failed to fetch ratings ");
+    }
+  }
+);
 export const createDeliveryBoy = createAsyncThunk(
   "delivery/createboy",
   async (formdata, { rejectWithValue }) => {
@@ -106,6 +120,9 @@ const deliverySlice = createSlice({
     // builder.addCase(getdeliveryOntimeRate.pending, (state) => {
     //   state.isLoading = true;
     // });
+    builder.addCase(getRatings.fulfilled,(state,action)=>{
+      state.Ratings=action.payload?.ratings;
+    })
   },
 });
 export const {} = deliverySlice.actions;
