@@ -49,7 +49,9 @@ export default function Details() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { singleProduct, isLoading } = useAppSelector((state) => state.product);
-  const { carts, userInfo } = useAppSelector((state) => state.auth);
+  const { carts, userInfo, isAuthenticated } = useAppSelector(
+    (state) => state.auth
+  );
   const location = useLocation();
   const [selectedProductId, setSelectedProductId] = useState<string | null>(
     null
@@ -237,6 +239,10 @@ export default function Details() {
   };
 
   const handleCart = () => {
+    if (!isAuthenticated) {
+      navigate("/Sign-in");
+      return;
+    }
     if (selectedVariantId) {
       if (!selectedSize) {
         toast({
@@ -267,6 +273,10 @@ export default function Details() {
     }
   };
   const handleOrder = () => {
+    if (!isAuthenticated) {
+      navigate("Sign-in");
+      return;
+    }
     setIsModalOpen(true);
   };
   const handlechangeSize = (size: string) => {
@@ -285,6 +295,10 @@ export default function Details() {
     });
   };
   const handleHelpFullCount = (reviewId: string) => {
+    if (!isAuthenticated) {
+      navigate("/Sign-in");
+      return;
+    }
     dispatch(helpfulcount({ productId: selectedProductId, reviewId }))
       .then(() => {
         toast({
@@ -426,10 +440,16 @@ export default function Details() {
           </div>
 
           <div className="flex gap-1 w-full">
-            {isAlreadyExistInCart() ? (
-              <Button size="lg" onClick={() => navigate("/mycarts")}>
-                Go To Carts
-              </Button>
+            {isAuthenticated ? (
+              isAlreadyExistInCart() ? (
+                <Button size="lg" onClick={() => navigate("/mycarts")}>
+                  Go To Carts
+                </Button>
+              ) : (
+                <Button size="lg" onClick={handleCart}>
+                  Add to Cart
+                </Button>
+              )
             ) : (
               <Button size="lg" onClick={handleCart}>
                 Add to Cart

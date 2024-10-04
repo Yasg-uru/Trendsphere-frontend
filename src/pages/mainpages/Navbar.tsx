@@ -222,17 +222,19 @@ export default function Navbar() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Link to="/mycarts">
-              <Button variant="ghost" size="icon" className="relative">
-                <ShoppingCart className="h-5 w-5" />
-                {carts && carts?.length > 0 && (
-                  <div className="absolute top-0 right-0  flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground">
-                    {carts.length}
-                  </div>
-                )}
-                <span className="sr-only">Shopping cart</span>
-              </Button>
-            </Link>
+            {isAuthenticated && (
+              <Link to="/mycarts">
+                <Button variant="ghost" size="icon" className="relative">
+                  <ShoppingCart className="h-5 w-5" />
+                  {carts && carts?.length > 0 && (
+                    <div className="absolute top-0 right-0  flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground">
+                      {carts.length}
+                    </div>
+                  )}
+                  <span className="sr-only">Shopping cart</span>
+                </Button>
+              </Link>
+            )}
             <Button
               variant="ghost"
               size="icon"
@@ -274,7 +276,9 @@ export default function Navbar() {
                   <div className="flex items-center gap-2 p-2">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src="/placeholder-user.jpg" />
-                      <AvatarFallback>JD</AvatarFallback>
+                      <AvatarFallback>
+                        {userInfo?.username.slice(0, 1)}
+                      </AvatarFallback>
                     </Avatar>
                     <div className="grid gap-0.5 leading-none">
                       <div className="font-semibold">{userInfo?.username}</div>
@@ -296,12 +300,22 @@ export default function Navbar() {
                       <span>Wishlist</span>
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Link to="#" className="flex items-center gap-2">
-                      <div className="h-4 w-4" />
-                      <span>Dashboard</span>
-                    </Link>
-                  </DropdownMenuItem>
+                  {isAuthenticated && userInfo?.Role === "admin" && (
+                    <DropdownMenuItem>
+                      <Link to="#" className="flex items-center gap-2">
+                        <div className="h-4 w-4" />
+                        <span>Dashboard</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  {isAuthenticated && userInfo?.Role === "delivery_boy" && (
+                    <DropdownMenuItem>
+                      <Link to="#" className="flex items-center gap-2">
+                        <div className="h-4 w-4" />
+                        <span>Dashboard</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => {
@@ -354,12 +368,14 @@ export default function Navbar() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <Link to="/mycarts">
-                <Button variant="ghost" size="icon" className="ml-4">
-                  <ShoppingCart className="h-5 w-5" />
-                  <span className="sr-only">Shopping cart</span>
-                </Button>
-              </Link>
+              {isAuthenticated && (
+                <Link to="/mycarts">
+                  <Button variant="ghost" size="icon" className="ml-4">
+                    <ShoppingCart className="h-5 w-5" />
+                    <span className="sr-only">Shopping cart</span>
+                  </Button>
+                </Link>
+              )}
               <Button
                 variant="ghost"
                 size="icon"
