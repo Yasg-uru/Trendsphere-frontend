@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Home from "./pages/mainpages/Home";
 import { Route, Routes } from "react-router-dom";
 import Navbar from "./pages/mainpages/Navbar";
@@ -22,14 +22,27 @@ import { AddProduct } from "./pages/dashboard/addproduct";
 import OrdersAdmin from "./pages/dashboard/orders";
 import OrderDetailsPage from "./pages/dashboard/adminorder";
 import ReviewForm from "./pages/review-pages/create-review";
-import Loader from "./helper/Loader";
+import { io } from "socket.io-client";
 import DeliveryBoyDashboard from "./pages/dashboard/delivery-boy-dashboard";
+import DeliveryRatingDialog from "./dialogs/delivery-boy-rating";
+import { useToast } from "./hooks/use-toast";
+const socket = io("http://localhost:8000", { withCredentials: true });
 const App: React.FunctionComponent = () => {
+  const { toast } = useToast();
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const dispatch = useAppDispatch();
 
-  const { isLoading } = useAppSelector((state) => state.product);
   useEffect(() => {
+    socket.on("orderDelivered", (data: { message: string }) => {
+      setIsOpen(true);
+      toast({
+        title: data.message,
+      });
+    });
     dispatch(getUniqueCategories());
+    return () => {
+      socket.off("orderDelivered");
+    };
   }, []);
 
   return (
@@ -56,6 +69,7 @@ const App: React.FunctionComponent = () => {
         <Route path="/orders/details/:orderId" element={<OrderDetailsPage />} />
         <Route path="/review/:productId" element={<ReviewForm />} />
       </Routes>
+      <DeliveryRatingDialog isOpen={isOpen} setIsOpen={setIsOpen} />
     </>
   );
 };

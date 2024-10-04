@@ -17,7 +17,7 @@ const initialState: deliveryState = {
   weeklyDataLoading: false,
   deliveryPerformanceData: null,
   Ratings: null,
-  Earnings: null
+  Earnings: null,
 };
 export const getRatings = createAsyncThunk(
   "delivery/ratings",
@@ -29,6 +29,23 @@ export const getRatings = createAsyncThunk(
       return response.data;
     } catch (error) {
       return rejectWithValue("Failed to fetch ratings ");
+    }
+  }
+);
+export const RateDeliveryBoy = createAsyncThunk(
+  "delivery/rate",
+  async (rating: number, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post(
+        "/delivery/rate",
+        { rating },
+        {
+          withCredentials: true,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue("failed to rate delivery boy ");
     }
   }
 );
@@ -137,9 +154,9 @@ const deliverySlice = createSlice({
     builder.addCase(getRatings.fulfilled, (state, action) => {
       state.Ratings = action.payload?.ratings;
     });
-    builder.addCase(getMyEarnings.fulfilled,(state,action)=>{
-      state.Earnings=action.payload?.DeliveryEarnings;
-    })
+    builder.addCase(getMyEarnings.fulfilled, (state, action) => {
+      state.Earnings = action.payload?.DeliveryEarnings;
+    });
   },
 });
 export const {} = deliverySlice.actions;

@@ -310,7 +310,10 @@ export default function Navbar() {
                   )}
                   {isAuthenticated && userInfo?.Role === "delivery_boy" && (
                     <DropdownMenuItem>
-                      <Link to="#" className="flex items-center gap-2">
+                      <Link
+                        to="/delivery-dashboard"
+                        className="flex items-center gap-2"
+                      >
                         <div className="h-4 w-4" />
                         <span>Dashboard</span>
                       </Link>
