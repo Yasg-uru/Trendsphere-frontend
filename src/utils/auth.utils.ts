@@ -1,9 +1,8 @@
 import Cookies from "js-cookie";
 import { JwtPayload, jwtDecode } from "jwt-decode";
 
-
 interface MyTokenPayload extends JwtPayload {
-  roles?: string[]; // Add roles property
+  role?: string; // Update this to be a single role
 }
 
 export const getTokenPayload = () => {
@@ -28,8 +27,7 @@ export const isTokenExpired = (): boolean => {
     return true; 
   }
 
-  
   const currentTime = Math.floor(Date.now() / 1000);
-
+  
   return payload.exp ? payload.exp < currentTime : true; 
 };
