@@ -4,11 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Breadcrumb,
-  BreadcrumbEllipsis,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import {
@@ -27,7 +25,7 @@ import {
 } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Search, Filter, RefreshCcw } from "lucide-react";
+import { Search, Filter, RefreshCcw, Star } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 import Loader from "@/helper/Loader";
 import { IProductFrontend } from "@/types/productState/product.type";
@@ -46,7 +44,7 @@ export default function ProductsPage() {
   const [sizes, setSizes] = useState<string[]>([]);
   const [minRating, setMinRating] = useState<number>(0);
   const [materials, setMaterials] = useState<string[]>([]);
-  const [isRefreshFunctionCalled, setISRefreshFunctionCalled] =
+  const [isRefreshFunctionCalled, setIsRefreshFunctionCalled] =
     useState<boolean>(false);
   const navigate = useNavigate();
   const [filters, setFilters] = useState({
@@ -54,30 +52,18 @@ export default function ProductsPage() {
     gender: "",
     childcategory: "",
     priceRange: [0, 200],
-    selectedBrands: [] as string[], // Updated to store selected brands
-    selectedColors: [] as string[], // Updated to store selected colors
-    selectedSizes: [] as string[], // Updated to store selected sizes
-    selectedMaterials: [] as string[], // Updated to store selected materials
+    selectedBrands: [] as string[],
+    selectedColors: [] as string[],
+    selectedSizes: [] as string[],
+    selectedMaterials: [] as string[],
     sustainabilityRating: 0,
   });
-  const handleCheckboxChange = (
-    filterKey:
-      | "selectedBrands"
-      | "selectedColors"
-      | "selectedSizes"
-      | "selectedMaterials",
-    value: string
-  ) => {
-    setFilters((prev) => {
-      const current = prev[filterKey] as string[];
-      const isSelected = current.includes(value);
-      const updated = isSelected
-        ? current.filter((item) => item !== value)
-        : [...current, value];
-      return { ...prev, [filterKey]: updated };
-    });
-  };
   const [showFilters, setShowFilters] = useState(false);
+
+  const dispatch = useAppDispatch();
+  const { toast } = useToast();
+  const location = useLocation();
+  const prevFiltersRef = useRef(filters);
 
   useEffect(() => {
     if (products.length > 0) {
@@ -120,25 +106,15 @@ export default function ProductsPage() {
         ...new Set(products.flatMap((product) => product.materials)),
       ];
       setMaterials(Materials);
-
-      // const MinRating = Math.min(
-      //   ...products.map((product) => product.sustainabilityRating)
-      // );
-      // setMinRating(MinRating);
     }
   }, [products]);
-  const dispatch = useAppDispatch();
-  const { toast } = useToast();
-  const prevFiltersRef = useRef(filters);
 
   useEffect(() => {
     if (JSON.stringify(prevFiltersRef.current) !== JSON.stringify(filters)) {
       const params = {
         childcategory: filters.childcategory,
-
         minPrice: filters.priceRange[0],
         maxPrice: filters.priceRange[1],
-
         brands: filters.selectedBrands,
         colors: filters.selectedColors,
         sizes: filters.selectedSizes,
@@ -154,12 +130,30 @@ export default function ProductsPage() {
         })
         .catch(() => {
           toast({
-            title: "Sorry No results found ",
+            title: "Sorry, no results found",
           });
         });
       prevFiltersRef.current = filters;
     }
-  }, [filters]);
+  }, [filters, dispatch, toast]);
+
+  const handleCheckboxChange = (
+    filterKey:
+      | "selectedBrands"
+      | "selectedColors"
+      | "selectedSizes"
+      | "selectedMaterials",
+    value: string
+  ) => {
+    setFilters((prev) => {
+      const current = prev[filterKey] as string[];
+      const isSelected = current.includes(value);
+      const updated = isSelected
+        ? current.filter((item) => item !== value)
+        : [...current, value];
+      return { ...prev, [filterKey]: updated };
+    });
+  };
 
   const handleFilterChange = (
     key: string,
@@ -168,34 +162,25 @@ export default function ProductsPage() {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
+  const handleRefresh = () => {
+    setIsRefreshFunctionCalled(true);
+    const { category, subcategory, childcategory } = location.state;
+    dispatch(ApplyFilter({ category, subcategory, childcategory }))
+      .then(() => {
+        toast({ title: "Refreshed Successfully" });
+      })
+      .catch(() => {
+        toast({ title: "Failed to refresh" });
+      })
+      .finally(() => {
+        setIsRefreshFunctionCalled(false);
+      });
+  };
+
   if (isLoading && !isRefreshFunctionCalled) {
     return <Loader />;
   }
-  const handleRefresh = () => {
-    setISRefreshFunctionCalled(true);
-    const { category, subcategory, childcategory } = location.state;
-    dispatch(
-      ApplyFilter({
-        category,
-        subcategory,
-        childcategory,
-      })
-    )
-      .then(() => {
-        toast({
-          title: "Refreshed Successfully",
-        });
-      })
-      .catch(() => {
-        toast({
-          title: "Failed to refresh",
-        });
-      })
-      .finally(() => {
-        setISRefreshFunctionCalled(false);
-      });
-  };
-  const location = useLocation();
+
   if (products.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
@@ -207,19 +192,22 @@ export default function ProductsPage() {
           className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
         >
           {isLoading ? (
-            <RefreshCcw className="h-6 w-6 animate-spin " />
+            <RefreshCcw className="h-6 w-6 animate-spin" />
           ) : (
-            "Refresh "
+            "Refresh"
           )}
         </Button>
       </div>
     );
   }
+
   return (
     <div className="min-h-screen bg-background text-foreground p-4">
       <div className="container mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">TrendSphere Products</h1>
+          <h1 className="text-3xl font-bold text-primary">
+            TrendSphere Products
+          </h1>
           <Button
             variant="outline"
             size="icon"
@@ -232,18 +220,23 @@ export default function ProductsPage() {
 
         <div className="flex flex-col md:flex-row gap-8">
           <aside
-            className={`w-full md:w-1/4 space-y-6 ${
+            className={`w-full md:w-1/4 space-y-6 bg-card p-6 rounded-lg shadow-md ${
               showFilters ? "block" : "hidden md:block"
             }`}
           >
             <div>
-              <Label htmlFor="search">Search</Label>
+              <Label
+                htmlFor="search"
+                className="text-lg font-semibold mb-2 block"
+              >
+                Search
+              </Label>
               <div className="relative">
-                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id="search"
                   placeholder="Search products..."
-                  className="pl-8"
+                  className="pl-10"
                   value={filters.search}
                   onChange={(e) => handleFilterChange("search", e.target.value)}
                 />
@@ -252,7 +245,12 @@ export default function ProductsPage() {
 
             {genders.length > 0 && (
               <div>
-                <Label htmlFor="gender">Gender</Label>
+                <Label
+                  htmlFor="gender"
+                  className="text-lg font-semibold mb-2 block"
+                >
+                  Gender
+                </Label>
                 <Select
                   value={filters.gender}
                   onValueChange={(value) => handleFilterChange("gender", value)}
@@ -273,7 +271,12 @@ export default function ProductsPage() {
             )}
 
             <div>
-              <Label htmlFor="childcategory">Category</Label>
+              <Label
+                htmlFor="childcategory"
+                className="text-lg font-semibold mb-2 block"
+              >
+                Category
+              </Label>
               <Select
                 value={filters.childcategory}
                 onValueChange={(value) =>
@@ -295,7 +298,9 @@ export default function ProductsPage() {
             </div>
 
             <div>
-              <Label>Price Range</Label>
+              <Label className="text-lg font-semibold mb-2 block">
+                Price Range
+              </Label>
               <Slider
                 min={minPrice}
                 max={maxPrice}
@@ -306,7 +311,7 @@ export default function ProductsPage() {
                 }
                 className="mt-2"
               />
-              <div className="flex justify-between mt-2">
+              <div className="flex justify-between mt-2 text-sm text-muted-foreground">
                 <span>${filters.priceRange[0]}</span>
                 <span>${filters.priceRange[1]}</span>
               </div>
@@ -343,6 +348,7 @@ export default function ProductsPage() {
                 ))}
               </div>
             </div>
+
             <div>
               <Label
                 htmlFor="color"
@@ -406,6 +412,7 @@ export default function ProductsPage() {
                 ))}
               </div>
             </div>
+
             <div>
               <Label
                 htmlFor="material"
@@ -439,7 +446,10 @@ export default function ProductsPage() {
             </div>
 
             <div>
-              <Label htmlFor="sustainabilityRating">
+              <Label
+                htmlFor="sustainabilityRating"
+                className="text-lg font-semibold mb-2 block"
+              >
                 Minimum Sustainability Rating
               </Label>
               <Select
@@ -463,8 +473,8 @@ export default function ProductsPage() {
             </div>
           </aside>
 
-          <section className="flex-1 ">
-            <Breadcrumb className="mb-10">
+          <section className="flex-1">
+            <Breadcrumb className="mb-6">
               <BreadcrumbList>
                 {location.state?.category && (
                   <>
@@ -474,7 +484,6 @@ export default function ProductsPage() {
                     <BreadcrumbSeparator />
                   </>
                 )}
-
                 {location.state?.subcategory && (
                   <>
                     <BreadcrumbItem>
@@ -485,7 +494,6 @@ export default function ProductsPage() {
                     <BreadcrumbSeparator />
                   </>
                 )}
-
                 {location.state?.childcategory && (
                   <>
                     <BreadcrumbItem>
@@ -506,45 +514,45 @@ export default function ProductsPage() {
                   onClick={() =>
                     navigate("/details", { state: { id: product._id } })
                   }
-                  className="cursor-pointer"
+                  className="cursor-pointer hover:shadow-lg transition-shadow duration-300"
                 >
-                  <CardHeader>
+                  <CardHeader className="p-0">
                     <img
                       src={product.defaultImage}
                       alt={product.name}
-                      className="w-full h-56 object-cover rounded-t-lg"
+                      className="w-full h-64 object-cover rounded-t-lg"
                     />
                   </CardHeader>
-                  <CardContent>
-                    <CardTitle className="text-lg">{product.name}</CardTitle>
-                    <p className="text-sm text-muted-foreground mt-2">
+                  <CardContent className="p-4">
+                    <CardTitle className="text-xl font-bold mb-2">
+                      {product.name}
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground mb-2">
                       {product.brand}
                     </p>
-                    <p className="font-bold mt-2">
+                    <p className="font-bold text-lg text-primary">
                       ${product.basePrice.toFixed(2)}
                     </p>
                   </CardContent>
-                  <CardFooter className="flex justify-between">
+                  <CardFooter className="flex justify-between items-center p-4 bg-secondary rounded-b-lg">
                     <div className="flex items-center">
-                      <span className="text-sm mr-2">Sustainability:</span>
+                      <span className="text-sm mr-2">Rating:</span>
                       {[...Array(5)].map((_, i) => (
-                        <span
+                        <Star
                           key={i}
-                          className={`text-lg ${
+                          className={`w-4 h-4 ${
                             i < product.sustainabilityRating
-                              ? "text-green-500"
+                              ? "text-yellow-400 fill-current"
                               : "text-gray-300"
                           }`}
-                        >
-                          ●
-                        </span>
+                        />
                       ))}
                     </div>
                     {/* <Button
                       variant="outline"
-                      className={`font-semibold transition-colors duration-200 dark:text-black dark:bg-white text-white bg-black`}
+                      className="font-semibold transition-colors duration-200 hover:bg-primary hover:text-primary-foreground"
                     >
-                      Add Cart
+                      View Details
                     </Button> */}
                   </CardFooter>
                 </Card>

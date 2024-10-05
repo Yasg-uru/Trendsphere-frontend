@@ -6,10 +6,7 @@ import { ShieldX, ArrowLeft, Home } from "lucide-react";
 export default function AccessDeniedPage() {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    document.title = "Access Denied";
-  }, []);
-
+  
   const handleGoBack = () => {
     navigate(-1);
   };
