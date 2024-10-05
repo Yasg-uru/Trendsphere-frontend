@@ -26,6 +26,8 @@ import { io } from "socket.io-client";
 import DeliveryBoyDashboard from "./pages/dashboard/delivery-boy-dashboard";
 import DeliveryRatingDialog from "./dialogs/delivery-boy-rating";
 import { useToast } from "./hooks/use-toast";
+import ProtectedRoute from "./helper/protected";
+import ErrorPage from "./pages/mainpages/somethings-went-wrong";
 export const socket = io("http://localhost:8000");
 const App: React.FunctionComponent = () => {
   const { toast } = useToast();
@@ -59,7 +61,7 @@ const App: React.FunctionComponent = () => {
       socket.disconnect();
     };
   }, []);
-
+  // ["user", "admin", "delivery_boy"]
   return (
     <>
       <Navbar />
@@ -70,19 +72,90 @@ const App: React.FunctionComponent = () => {
         <Route path="/verify/:email" element={<VerifyOTP />} />
         <Route path="/products" element={<Products />} />
         <Route path="/details" element={<Details />} />
-        <Route path="/mycarts" element={<Carts />} />
-        <Route path="/review/:productId" element={<AddReview />} />
-        <Route path="/order" element={<CreateOrder />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/delivery-dashboard" element={<DeliveryBoyDashboard />} />
-        <Route path="/create-product" element={<AddProduct />} />
-        <Route path="/u/orders" element={<Orders />} />
-        <Route path="/u/order/details/:orderId" element={<OrderDetail />} />
+        <Route
+          path="/mycarts"
+          element={
+            <ProtectedRoute allowedRoles={["user"]}>
+              <Carts />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/review/:productId"
+          element={
+            <ProtectedRoute allowedRoles={["user"]}>
+              <AddReview />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/order"
+          element={
+            <ProtectedRoute allowedRoles={["user"]}>
+              <CreateOrder />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/delivery-dashboard"
+          element={
+            <ProtectedRoute allowedRoles={["user"]}>
+              <DeliveryBoyDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/create-product"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <AddProduct />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/u/orders"
+          element={
+            <ProtectedRoute allowedRoles={["user"]}>
+              <Orders />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/u/order/details/:orderId"
+          element={
+            <ProtectedRoute allowedRoles={["user"]}>
+              <OrderDetail />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
-        <Route path="/orders" element={<OrdersAdmin />} />
-        <Route path="/orders/details/:orderId" element={<OrderDetailsPage />} />
+        <Route
+          path="/orders"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <OrdersAdmin />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/orders/details/:orderId"
+          element={
+            <ProtectedRoute allowedRoles={["admin", "delivery_boy"]}>
+              <OrderDetailsPage />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/review/:productId" element={<ReviewForm />} />
+        <Route path="*" element={<ErrorPage />} />
       </Routes>
       <DeliveryRatingDialog
         isOpen={isOpen}

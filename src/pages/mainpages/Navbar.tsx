@@ -157,10 +157,10 @@ export default function Navbar() {
                             {categoryItem.category}
                           </NavigationMenuTrigger>
                           <NavigationMenuContent className="cursor-pointer">
-                            <div className="grid w-[400px] p-2">
+                            <div className="grid w-[600px] p-4 gap-4">
                               {categoryItem.subcategories.map(
                                 (subcat, subIndex) => (
-                                  <div key={subIndex}>
+                                  <div key={subIndex} className="space-y-2">
                                     <NavigationMenuLink
                                       asChild
                                       onMouseEnter={() =>
@@ -172,26 +172,24 @@ export default function Navbar() {
                                     >
                                       <Link
                                         to="#"
-                                        className="group grid h-auto w-full items-center justify-start gap-1 rounded-md bg-background p-4 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+                                        className="block text-lg font-semibold text-primary hover:underline"
                                       >
-                                        <div className="text-sm font-medium leading-none group-hover:underline">
-                                          {subcat.subcategory}
-                                        </div>
+                                        {subcat.subcategory}
                                       </Link>
                                     </NavigationMenuLink>
                                     {subcat.childcategories &&
                                       subcat.childcategories.length > 0 && (
-                                        <div className="ml-4  flex flex-col ">
+                                        <div className="grid grid-cols-2 gap-2">
                                           {subcat.childcategories.map(
                                             (child, childIndex) => (
                                               <span
+                                                key={childIndex}
                                                 onClick={() =>
                                                   handleChildCategoryClick(
                                                     child
                                                   )
                                                 }
-                                                key={childIndex}
-                                                className="text-sm text-muted-foreground"
+                                                className="text-sm text-muted-foreground hover:text-primary hover:underline cursor-pointer"
                                               >
                                                 {child}
                                               </span>
