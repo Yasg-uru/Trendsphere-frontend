@@ -125,22 +125,26 @@ export default function Details() {
     }
   }, [location.state?.id]);
   useEffect(() => {
-    socket.on("stock-updated", (data: { productID: string }) => {
-      if (data.productID === selectedProductId) {
-        dispatch(getsingleProduct(location.state.id))
-          .then(() => {
-            toast({
-              title: "Successfully fetched product details",
+    socket.on(
+      "stock-updated",
+      (data: { productID: string; variantID: string }) => {
+        if (data.productID === selectedProductId) {
+          dispatch(getsingleProduct(location.state.id))
+            .then(() => {
+              toast({
+                title: "Successfully fetched product details",
+              });
+            })
+            .catch((error) => {
+              toast({
+                title: error,
+                variant: "destructive",
+              });
             });
-          })
-          .catch((error) => {
-            toast({
-              title: error,
-              variant: "destructive",
-            });
-          });
+          setSelectedVariantId(data.variantID);
+        }
       }
-    });
+    );
   }, [selectedProductId]);
   useEffect(() => {
     if (singleProduct) {
@@ -199,7 +203,7 @@ export default function Details() {
     }
   }, [singleProduct]);
 
-  if (isLoading || !singleProduct || !selectedProductId) return <Loader />;
+  if (isLoading || !singleProduct || !selectedProductId) return null;
 
   const selectedProduct = singleProduct;
   const selectedVariant =

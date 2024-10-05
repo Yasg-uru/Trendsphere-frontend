@@ -19,7 +19,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useAppDispatch } from "@/state-manager/hook";
 import { useToast } from "@/hooks/use-toast";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { GiveReview } from "@/state-manager/slices/productSlice";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -78,21 +78,27 @@ export default function AddReview() {
 
   const watchedImages = watch("images");
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const { productId } = useParams();
 
   const onSubmit = async (data: FormValues) => {
     console.log("this is a data :", data);
-    dispatch(GiveReview({ data, productId }))
+    dispatch(GiveReview({ data, productId })).unwrap()
       .then(() => {
         toast({
           title: "Successfully added review",
         });
+        setSubmitStatus("success");
+        setTimeout(() => {
+          navigate(-1);
+        }, 2000);
       })
       .catch((error) => {
         toast({
           title: error,
         });
+        setSubmitStatus("error");
       });
   };
   console.log("this is errors related to the validation :", errors);

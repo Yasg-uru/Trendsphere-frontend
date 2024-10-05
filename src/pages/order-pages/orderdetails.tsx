@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { replace, useParams } from "react-router-dom";
+import { replace, useNavigate, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 import { IOrder, RefundOrders } from "@/types/ordertypes/initialState";
 import { Button } from "@/components/ui/button";
@@ -75,6 +75,7 @@ type ReplacementFormValues = z.infer<typeof replacementSchema>;
 export default function OrderDetail() {
   const dispatch = useAppDispatch();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const { Myorders, isLoading } = useAppSelector((state) => state.order);
   const [order, setOrder] = useState<IOrder | null>(null);
   const [refundItems, setRefundItems] = useState<RefundOrders[]>([]);
@@ -406,6 +407,23 @@ export default function OrderDetail() {
                               Return
                             </Button>
                           )}
+                          {
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                navigate(`/review/${product.productId}`);
+                              }}
+                              disabled={order.orderStatus !== "delivered"}
+                              className={`transition-opacity ${
+                                order.orderStatus !== "delivered"
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
+                              } bg-green-600`}
+                            >
+                              ADD REVIEW
+                            </Button>
+                          }
                         </TableCell>
                       </TableRow>
                     ))}

@@ -71,7 +71,7 @@ const App: React.FunctionComponent = () => {
         <Route path="/products" element={<Products />} />
         <Route path="/details" element={<Details />} />
         <Route path="/mycarts" element={<Carts />} />
-        <Route path="/review" element={<AddReview />} />
+        <Route path="/review/:productId" element={<AddReview />} />
         <Route path="/order" element={<CreateOrder />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/delivery-dashboard" element={<DeliveryBoyDashboard />} />
