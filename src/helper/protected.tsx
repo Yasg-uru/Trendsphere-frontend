@@ -16,12 +16,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   useEffect(() => {
     const payload = getTokenPayload();
 
-    if (
-      isTokenExpired() ||
-      !payload ||
-      !allowedRoles.includes(payload.role || "")
-    ) {
+    if (isTokenExpired() || !payload) {
       navigate("/Sign-in");
+    } else if (!allowedRoles.includes(payload.role || "")) {
+      navigate("/access-denied");
     }
   }, [navigate, allowedRoles]);
 

@@ -28,6 +28,7 @@ import DeliveryRatingDialog from "./dialogs/delivery-boy-rating";
 import { useToast } from "./hooks/use-toast";
 import ProtectedRoute from "./helper/protected";
 import ErrorPage from "./pages/mainpages/somethings-went-wrong";
+import AccessDeniedPage from "./pages/mainpages/access-denied-page";
 export const socket = io("http://localhost:8000");
 const App: React.FunctionComponent = () => {
   const { toast } = useToast();
@@ -156,6 +157,7 @@ const App: React.FunctionComponent = () => {
         />
         <Route path="/review/:productId" element={<ReviewForm />} />
         <Route path="*" element={<ErrorPage />} />
+        <Route path="/access-denied" element={<AccessDeniedPage />} />
       </Routes>
       <DeliveryRatingDialog
         isOpen={isOpen}
