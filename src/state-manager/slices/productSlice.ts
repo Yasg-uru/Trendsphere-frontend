@@ -242,9 +242,9 @@ const productSlice = createSlice({
   name: "product",
   initialState,
   reducers: {
-    clearSearchedProducts(state){
-state.searchedProducts=[];
-    }
+    clearSearchedProducts(state) {
+      state.searchedProducts = [];
+    },
   },
   extraReducers(builder) {
     builder
@@ -309,6 +309,6 @@ state.searchedProducts=[];
       });
   },
 });
-export const {clearSearchedProducts}=productSlice.actions
+export const { clearSearchedProducts } = productSlice.actions;
 export default productSlice.reducer;
 export const {} = productSlice.actions;

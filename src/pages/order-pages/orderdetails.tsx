@@ -412,7 +412,7 @@ export default function OrderDetail() {
                               variant="outline"
                               size="sm"
                               onClick={() => {
-                                navigate(`/review/${product.productId}`);
+                                navigate(`/review/${product.productId._id}`);
                               }}
                               disabled={order.orderStatus !== "delivered"}
                               className={`transition-opacity ${
