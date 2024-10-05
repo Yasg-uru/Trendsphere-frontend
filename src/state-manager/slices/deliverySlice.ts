@@ -34,11 +34,11 @@ export const getRatings = createAsyncThunk(
 );
 export const RateDeliveryBoy = createAsyncThunk(
   "delivery/rate",
-  async (rating: number, { rejectWithValue }) => {
+  async (data:{rating: number;deliveryBoyID:string}, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.post(
-        "/delivery/rate",
-        { rating },
+      `/delivery/rate/${data.deliveryBoyID}`,
+        { rating:data.rating },
         {
           withCredentials: true,
         }

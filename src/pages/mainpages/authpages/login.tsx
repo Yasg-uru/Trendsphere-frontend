@@ -143,7 +143,10 @@ export default function SignInForm() {
           </p>
           <p className="text-sm text-muted-foreground mt-2">
             Forgot your password?{" "}
-            <Link to="/forgot-password" className="text-primary hover:underline">
+            <Link
+              to="/forgot-password"
+              className="text-primary hover:underline"
+            >
               Reset here
             </Link>
           </p>

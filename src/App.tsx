@@ -26,14 +26,24 @@ import { io } from "socket.io-client";
 import DeliveryBoyDashboard from "./pages/dashboard/delivery-boy-dashboard";
 import DeliveryRatingDialog from "./dialogs/delivery-boy-rating";
 import { useToast } from "./hooks/use-toast";
-const socket = io("http://localhost:8000", { withCredentials: true });
+const socket = io("http://localhost:8000");
 const App: React.FunctionComponent = () => {
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [deliveryBoyID,setDeliveryBoyID]=useState<string>("");
   const dispatch = useAppDispatch();
+  const { userInfo } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
-    socket.on("orderDelivered", (data: { message: string }) => {
+    socket.on("connect", () => {
+      if (userInfo?._id) {
+        socket.emit("register", userInfo?._id);
+        console.log("Socket connected and user registered:", userInfo?._id);
+      }
+    });
+    socket.on("orderDelivered", (data: { message: string ,deliveryBoyID:string}) => {
+      console.log("this is a data from the socket :", data);
+      setDeliveryBoyID(data.deliveryBoyID);
       setIsOpen(true);
       toast({
         title: data.message,
@@ -41,7 +51,9 @@ const App: React.FunctionComponent = () => {
     });
     dispatch(getUniqueCategories());
     return () => {
+      socket.off("connect");
       socket.off("orderDelivered");
+      socket.disconnect();
     };
   }, []);
 
@@ -69,7 +81,7 @@ const App: React.FunctionComponent = () => {
         <Route path="/orders/details/:orderId" element={<OrderDetailsPage />} />
         <Route path="/review/:productId" element={<ReviewForm />} />
       </Routes>
-      <DeliveryRatingDialog isOpen={isOpen} setIsOpen={setIsOpen} />
+      <DeliveryRatingDialog isOpen={isOpen} setIsOpen={setIsOpen} ID={deliveryBoyID}/>
     </>
   );
 };

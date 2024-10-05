@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { ArrowRight, Mail } from "lucide-react";
 
 export default function Home() {
+  
   const featuredCategories = [
     {
       name: "Summer Collection",
@@ -75,22 +76,23 @@ export default function Home() {
       <section className="mb-12">
         <h2 className="text-3xl font-bold mb-6">Featured Categories</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {featuredCategories.map((category, index) => (
-            <Link to="#" key={index} className="group">
-              <div className="relative h-60 rounded-lg overflow-hidden">
-                <img
-                  src={category.image}
-                  alt={category.name}
-                  className="group-hover:scale-105 transition-transform duration-200"
-                />
-                <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-                  <h3 className="dark:text-white text-xl font-semibold text-center">
-                    {category.name}
-                  </h3>
+          {featuredCategories.length > 0 &&
+            featuredCategories.map((category, index) => (
+              <Link to="#" key={index} className="group">
+                <div className="relative h-60 rounded-lg overflow-hidden">
+                  <img
+                    src={category.image}
+                    alt={category.name}
+                    className="group-hover:scale-105 transition-transform duration-200"
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                    <h3 className="dark:text-white text-xl font-semibold text-center">
+                      {category.name}
+                    </h3>
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            ))}
         </div>
       </section>
 

@@ -16,17 +16,19 @@ import { useToast } from "@/hooks/use-toast";
 interface props {
   isOpen: boolean;
   setIsOpen: (val: boolean) => void;
+  ID: string;
 }
 const DeliveryRatingDialog: React.FunctionComponent<props> = ({
   isOpen,
   setIsOpen,
+  ID,
 }) => {
   const [rating, setRating] = useState(0);
   const dispatch = useAppDispatch();
   const { toast } = useToast();
 
   const handleSubmit = () => {
-    dispatch(RateDeliveryBoy(rating))
+    dispatch(RateDeliveryBoy({ rating, deliveryBoyID: ID })).unwrap()
       .then(() => {
         toast({
           title: "Your rating added successfully",
@@ -48,9 +50,6 @@ const DeliveryRatingDialog: React.FunctionComponent<props> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline">Rate Delivery</Button>
-      </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Rate Your Delivery</DialogTitle>

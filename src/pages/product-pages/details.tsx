@@ -81,7 +81,7 @@ export default function Details() {
   };
   const isAlreadyExistInCart = () => {
     let isAlreadyExist = false;
-    if (carts.length > 0) {
+    if (carts && carts.length > 0) {
       isAlreadyExist = carts.some(
         (cart) =>
           cart.productId === selectedProductId &&
