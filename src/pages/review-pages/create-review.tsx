@@ -1,4 +1,4 @@
-"use client";
+
 
 import { useState, useRef } from "react";
 import { Star, Upload, X } from "lucide-react";
@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 import { uplaodReview } from "@/state-manager/slices/productSlice";
-import { useNavigate, useParams } from "react-router-dom";
+import {  useParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import Loader from "@/helper/Loader";
 
@@ -25,7 +25,7 @@ export default function ReviewForm() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dispatch = useAppDispatch();
   const { productId } = useParams();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const { toast } = useToast();
   const { isLoading } = useAppSelector((state) => state.product);
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {

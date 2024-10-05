@@ -4,7 +4,7 @@ import { FormValues } from "@/pages/product-pages/Review";
 import { ProductState } from "@/types/productState/productstate";
 
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios, { AxiosError } from "axios";
+import  { AxiosError } from "axios";
 interface productError {
   error: string;
 }

@@ -8,7 +8,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+
 } from "@/components/ui/dialog";
 import { useAppDispatch } from "@/state-manager/hook";
 import { RateDeliveryBoy } from "@/state-manager/slices/deliverySlice";

@@ -11,7 +11,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  // DialogTrigger,
 } from "@/components/ui/dialog";
 
 import {
@@ -32,15 +32,15 @@ import {
 } from "@/state-manager/slices/productSlice";
 import { useToast } from "@/hooks/use-toast";
 import {
-  CheckIcon,
+  // CheckIcon,
   MinusIcon,
   PlusIcon,
   ThumbsUp,
   TrashIcon,
 } from "lucide-react";
-import { selectProductsForOrder } from "@/types/ordertypes/initialState";
+// import { selectProductsForOrder } from "@/types/ordertypes/initialState";
 import { Input } from "@/components/ui/input";
-import Loader from "@/helper/Loader";
+// import Loader from "@/helper/Loader";
 import { useProductSelection } from "@/custom-hooks/select-unselect";
 import { GetCarts } from "@/state-manager/slices/authSlice";
 import { socket } from "@/App";
@@ -162,11 +162,11 @@ export default function Details() {
           )
         : false;
 
-      const discountedPrice = validDiscount
-        ? (initialVariant.price *
-            (singleProduct?.discount?.discountPercentage ?? 0)) /
-          100
-        : 0;
+      // const discountedPrice = validDiscount
+      //   ? (initialVariant.price *
+      //       (singleProduct?.discount?.discountPercentage ?? 0)) /
+      //     100
+      //   : 0;
 
       const initialProduct = {
         productId: singleProduct._id,
@@ -289,7 +289,7 @@ export default function Details() {
         })
         .catch((error) => {
           toast({
-            title: "Failed to add cart",
+            title: error,
           });
         });
     }

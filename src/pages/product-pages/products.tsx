@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,10 +28,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Search, Filter, RefreshCcw, Star } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 import Loader from "@/helper/Loader";
-import { IProductFrontend } from "@/types/productState/product.type";
+// import { IProductFrontend } from "@/types/productState/product.type";
 import { ApplyFilter } from "@/state-manager/slices/productSlice";
 import { useToast } from "@/hooks/use-toast";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import {  useLocation, useNavigate } from "react-router-dom";
 
 export default function ProductsPage() {
   const { isLoading, products } = useAppSelector((state) => state.product);
@@ -42,7 +42,7 @@ export default function ProductsPage() {
   const [brands, setBrands] = useState<string[]>([]);
   const [colors, setColors] = useState<string[]>([]);
   const [sizes, setSizes] = useState<string[]>([]);
-  const [minRating, setMinRating] = useState<number>(0);
+  // const [minRating, setMinRating] = useState<number>(0);
   const [materials, setMaterials] = useState<string[]>([]);
   const [isRefreshFunctionCalled, setIsRefreshFunctionCalled] =
     useState<boolean>(false);

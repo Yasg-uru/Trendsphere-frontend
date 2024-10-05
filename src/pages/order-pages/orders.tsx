@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
-import { useDebounce } from "@uidotdev/usehooks";
+// import { useDebounce } from "@uidotdev/usehooks";
 import {
   ChevronDown,
   ChevronUp,
@@ -31,13 +31,13 @@ import { searchOrders, userorders } from "@/state-manager/slices/orderSlice";
 import { useToast } from "@/hooks/use-toast";
 import Loader from "@/helper/Loader";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select";
 import {
   Popover,
   PopoverContent,
@@ -88,7 +88,7 @@ export default function Orders() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
 
-  const debouncedSearchTerm = useDebounce<string>(searchTerm, 500);
+  // const debouncedSearchTerm = useDebounce<string>(searchTerm, 500);
   const navigate = useNavigate();
   useEffect(() => {
     fetchOrders();

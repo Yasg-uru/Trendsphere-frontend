@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { replace, useNavigate, useParams } from "react-router-dom";
+import  { useEffect, useState } from "react";
+import {  useNavigate, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 import { IOrder, RefundOrders } from "@/types/ordertypes/initialState";
 import { Button } from "@/components/ui/button";
@@ -47,7 +47,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  // DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -60,9 +60,9 @@ import {
   userorders,
 } from "@/state-manager/slices/orderSlice";
 import Loader from "@/helper/Loader";
-import { title } from "process";
+// import { title } from "process";
 import { Checkbox } from "@/components/ui/checkbox";
-import { JSX } from "react/jsx-runtime";
+// import { JSX } from "react/jsx-runtime";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -85,7 +85,7 @@ export default function OrderDetail() {
   const [isOrderCanceling, setIsOrderCanceling] = useState<boolean>(false);
   const [isRefunding, setIsRefunding] = useState<boolean>(false);
   const [reason, setReason] = useState<string>("");
-  const role = "";
+  // const role = "";
   const { orderId } = useParams();
   const form = useForm<ReplacementFormValues>({
     resolver: zodResolver(replacementSchema),
@@ -265,7 +265,7 @@ export default function OrderDetail() {
         });
       });
   };
-  const processReplaceRequest = () => {
+  // const processReplaceRequest = () => {
     // dispatch(processReplacement())
     //   .then(() => {
     //     toast({
@@ -278,7 +278,7 @@ export default function OrderDetail() {
     //       variant: "destructive",
     //     });
     //   });
-  };
+  // };
   return (
     <div className="flex justify-center items-center min-h-screen bg-background p-4">
       <Card className="w-full max-w-4xl mx-auto shadow-lg">

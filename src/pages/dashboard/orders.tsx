@@ -21,7 +21,7 @@ import { useToast } from "@/hooks/use-toast";
 import { filtersOrders } from "@/state-manager/slices/orderSlice";
 import { OrderQueryParams } from "@/types/ordertypes/initialState";
 import { useDebounce } from "@uidotdev/usehooks";
-import { useFetcher, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Loader from "@/helper/Loader";
 
 export default function OrdersAdmin() {

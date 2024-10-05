@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { SVGProps, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -9,24 +10,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { Separator } from "@/components/ui/separator";
 import {
   AlertCircle,
   CheckCircle,
-  Package,
-  Truck,
+  // Package,
+  // Truck,
   CreditCard,
   MapPin,
-  RefreshCcw,
   ArrowLeft,
 } from "lucide-react";
 import {
@@ -34,11 +26,11 @@ import {
   orderproduct,
   OrderProductWithProduct,
 } from "@/types/ordertypes/initialState";
-import { replace, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 import Loader from "@/helper/Loader";
-import orderSlice, {
-  filtersOrders,
+import {
+  // filtersOrders,
   GetSingleOrder,
   processReplacement,
   processReturnItems,
@@ -105,9 +97,9 @@ export default function OrderDetailsPage() {
 
   const { orderId } = useParams<{ orderId: string }>();
   const [orderStatus, setOrderStatus] = useState<string>("pending");
-  const [refundStatus, setRefundStatus] = useState<string>("Not Requested");
-  const [replacementStatus, setReplacementStatus] =
-    useState<string>("Not Requested");
+  // const [refundStatus, setRefundStatus] = useState<string>("Not Requested");
+  // const [replacementStatus, setReplacementStatus] =
+  useState<string>("Not Requested");
   const [selectedReason, setSelectedReason] = useState("");
   const [otherReason, setOtherReason] = useState("");
   const [isOrderCancelling, setIsOrderCancelling] = useState<boolean>(false);
@@ -150,13 +142,13 @@ export default function OrderDetailsPage() {
       setOrder(singleOrder);
       setOrderStatus(singleOrder.orderStatus ?? "pending");
 
-      if (singleOrder.products?.[0]?.refund?.requested) {
-        setRefundStatus("Requested");
-      }
+      // if (singleOrder.products?.[0]?.refund?.requested) {
+      //   setRefundStatus("Requested");
+      // }
 
-      if (singleOrder.products?.[0]?.replacement?.requested) {
-        setReplacementStatus("Requested");
-      }
+      // if (singleOrder.products?.[0]?.replacement?.requested) {
+      //   setReplacementStatus("Requested");
+      // }
     }
   }, [singleOrder]);
   const form = useForm<StatusFormValues>({

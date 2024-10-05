@@ -1,19 +1,19 @@
-import { configureStore, combineReducers, Middleware } from "@reduxjs/toolkit";
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
-import authSlice, { Logout } from "./slices/authSlice";
+import authSlice from "./slices/authSlice";
 import productSlice from "./slices/productSlice";
 import orderSlice from "./slices/orderSlice";
 import deliverySlice from "./slices/deliverySlice";
-import Cookies from "js-cookie";
-import { isTokenExpired } from "@/utils/auth.utils";
-const tokenValidationMiddleware: Middleware = (store) => (next) => (action) => {
-  const token = Cookies.get("token");
-  if (!token || isTokenExpired()) {
-    store.dispatch(Logout() as any);
-  }
-  return next(action);
-};
+// import Cookies from "js-cookie";
+// import { isTokenExpired } from "@/utils/auth.utils";
+// const tokenValidationMiddleware: Middleware = (store) => (next) => (action) => {
+//   const token = Cookies.get("token");
+//   if (!token || isTokenExpired()) {
+//     store.dispatch(Logout() as any);
+//   }
+//   return next(action);
+// };
 const persistConfig = {
   key: "root",
   storage,

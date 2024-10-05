@@ -1,35 +1,31 @@
+ /* eslint-disable */ 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { SiQuantcast, SiRazorpay } from "react-icons/si";
+import {  SiRazorpay } from "react-icons/si";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-  CardFooter,
+  // CardFooter,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Check,
-  ChevronDown,
+  // Check,
+  // ChevronDown,
   Edit2,
   MapPin,
   Plus,
   ShieldCheck,
   Truck,
-  CreditCard,
+  // CreditCard,
   DollarSign,
   ShoppingBag,
   Percent,
@@ -37,8 +33,7 @@ import {
 import { motion } from "framer-motion";
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 import {
-  useFetcher,
-  useFormAction,
+ 
   useLocation,
   useNavigate,
 } from "react-router-dom";
@@ -69,7 +64,7 @@ import {
   orderDataType,
   selectProductsForOrder,
 } from "@/types/ordertypes/initialState";
-import { IProductFrontend } from "@/types/productState/product.type";
+// import { IProductFrontend } from "@/types/productState/product.type";
 import { createOrder, verifyOrder } from "@/state-manager/slices/orderSlice";
 import { getProductByIds } from "@/state-manager/slices/productSlice";
 
@@ -122,11 +117,11 @@ export default function CreateOrder() {
   const [orderSummaryDetails, setOrderSummayDetails] = useState<orderDetails[]>(
     []
   );
-  const [couponCode, setCouponCode] = useState<string>("");
+  const [couponCode] = useState<string>("");
   const [TotalPrice, SetTotalPrice] = useState<number>(0);
   const [finalPrice, setFinalPrice] = useState<number>(0);
   const [discountPrice, setDiscountPrice] = useState<number>(0);
-  const [isLoadingProduct, setIsLoadingProduct] = useState<boolean>(true);
+  // const [isLoadingProduct, setIsLoadingProduct] = useState<boolean>(true);
   console.log(
     "this is a vlaue of the selected address after change ",
     selectedAddress
@@ -147,7 +142,7 @@ export default function CreateOrder() {
         })
         .catch((error) => {
           toast({
-            // title: error,
+            title: error,
             variant: "destructive",
           });
           return;
@@ -349,15 +344,12 @@ export default function CreateOrder() {
     setIsModalOpen(true);
   };
 
-  const items = [
-    { name: "Trendy T-Shirt", price: 29.99, quantity: 2 },
-    { name: "Designer Jeans", price: 89.99, quantity: 1 },
-  ];
+  
 
-  const totalPrice = items.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
+  // const totalPrice = items.reduce(
+  //   (sum, item) => sum + item.price * item.quantity,
+  //   0
+  // );
 
   const handleNextStep = () => {
     setCurrentStep((prev) => Math.min(prev + 1, 4));
