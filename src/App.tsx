@@ -26,11 +26,11 @@ import { io } from "socket.io-client";
 import DeliveryBoyDashboard from "./pages/dashboard/delivery-boy-dashboard";
 import DeliveryRatingDialog from "./dialogs/delivery-boy-rating";
 import { useToast } from "./hooks/use-toast";
-const socket = io("http://localhost:8000");
+export const socket = io("http://localhost:8000");
 const App: React.FunctionComponent = () => {
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [deliveryBoyID,setDeliveryBoyID]=useState<string>("");
+  const [deliveryBoyID, setDeliveryBoyID] = useState<string>("");
   const dispatch = useAppDispatch();
   const { userInfo } = useAppSelector((state) => state.auth);
 
@@ -41,14 +41,17 @@ const App: React.FunctionComponent = () => {
         console.log("Socket connected and user registered:", userInfo?._id);
       }
     });
-    socket.on("orderDelivered", (data: { message: string ,deliveryBoyID:string}) => {
-      console.log("this is a data from the socket :", data);
-      setDeliveryBoyID(data.deliveryBoyID);
-      setIsOpen(true);
-      toast({
-        title: data.message,
-      });
-    });
+    socket.on(
+      "orderDelivered",
+      (data: { message: string; deliveryBoyID: string }) => {
+        console.log("this is a data from the socket :", data);
+        setDeliveryBoyID(data.deliveryBoyID);
+        setIsOpen(true);
+        toast({
+          title: data.message,
+        });
+      }
+    );
     dispatch(getUniqueCategories());
     return () => {
       socket.off("connect");
@@ -81,7 +84,11 @@ const App: React.FunctionComponent = () => {
         <Route path="/orders/details/:orderId" element={<OrderDetailsPage />} />
         <Route path="/review/:productId" element={<ReviewForm />} />
       </Routes>
-      <DeliveryRatingDialog isOpen={isOpen} setIsOpen={setIsOpen} ID={deliveryBoyID}/>
+      <DeliveryRatingDialog
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        ID={deliveryBoyID}
+      />
     </>
   );
 };

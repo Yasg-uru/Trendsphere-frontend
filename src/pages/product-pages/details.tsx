@@ -43,6 +43,7 @@ import { Input } from "@/components/ui/input";
 import Loader from "@/helper/Loader";
 import { useProductSelection } from "@/custom-hooks/select-unselect";
 import { GetCarts } from "@/state-manager/slices/authSlice";
+import { socket } from "@/App";
 
 export default function Details() {
   const { toast } = useToast();
@@ -123,7 +124,24 @@ export default function Details() {
         });
     }
   }, [location.state?.id]);
-
+  useEffect(() => {
+    socket.on("stock-updated", (data: { productID: string }) => {
+      if (data.productID === selectedProductId) {
+        dispatch(getsingleProduct(location.state.id))
+          .then(() => {
+            toast({
+              title: "Successfully fetched product details",
+            });
+          })
+          .catch((error) => {
+            toast({
+              title: error,
+              variant: "destructive",
+            });
+          });
+      }
+    });
+  }, [selectedProductId]);
   useEffect(() => {
     if (singleProduct) {
       setSelectedProductId(singleProduct._id);
