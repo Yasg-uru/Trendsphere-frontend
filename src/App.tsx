@@ -110,7 +110,7 @@ const App: React.FunctionComponent = () => {
         <Route
           path="/delivery-dashboard"
           element={
-            <ProtectedRoute allowedRoles={["delivery_boy"]}>
+            <ProtectedRoute allowedRoles={["delivery_boy", "admin"]}>
               <DeliveryBoyDashboard />
             </ProtectedRoute>
           }
@@ -144,7 +144,7 @@ const App: React.FunctionComponent = () => {
         <Route
           path="/orders"
           element={
-            <ProtectedRoute allowedRoles={["delivery_boy"]}>
+            <ProtectedRoute allowedRoles={["delivery_boy", "admin"]}>
               <OrdersAdmin />
             </ProtectedRoute>
           }

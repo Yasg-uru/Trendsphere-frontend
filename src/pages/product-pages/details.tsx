@@ -34,6 +34,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   // CheckIcon,
   MinusIcon,
+  Plus,
   PlusIcon,
   ThumbsUp,
   TrashIcon,
@@ -388,6 +389,14 @@ export default function Details() {
                 : selectedProduct.reviews.length}
               )
             </span>
+          </div>
+          <div className="flex flex-center gap-2 mt-2 mb-2">
+            {selectedProduct.loyalityPoints > 0 ? (
+              <span className="loyalty-points-text flex ">
+                <Plus className=" text-green-500" />
+                Loyalty Points: {selectedProduct.loyalityPoints}
+              </span>
+            ) : null}
           </div>
           <div className="flex items-center gap-2">
             <span className="text-3xl font-bold">

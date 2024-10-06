@@ -191,8 +191,8 @@ export const GetSingleOrder = createAsyncThunk(
   "order/getsingle",
   async (orderId: string, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get(`/order/single/${orderId}`,{
-        withCredentials:true
+      const response = await axiosInstance.get(`/order/single/${orderId}`, {
+        withCredentials: true,
       });
       return response.data;
     } catch (error) {
