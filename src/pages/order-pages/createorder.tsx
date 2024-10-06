@@ -456,7 +456,9 @@ export default function CreateOrder() {
 
       <div className="grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-8">
-          <Card className={enabledSteps[0] ? "" : "opacity-50 pointer-events-none"}>
+          <Card
+            className={enabledSteps[0] ? "" : "opacity-50 pointer-events-none"}
+          >
             <CardHeader className="bg-primary text-primary-foreground">
               <CardTitle className="text-xl font-bold">1. LOGIN</CardTitle>
             </CardHeader>
@@ -475,7 +477,9 @@ export default function CreateOrder() {
             </CardContent>
           </Card>
 
-          <Card className={enabledSteps[1] ? "" : "opacity-50 pointer-events-none"}>
+          <Card
+            className={enabledSteps[1] ? "" : "opacity-50 pointer-events-none"}
+          >
             <CardHeader className="bg-primary text-primary-foreground">
               <CardTitle className="text-xl font-bold">
                 2. DELIVERY ADDRESS
@@ -538,7 +542,9 @@ export default function CreateOrder() {
             </CardContent>
           </Card>
 
-          <Card className={enabledSteps[2] ? "" : "opacity-50 pointer-events-none"}>
+          <Card
+            className={enabledSteps[2] ? "" : "opacity-50 pointer-events-none"}
+          >
             <CardHeader className="bg-primary text-primary-foreground">
               <CardTitle className="text-xl font-bold">
                 3. DELIVERY OPTIONS
@@ -568,7 +574,9 @@ export default function CreateOrder() {
             </CardContent>
           </Card>
 
-          <Card className={enabledSteps[3] ? "" : "opacity-50 pointer-events-none"}>
+          <Card
+            className={enabledSteps[3] ? "" : "opacity-50 pointer-events-none"}
+          >
             <CardHeader className="bg-primary text-primary-foreground">
               <CardTitle className="text-xl font-bold">
                 4. PAYMENT OPTIONS
@@ -639,8 +647,8 @@ export default function CreateOrder() {
             <Button onClick={handlePrevStep} disabled={currentStep === 1}>
               Previous
             </Button>
-            <Button 
-              onClick={handleNextStep} 
+            <Button
+              onClick={handleNextStep}
               disabled={currentStep === 4 || !enabledSteps[currentStep - 1]}
             >
               {currentStep === 4 ? "Place Order" : "Next"}

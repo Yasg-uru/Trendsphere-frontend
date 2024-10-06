@@ -1,4 +1,4 @@
-import  { useEffect } from "react";
+import { useEffect } from "react";
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -35,7 +35,6 @@ import {
   TrendingUp,
   DollarSign,
   MapPin,
- 
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
@@ -73,7 +72,7 @@ export default function DeliveryBoyDashboard() {
     Earnings,
   } = useAppSelector((state) => state.delivery);
   const { toast } = useToast();
-
+  console.log("this is a weekly data :", WeeklyData);
   useEffect(() => {
     dispatch(GetMyDeliveries())
       .unwrap()
@@ -114,6 +113,13 @@ export default function DeliveryBoyDashboard() {
     dispatch(getRatings());
     dispatch(getMyEarnings());
   }, []);
+  const updatedWeeklyData = {
+    ...WeeklyData,
+    datasets: WeeklyData.datasets.map((dataset) => ({
+      ...dataset,
+      data: [...dataset.data], // Spread to avoid mutating the original data
+    })),
+  };
 
   if (isLoading) {
     return <Loader />;
@@ -239,7 +245,7 @@ export default function DeliveryBoyDashboard() {
               <CardTitle>Weekly Delivery Performance</CardTitle>
             </CardHeader>
             <CardContent>
-              {!weeklyDataLoading && <Bar data={WeeklyData} />}
+              {!weeklyDataLoading && <Bar data={updatedWeeklyData} />}
             </CardContent>
           </Card>
 

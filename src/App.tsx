@@ -110,7 +110,7 @@ const App: React.FunctionComponent = () => {
         <Route
           path="/delivery-dashboard"
           element={
-            <ProtectedRoute allowedRoles={["user"]}>
+            <ProtectedRoute allowedRoles={["delivery_boy"]}>
               <DeliveryBoyDashboard />
             </ProtectedRoute>
           }
@@ -144,7 +144,7 @@ const App: React.FunctionComponent = () => {
         <Route
           path="/orders"
           element={
-            <ProtectedRoute allowedRoles={["admin"]}>
+            <ProtectedRoute allowedRoles={["delivery_boy"]}>
               <OrdersAdmin />
             </ProtectedRoute>
           }
@@ -161,7 +161,7 @@ const App: React.FunctionComponent = () => {
         <Route path="*" element={<ErrorPage />} />
         <Route path="/access-denied" element={<AccessDeniedPage />} />
       </Routes>
-      <Footer/>
+      <Footer />
       <DeliveryRatingDialog
         isOpen={isOpen}
         setIsOpen={setIsOpen}
