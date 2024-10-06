@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowRight, Mail, Star } from "lucide-react";
@@ -6,6 +6,7 @@ import { useEffect } from "react";
 
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 import {
+  ApplyFilter,
   getcategories,
   getUniqueCategories,
   TopRatedProducts,
@@ -42,10 +43,48 @@ export default function Home() {
         });
       });
   }, []);
+  const navigate = useNavigate();
+  const handleClick = (category: string) => {
+    const params = {
+      category,
+    };
+    dispatch(ApplyFilter(params))
+      .then(() => {
+        toast({
+          title: "Fetched successfully your results ",
+        });
+        if (location.pathname === "/products") {
+          navigate("/products", {
+            replace: true,
+            state: {
+              category,
+              subcategory: "",
+              childcategory: "",
+              fromNavbar: true,
+            },
+          });
+        } else {
+          navigate("/products", {
+            state: {
+              category,
+              subcategory: "",
+              childcategory: "",
+              fromNavbar: true,
+            },
+          });
+        }
+      })
+      .catch(() => {
+        toast({
+          title: "Failed to Fetch results",
+        });
+      });
+  };
 
   if (isLoading) {
     return <Loader />;
   }
+
   console.log("this is a top rated products :", topRated);
   return (
     <div className="container mx-auto px-4 py-8">
@@ -78,7 +117,12 @@ export default function Home() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {MappedCategoriesWithImage.length > 0 &&
             MappedCategoriesWithImage.map((category, index) => (
-              <Link to="#" key={index} className="group">
+              <Link
+                to="#"
+                key={index}
+                className="group"
+                onClick={() => handleClick(category.category)}
+              >
                 <div className="relative h-60 rounded-lg overflow-hidden">
                   <img
                     src={category.image}
@@ -102,7 +146,13 @@ export default function Home() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {topRated.length > 0 &&
             topRated.map((product, index) => (
-              <div key={index} className="group">
+              <div
+                key={index}
+                className="group"
+                onClick={() =>
+                  navigate("/details", { state: { id: product._id } })
+                }
+              >
                 <div className="relative h-72 rounded-lg overflow-hidden mb-2">
                   <img
                     src={product.defaultImage}
@@ -124,8 +174,6 @@ export default function Home() {
             ))}
         </div>
       </section>
-
-      
     </div>
   );
 }

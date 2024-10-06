@@ -26,17 +26,15 @@ import { useTheme } from "@/components/theme-provider";
 export default function Footer() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [language, setLanguage] = useState("English");
-const {theme,setTheme}=useTheme()
+  const { theme, setTheme } = useTheme();
   const toggleDarkMode = () => {
-    if(theme==='dark'){
-        setIsDarkMode(true)
+    if (theme === "dark") {
+      setIsDarkMode(true);
     }
-     if (theme==='light'){
-        setIsDarkMode(false)
+    if (theme === "light") {
+      setIsDarkMode(false);
     }
-    setTheme(theme === "dark" ? "light" : "dark")
-   
-   
+    setTheme(theme === "dark" ? "light" : "dark");
   };
 
   const scrollToTop = () => {
@@ -44,7 +42,9 @@ const {theme,setTheme}=useTheme()
   };
 
   return (
+    
     <footer className="bg-background text-foreground pt-16 pb-8">
+        <Separator className="my-8" />
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div>
