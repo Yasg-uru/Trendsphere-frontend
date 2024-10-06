@@ -125,31 +125,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Newsletter Signup */}
-      <section className="bg-secondary rounded-lg p-8 mb-12">
-        <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-4">
-            Join the TrendSphere Community
-          </h2>
-          <p className="text-muted-foreground mb-6">
-            Subscribe to our newsletter for sustainable fashion tips and
-            exclusive offers.
-          </p>
-          <form className="flex flex-col sm:flex-row gap-4">
-            <Input
-              type="email"
-              placeholder="Enter your email"
-              className="flex-grow"
-            />
-            <Button
-              type="submit"
-              className="whitespace-nowrap bg-primary text-primary-foreground hover:bg-primary/90"
-            >
-              Subscribe <Mail className="ml-2 h-5 w-5" />
-            </Button>
-          </form>
-        </div>
-      </section>
+      
     </div>
   );
 }

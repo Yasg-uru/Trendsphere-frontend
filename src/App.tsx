@@ -29,6 +29,7 @@ import { useToast } from "./hooks/use-toast";
 import ProtectedRoute from "./helper/protected";
 import ErrorPage from "./pages/mainpages/somethings-went-wrong";
 import AccessDeniedPage from "./pages/mainpages/access-denied-page";
+import Footer from "./pages/mainpages/footer";
 // export const socket = io("https://trendshpere-backend-2.onrender.com");
 export const socket = io("http://localhost:8000");
 const App: React.FunctionComponent = () => {
@@ -160,6 +161,7 @@ const App: React.FunctionComponent = () => {
         <Route path="*" element={<ErrorPage />} />
         <Route path="/access-denied" element={<AccessDeniedPage />} />
       </Routes>
+      <Footer/>
       <DeliveryRatingDialog
         isOpen={isOpen}
         setIsOpen={setIsOpen}
