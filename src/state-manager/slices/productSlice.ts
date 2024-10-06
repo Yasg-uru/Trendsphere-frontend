@@ -36,6 +36,7 @@ const initialState: ProductState = {
   singleProduct: null,
   productsByIds: [],
   topRated: [],
+  MappedCategoriesWithImage: [],
 };
 
 export const getUniqueCategories = createAsyncThunk(
@@ -45,6 +46,7 @@ export const getUniqueCategories = createAsyncThunk(
       const response = await axiosInstance.get(`/product/catgory-unique`, {
         withCredentials: true,
       });
+      console.log(`this is response of unique categories`, response.data);
       return response.data;
     } catch (err) {
       let error: AxiosError = err as AxiosError;
@@ -239,6 +241,17 @@ export const getsingleProduct = createAsyncThunk(
     }
   }
 );
+export const getcategories = createAsyncThunk(
+  "product/getcategories",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(`/product/categories`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue("failed to get single  order");
+    }
+  }
+);
 export const createProduct = createAsyncThunk(
   "product/create",
   async (formdata: ProductFormValues, { rejectWithValue }) => {
@@ -263,13 +276,25 @@ const productSlice = createSlice({
   extraReducers(builder) {
     builder
       .addCase(getUniqueCategories.fulfilled, (state, action) => {
-        state.isLoading = false;
         state.categories = action.payload?.categories;
+
+        state.isLoading = false;
       })
       .addCase(getUniqueCategories.rejected, (state) => {
         state.isLoading = false;
       })
       .addCase(getUniqueCategories.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(getcategories.fulfilled, (state, action) => {
+        state.MappedCategoriesWithImage = action.payload?.categoriesMapped;
+
+        state.isLoading = false;
+      })
+      .addCase(getcategories.rejected, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(getcategories.pending, (state) => {
         state.isLoading = true;
       })
       .addCase(ApplyFilter.pending, (state) => {
@@ -323,7 +348,7 @@ const productSlice = createSlice({
       })
       .addCase(TopRatedProducts.fulfilled, (state, action) => {
         state.topRated = action.payload?.products;
-        console.log("this is a action payload of top rated :",action.payload)
+        console.log("this is a action payload of top rated :", action.payload);
         state.isLoading = false;
       })
       .addCase(TopRatedProducts.rejected, (state) => {

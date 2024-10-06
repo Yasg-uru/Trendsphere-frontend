@@ -5,7 +5,11 @@ import { ArrowRight, Mail, Star } from "lucide-react";
 import { useEffect } from "react";
 
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
-import { TopRatedProducts } from "@/state-manager/slices/productSlice";
+import {
+  getcategories,
+  getUniqueCategories,
+  TopRatedProducts,
+} from "@/state-manager/slices/productSlice";
 import { useToast } from "@/hooks/use-toast";
 import Loader from "@/helper/Loader";
 
@@ -13,8 +17,18 @@ export default function Home() {
   const dispatch = useAppDispatch();
   const { toast } = useToast();
 
-  const { topRated=[], isLoading } = useAppSelector((state) => state.product);
+  const {
+    topRated = [],
+    isLoading,
+    MappedCategoriesWithImage = [],
+  } = useAppSelector((state) => state.product);
+  console.log("this is a mapped categories:", MappedCategoriesWithImage);
   useEffect(() => {
+    dispatch(getcategories()).catch((error) => {
+      toast({
+        title: error,
+      });
+    });
     dispatch(TopRatedProducts())
       .unwrap()
       .then(() => {
@@ -28,55 +42,7 @@ export default function Home() {
         });
       });
   }, []);
-  const productCategories = [
-    {
-      name: "Clothing",
-      image:
-        "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/clothing-category-2Xq8kNGd3TvI8k9wSxDtD6ALwxLHFQ.jpg",
-    },
-    {
-      name: "Footwear",
-      image:
-        "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/footwear-category-0Iy8Kx9aqHwvbB7tnbQQbLUBDqxmFQ.jpg",
-    },
-    {
-      name: "Accessories",
-      image:
-        "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/accessories-category-rnPHCEWEGBXEFELMXx5Hs7Ue3YNQFQ.jpg",
-    },
-    {
-      name: "Sportswear",
-      image:
-        "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/sportswear-category-Hy8Ue3YNQFQ7tnbQQbLUBDqxmFQ.jpg",
-    },
-  ];
 
-  const topRatedProducts = [
-    {
-      name: "Eco-Friendly T-Shirt",
-      price: 29.99,
-      rating: 4.8,
-      image: "/placeholder.svg?height=300&width=300",
-    },
-    {
-      name: "Sustainable Denim Jeans",
-      price: 79.99,
-      rating: 4.7,
-      image: "/placeholder.svg?height=300&width=300",
-    },
-    {
-      name: "Recycled Polyester Jacket",
-      price: 89.99,
-      rating: 4.9,
-      image: "/placeholder.svg?height=300&width=300",
-    },
-    {
-      name: "Organic Cotton Dress",
-      price: 59.99,
-      rating: 4.6,
-      image: "/placeholder.svg?height=300&width=300",
-    },
-  ];
   if (isLoading) {
     return <Loader />;
   }
@@ -110,22 +76,23 @@ export default function Home() {
       <section className="mb-12">
         <h2 className="text-3xl font-bold mb-6">Product Categories</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {productCategories.map((category, index) => (
-            <Link to="#" key={index} className="group">
-              <div className="relative h-60 rounded-lg overflow-hidden">
-                <img
-                  src={category.image}
-                  alt={category.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                />
-                <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-                  <h3 className="text-white text-xl font-semibold text-center">
-                    {category.name}
-                  </h3>
+          {MappedCategoriesWithImage.length > 0 &&
+            MappedCategoriesWithImage.map((category, index) => (
+              <Link to="#" key={index} className="group">
+                <div className="relative h-60 rounded-lg overflow-hidden">
+                  <img
+                    src={category.image}
+                    alt={category.category}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                    <h3 className="text-white text-xl font-semibold text-center">
+                      {category.category}
+                    </h3>
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            ))}
         </div>
       </section>
 
