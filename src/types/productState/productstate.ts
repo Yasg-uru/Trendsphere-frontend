@@ -7,6 +7,7 @@ export interface ProductState {
   searchedProducts:IProductFrontend[];
   singleProduct:IProductFrontend | null;
   productsByIds:IProductFrontend[];
+  topRated:IProductFrontend[];
 }
 interface Subcategory {
   subcategory: string;

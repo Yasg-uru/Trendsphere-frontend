@@ -4,7 +4,7 @@ import { FormValues } from "@/pages/product-pages/Review";
 import { ProductState } from "@/types/productState/productstate";
 
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import  { AxiosError } from "axios";
+import { AxiosError } from "axios";
 interface productError {
   error: string;
 }
@@ -35,6 +35,7 @@ const initialState: ProductState = {
   searchedProducts: [],
   singleProduct: null,
   productsByIds: [],
+  topRated: [],
 };
 
 export const getUniqueCategories = createAsyncThunk(
@@ -60,6 +61,19 @@ export const ApplyFilter = createAsyncThunk(
         withCredentials: true,
         params: FilterParams,
       });
+      return response.data;
+    } catch (err) {
+      let error: AxiosError = err as AxiosError;
+      const ResponseData = error.response?.data as productError;
+      return rejectWithValue(ResponseData.error);
+    }
+  }
+);
+export const TopRatedProducts = createAsyncThunk(
+  "product/topratedproducts",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(`/product/top-rated`);
       return response.data;
     } catch (err) {
       let error: AxiosError = err as AxiosError;
@@ -306,6 +320,17 @@ const productSlice = createSlice({
       })
       .addCase(createProduct.fulfilled, (state) => {
         state.isLoading = false;
+      })
+      .addCase(TopRatedProducts.fulfilled, (state, action) => {
+        state.topRated = action.payload?.products;
+        console.log("this is a action payload of top rated :",action.payload)
+        state.isLoading = false;
+      })
+      .addCase(TopRatedProducts.rejected, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(TopRatedProducts.pending, (state) => {
+        state.isLoading = true;
       });
   },
 });
