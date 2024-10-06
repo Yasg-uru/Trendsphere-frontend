@@ -21,15 +21,22 @@ import {
   Sun,
   ChevronUp,
 } from "lucide-react";
+import { useTheme } from "@/components/theme-provider";
 
 export default function Footer() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [language, setLanguage] = useState("English");
-
+const {theme,setTheme}=useTheme()
   const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-    // Here you would typically toggle a class on the body or update a context
-    document.body.classList.toggle("dark");
+    if(theme==='dark'){
+        setIsDarkMode(true)
+    }
+     if (theme==='light'){
+        setIsDarkMode(false)
+    }
+    setTheme(theme === "dark" ? "light" : "dark")
+   
+   
   };
 
   const scrollToTop = () => {
