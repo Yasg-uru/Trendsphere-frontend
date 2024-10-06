@@ -246,6 +246,7 @@ export default function Navbar() {
                 </Button>
               </Link>
             )}
+            <Button variant={"outline"}>{userInfo?.loyaltyPoints}</Button>
             <Button
               variant="ghost"
               size="icon"

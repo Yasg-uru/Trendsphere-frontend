@@ -31,10 +31,11 @@ import {
   Percent,
   Unlock,
   Lock,
+  Gift,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useFormAction, useLocation, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -120,12 +121,15 @@ export default function CreateOrder() {
   const [finalPrice, setFinalPrice] = useState<number>(0);
   const [discountPrice, setDiscountPrice] = useState<number>(0);
   const [enabledSteps, setEnabledSteps] = useState([true, false, false, false]);
+  const [usedLoyaltyPoints, setUsedLoyaltyPoints] = useState(0);
+  const [loyaltyDiscount, setLoyaltyDiscount] = useState(0);
   // const [isLoadingProduct, setIsLoadingProduct] = useState<boolean>(true);
   console.log(
     "this is a vlaue of the selected address after change ",
     selectedAddress
   );
   console.log("this is a selected ids array :", selectedProductIds);
+  const loyalityPoints = userInfo?.loyaltyPoints ? userInfo.loyaltyPoints : 0;
   const handleCreateOrder = () => {
     console.log(
       "This is the order data inside the handleCreateOrder function:",
@@ -284,7 +288,7 @@ export default function CreateOrder() {
         });
       }
     }
-  }, [expressDelivery, selectedProducts, selectedAddress]);
+  }, [expressDelivery, selectedProducts, selectedAddress, usedLoyaltyPoints]);
   const calculatePrice = () => {
     let discount = 0;
     let totalPrice = 0;
@@ -293,18 +297,30 @@ export default function CreateOrder() {
       discount += product.discount * product.quantity;
       totalPrice += product.priceAtPurchase * product.quantity;
     });
+    const loyaltyDiscount = usedLoyaltyPoints / 10; // 10 points = 1 rupee
+    setLoyaltyDiscount(loyaltyDiscount);
     if (expressDelivery) {
-      setFinalPrice(totalPrice - discount + 10);
+      setFinalPrice(totalPrice - discount - loyaltyDiscount + 10);
     } else {
-      setFinalPrice(totalPrice - discount);
+      setFinalPrice(totalPrice - discount - loyaltyDiscount);
     }
     SetTotalPrice(totalPrice);
     setDiscountPrice(discount);
-    // console.log("this is a discount price after calculation :",discount)
     console.log("this is a total price after calculation :", totalPrice);
     console.log("this is a final price after calculation :", discount);
   };
-
+  const handleLoyaltyPointsChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const points = Math.min(Number(e.target.value), loyalityPoints);
+    setUsedLoyaltyPoints(points);
+    if (orderData) {
+      setOrderData({
+        ...orderData,
+        loyaltyPointsUsed: points,
+      });
+    }
+  };
   const onSubmit = (data: ChangeAddressForm) => {
     console.log("this is a new address data :", data);
 
@@ -694,7 +710,39 @@ export default function CreateOrder() {
               </div>
             </CardContent>
           </Card>
-
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-xl font-bold flex items-center">
+                <Gift className="mr-2 h-5 w-5" />
+                LOYALTY POINTS
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span>Available Points</span>
+                  <span className="font-bold">{loyalityPoints}</span>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="use-points">Use Points</Label>
+                  <Input
+                    id="use-points"
+                    type="number"
+                    min="0"
+                    max={loyalityPoints}
+                    value={usedLoyaltyPoints}
+                    onChange={handleLoyaltyPointsChange}
+                  />
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>Points Discount</span>
+                  <span className="font-bold text-green-600">
+                    - ${loyaltyDiscount.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
           <Card>
             <CardHeader>
               <CardTitle className="text-xl font-bold flex items-center">
