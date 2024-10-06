@@ -22,7 +22,7 @@ export default function Carts() {
   const {
     selectedProducts,
     unSelectedProducts,
-    
+
     setSelectedProducts,
     setUnselectedProducts,
   } = useProductSelection();
