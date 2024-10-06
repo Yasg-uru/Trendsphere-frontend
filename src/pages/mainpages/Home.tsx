@@ -8,7 +8,6 @@ import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 import {
   ApplyFilter,
   getcategories,
- 
   TopRatedProducts,
 } from "@/state-manager/slices/productSlice";
 import { useToast } from "@/hooks/use-toast";
