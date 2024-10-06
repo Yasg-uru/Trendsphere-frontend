@@ -59,7 +59,8 @@ export default function ProductsPage() {
     sustainabilityRating: 0,
   });
   const [showFilters, setShowFilters] = useState(false);
-
+  const [isPriceFilterEnabled, setIsPriceFilterEnabled] =
+    useState<boolean>(false);
   const dispatch = useAppDispatch();
   const { toast } = useToast();
   const location = useLocation();
@@ -140,7 +141,14 @@ export default function ProductsPage() {
       prevFiltersRef.current = filters;
     }
   }, [filters, location.state]);
-
+  const handlePriceFilterToggle = () => {
+    setIsPriceFilterEnabled(!isPriceFilterEnabled);
+    if (!isPriceFilterEnabled) {
+      setFilters((prev) => ({ ...prev, priceRange: [minPrice, maxPrice] }));
+    } else {
+      setFilters((prev) => ({ ...prev, priceRange: [0, maxPrice] }));
+    }
+  };
   const handleCheckboxChange = (
     filterKey:
       | "selectedBrands"
@@ -302,9 +310,16 @@ export default function ProductsPage() {
             </div>
 
             <div>
-              <Label className="text-lg font-semibold mb-2 block">
-                Price Range
-              </Label>
+              <div className="flex justify-between items-center mb-2">
+                <Label className="text-lg font-semibold">Price Range</Label>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handlePriceFilterToggle}
+                >
+                  {isPriceFilterEnabled ? "Disable" : "Enable"}
+                </Button>
+              </div>
               <Slider
                 min={minPrice}
                 max={maxPrice}
@@ -313,6 +328,7 @@ export default function ProductsPage() {
                 onValueChange={(value) =>
                   handleFilterChange("priceRange", value)
                 }
+                disabled={!isPriceFilterEnabled}
                 className="mt-2"
               />
               <div className="flex justify-between mt-2 text-sm text-muted-foreground">

@@ -127,12 +127,12 @@ export default function Navbar() {
   const handleChildCategoryClick = (childCategory: string) => {
     setCurrentChildCategory(childCategory);
   };
-  const handleSubCategoryClick=()=>{
-    if(!currentSubCategory && !currentCategory){
-      return ;
+  const handleSubCategoryClick = () => {
+    if (!currentSubCategory && !currentCategory) {
+      return;
     }
     handleClick();
-  }
+  };
   useEffect(() => {
     if (!currentChildCategory) {
       return;
