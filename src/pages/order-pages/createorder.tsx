@@ -29,6 +29,8 @@ import {
   DollarSign,
   ShoppingBag,
   Percent,
+  Unlock,
+  Lock,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
@@ -117,6 +119,7 @@ export default function CreateOrder() {
   const [TotalPrice, SetTotalPrice] = useState<number>(0);
   const [finalPrice, setFinalPrice] = useState<number>(0);
   const [discountPrice, setDiscountPrice] = useState<number>(0);
+  const [enabledSteps, setEnabledSteps] = useState([true, false, false, false]);
   // const [isLoadingProduct, setIsLoadingProduct] = useState<boolean>(true);
   console.log(
     "this is a vlaue of the selected address after change ",
@@ -346,11 +349,20 @@ export default function CreateOrder() {
   // );
 
   const handleNextStep = () => {
-    setCurrentStep((prev) => Math.min(prev + 1, 4));
+    if (currentStep < 4) {
+      setCurrentStep((prev) => prev + 1);
+      setEnabledSteps((prev) => {
+        const newEnabled = [...prev];
+        newEnabled[currentStep] = true;
+        return newEnabled;
+      });
+    }
   };
 
   const handlePrevStep = () => {
-    setCurrentStep((prev) => Math.max(prev - 1, 1));
+    if (currentStep > 1) {
+      setCurrentStep((prev) => prev - 1);
+    }
   };
 
   // my implementation
@@ -420,6 +432,11 @@ export default function CreateOrder() {
                 }`}
               >
                 {step}
+                {enabledSteps[step - 1] ? (
+                  <Unlock className="h-4 w-4 ml-1" />
+                ) : (
+                  <Lock className="h-4 w-4 ml-1" />
+                )}
               </div>
               <span className="text-sm mt-2">
                 {["Login", "Address", "Delivery", "Payment"][step - 1]}
@@ -439,7 +456,7 @@ export default function CreateOrder() {
 
       <div className="grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-8">
-          <Card className={currentStep === 1 ? "" : "opacity-50"}>
+          <Card className={enabledSteps[0] ? "" : "opacity-50 pointer-events-none"}>
             <CardHeader className="bg-primary text-primary-foreground">
               <CardTitle className="text-xl font-bold">1. LOGIN</CardTitle>
             </CardHeader>
@@ -458,7 +475,7 @@ export default function CreateOrder() {
             </CardContent>
           </Card>
 
-          <Card className={currentStep === 2 ? "" : "opacity-50"}>
+          <Card className={enabledSteps[1] ? "" : "opacity-50 pointer-events-none"}>
             <CardHeader className="bg-primary text-primary-foreground">
               <CardTitle className="text-xl font-bold">
                 2. DELIVERY ADDRESS
@@ -521,7 +538,7 @@ export default function CreateOrder() {
             </CardContent>
           </Card>
 
-          <Card className={currentStep === 3 ? "" : "opacity-50"}>
+          <Card className={enabledSteps[2] ? "" : "opacity-50 pointer-events-none"}>
             <CardHeader className="bg-primary text-primary-foreground">
               <CardTitle className="text-xl font-bold">
                 3. DELIVERY OPTIONS
@@ -551,7 +568,7 @@ export default function CreateOrder() {
             </CardContent>
           </Card>
 
-          <Card className={currentStep === 4 ? "" : "opacity-50"}>
+          <Card className={enabledSteps[3] ? "" : "opacity-50 pointer-events-none"}>
             <CardHeader className="bg-primary text-primary-foreground">
               <CardTitle className="text-xl font-bold">
                 4. PAYMENT OPTIONS
@@ -622,8 +639,11 @@ export default function CreateOrder() {
             <Button onClick={handlePrevStep} disabled={currentStep === 1}>
               Previous
             </Button>
-            <Button onClick={handleNextStep} disabled={currentStep === 4}>
-              Next
+            <Button 
+              onClick={handleNextStep} 
+              disabled={currentStep === 4 || !enabledSteps[currentStep - 1]}
+            >
+              {currentStep === 4 ? "Place Order" : "Next"}
             </Button>
           </div>
         </div>
