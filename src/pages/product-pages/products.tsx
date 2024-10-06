@@ -31,7 +31,7 @@ import Loader from "@/helper/Loader";
 // import { IProductFrontend } from "@/types/productState/product.type";
 import { ApplyFilter } from "@/state-manager/slices/productSlice";
 import { useToast } from "@/hooks/use-toast";
-import {  useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function ProductsPage() {
   const { isLoading, products } = useAppSelector((state) => state.product);

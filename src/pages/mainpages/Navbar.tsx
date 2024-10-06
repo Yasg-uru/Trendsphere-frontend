@@ -124,8 +124,13 @@ export default function Navbar() {
 
   const handleChildCategoryClick = (childCategory: string) => {
     setCurrentChildCategory(childCategory);
-    handleClick();
   };
+  useEffect(() => {
+    if (!currentChildCategory) {
+      return;
+    }
+    handleClick();
+  }, [currentChildCategory]);
   const { carts } = useAppSelector((state) => state.auth);
   if (isLoading) {
     return <Loader />;

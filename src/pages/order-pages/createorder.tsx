@@ -1,10 +1,10 @@
- /* eslint-disable */ 
+/* eslint-disable */
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {  SiRazorpay } from "react-icons/si";
+import { SiRazorpay } from "react-icons/si";
 import {
   Card,
   CardContent,
@@ -32,11 +32,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
-import {
- 
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -344,8 +340,6 @@ export default function CreateOrder() {
     setIsModalOpen(true);
   };
 
-  
-
   // const totalPrice = items.reduce(
   //   (sum, item) => sum + item.price * item.quantity,
   //   0
@@ -644,30 +638,31 @@ export default function CreateOrder() {
             </CardHeader>
             <CardContent>
               <div className="grid gap-6">
-                {orderSummaryDetails.map((item, index) => (
-                  <Card
-                    key={index}
-                    className="flex items-center justify-between gap-4 p-4"
-                  >
-                    <img
-                      src={item?.firstImage || ""}
-                      alt=""
-                      width={64}
-                      height={64}
-                      className="rounded-md"
-                      style={{ aspectRatio: "64/64", objectFit: "cover" }}
-                    />
-                    <div className="flex-1 grid gap-1">
-                      <div className="font-medium">{item?.variantInfo}</div>
-                      <div className="text-sm text-muted-foreground">
-                        Quantity: {item.quantity}
+                {orderSummaryDetails.length > 0 &&
+                  orderSummaryDetails.map((item, index) => (
+                    <Card
+                      key={index}
+                      className="flex items-center justify-between gap-4 p-4"
+                    >
+                      <img
+                        src={item?.firstImage || ""}
+                        alt=""
+                        width={64}
+                        height={64}
+                        className="rounded-md"
+                        style={{ aspectRatio: "64/64", objectFit: "cover" }}
+                      />
+                      <div className="flex-1 grid gap-1">
+                        <div className="font-medium">{item?.variantInfo}</div>
+                        <div className="text-sm text-muted-foreground">
+                          Quantity: {item?.quantity}
+                        </div>
                       </div>
-                    </div>
-                    <div className="font-medium">
-                      ${(item.price * item.quantity).toFixed(2)}
-                    </div>
-                  </Card>
-                ))}
+                      <div className="font-medium">
+                        ${(item?.price * item?.quantity).toFixed(2)}
+                      </div>
+                    </Card>
+                  ))}
               </div>
             </CardContent>
           </Card>
