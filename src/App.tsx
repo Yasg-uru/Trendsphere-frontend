@@ -30,8 +30,8 @@ import ProtectedRoute from "./helper/protected";
 import ErrorPage from "./pages/mainpages/somethings-went-wrong";
 import AccessDeniedPage from "./pages/mainpages/access-denied-page";
 import Footer from "./pages/mainpages/footer";
-// export const socket = io("https://trendshpere-backend-2.onrender.com");
-export const socket = io("http://localhost:8000");
+export const socket = io("https://trendshpere-backend-2.onrender.com");
+// export const socket = io("http://localhost:8000");
 const App: React.FunctionComponent = () => {
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState<boolean>(false);
