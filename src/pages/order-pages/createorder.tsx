@@ -48,7 +48,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { AddnewAddress, UpdateAddress } from "@/state-manager/slices/authSlice";
+import { AddnewAddress, getuserData, UpdateAddress } from "@/state-manager/slices/authSlice";
 import Loader from "@/helper/Loader";
 import {
   Select,
@@ -187,6 +187,7 @@ export default function CreateOrder() {
                 toast({
                   title: "Your payment verified successfully",
                 });
+                dispatch(getuserData())
               })
               .catch((error) => {
                 toast({
@@ -281,7 +282,7 @@ export default function CreateOrder() {
           products: selectedProducts,
           address,
           couponCode,
-          loyaltyPointsUsed: 0,
+          loyaltyPointsUsed: usedLoyaltyPoints,
           isGiftOrder: false,
           giftMessage: "",
           deliveryType: expressDelivery ? "express" : "standard",

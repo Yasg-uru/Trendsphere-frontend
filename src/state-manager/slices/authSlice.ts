@@ -169,6 +169,24 @@ export const removeCart = createAsyncThunk(
     }
   }
 );
+export const getuserData = createAsyncThunk(
+  "auth/userdata",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get("", {
+        withCredentials: true,
+      });
+      return response.data;
+    } catch (err) {
+      let error: AxiosError = err as AxiosError;
+      const ResponseData = error.response?.data as authError;
+
+      return rejectWithValue(
+        ResponseData.error || "error in fetching user data"
+      );
+    }
+  }
+);
 export const ForgotPassword = createAsyncThunk(
   "auth/forgot-password",
   async (formdata: { email: string }, { rejectWithValue }) => {
@@ -289,6 +307,9 @@ const authSlice = createSlice({
     builder.addCase(ResetuserPassword.rejected, (state) => {
       state.isLoading = false;
     });
+    builder.addCase(getuserData.fulfilled,(state,action)=>{
+      state.userInfo=action.payload.user;
+    })
   },
 });
 export const {} = authSlice.actions;
