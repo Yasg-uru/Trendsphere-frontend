@@ -90,7 +90,7 @@ export default function Navbar() {
               category: currentCategory,
               subcategory: currentSubCategory,
               childcategory: currentChildCategory,
-              fromNavbar:true
+              fromNavbar: true,
             },
           });
         }
@@ -127,6 +127,12 @@ export default function Navbar() {
   const handleChildCategoryClick = (childCategory: string) => {
     setCurrentChildCategory(childCategory);
   };
+  const handleSubCategoryClick=()=>{
+    if(!currentSubCategory && !currentCategory){
+      return ;
+    }
+    handleClick();
+  }
   useEffect(() => {
     if (!currentChildCategory) {
       return;
@@ -175,7 +181,7 @@ export default function Navbar() {
                                           subcat.subcategory
                                         )
                                       }
-                                      onClick={handleClick}
+                                      onClick={handleSubCategoryClick}
                                     >
                                       <Link
                                         to="#"

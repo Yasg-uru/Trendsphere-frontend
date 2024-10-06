@@ -111,7 +111,6 @@ export default function ProductsPage() {
 
   useEffect(() => {
     if (location.state?.fromNavbar) {
-      // Reset fromNavbar to false after first render to ensure filters apply correctly on further interactions
       location.state.fromNavbar = false;
       return;
     }
