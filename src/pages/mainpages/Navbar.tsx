@@ -81,6 +81,7 @@ export default function Navbar() {
               category: currentCategory,
               subcategory: currentSubCategory,
               childcategory: currentChildCategory,
+              fromNavbar: true,
             },
           });
         } else {
@@ -89,6 +90,7 @@ export default function Navbar() {
               category: currentCategory,
               subcategory: currentSubCategory,
               childcategory: currentChildCategory,
+              fromNavbar:true
             },
           });
         }
@@ -113,13 +115,13 @@ export default function Navbar() {
   const { userInfo } = useAppSelector((state) => state.auth);
   const handleCategoryHover = (category: string) => {
     setCurrentCategory(category);
-    setCurrentSubCategory(""); // Clear subcategory and child category on new category hover
+    setCurrentSubCategory("");
     setCurrentChildCategory("");
   };
 
   const handleSubcategoryHover = (subcategory: string) => {
     setCurrentSubCategory(subcategory);
-    setCurrentChildCategory(""); // Clear child category on new subcategory hover
+    setCurrentChildCategory("");
   };
 
   const handleChildCategoryClick = (childCategory: string) => {

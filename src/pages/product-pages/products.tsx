@@ -110,6 +110,11 @@ export default function ProductsPage() {
   }, [products]);
 
   useEffect(() => {
+    if (location.state?.fromNavbar) {
+      // Reset fromNavbar to false after first render to ensure filters apply correctly on further interactions
+      location.state.fromNavbar = false;
+      return;
+    }
     if (JSON.stringify(prevFiltersRef.current) !== JSON.stringify(filters)) {
       const params = {
         childcategory: filters.childcategory,
@@ -135,7 +140,7 @@ export default function ProductsPage() {
         });
       prevFiltersRef.current = filters;
     }
-  }, [filters, dispatch, toast]);
+  }, [filters, location.state]);
 
   const handleCheckboxChange = (
     filterKey:
