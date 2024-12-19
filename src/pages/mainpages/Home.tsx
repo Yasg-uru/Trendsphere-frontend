@@ -29,18 +29,18 @@ export default function Home() {
         title: error,
       });
     });
-    dispatch(TopRatedProducts())
-      .unwrap()
-      .then(() => {
-        toast({
-          title: "top rated products fetched successfully",
-        });
-      })
-      .catch((error) => {
-        toast({
-          title: error,
-        });
-      });
+    // dispatch(TopRatedProducts())
+    //   .unwrap()
+    //   .then(() => {
+    //     toast({
+    //       title: "top rated products fetched successfully",
+    //     });
+    //   })
+    //   .catch((error) => {
+    //     toast({
+    //       title: error,
+    //     });
+    //   });
   }, []);
   const navigate = useNavigate();
   const handleClick = (category: string) => {
@@ -140,7 +140,7 @@ export default function Home() {
       </section>
 
       {/* Top Rated Products */}
-      <section className="mb-12">
+      {/* <section className="mb-12">
         <h2 className="text-3xl font-bold mb-6">Top Rated Products</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {topRated.length > 0 &&
@@ -172,7 +172,7 @@ export default function Home() {
               </div>
             ))}
         </div>
-      </section>
+      </section> */}
     </div>
   );
 }

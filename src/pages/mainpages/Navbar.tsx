@@ -157,7 +157,7 @@ export default function Navbar() {
               <div className="container px-4 md:px-6 py-4">
                 <NavigationMenu>
                   <NavigationMenuList>
-                    {categories.length > 0 &&
+                    {categories && categories.length > 0 &&
                       categories.map((categoryItem, index) => (
                         <NavigationMenuItem
                           key={index}
