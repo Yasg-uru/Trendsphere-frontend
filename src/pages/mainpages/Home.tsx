@@ -1,14 +1,14 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
-import { ArrowRight, Star } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useEffect } from "react";
 
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 import {
   ApplyFilter,
   getcategories,
-  TopRatedProducts,
+  
 } from "@/state-manager/slices/productSlice";
 import { useToast } from "@/hooks/use-toast";
 import Loader from "@/helper/Loader";
