@@ -30,6 +30,7 @@ import ProtectedRoute from "./helper/protected";
 import ErrorPage from "./pages/mainpages/somethings-went-wrong";
 import AccessDeniedPage from "./pages/mainpages/access-denied-page";
 import Footer from "./pages/mainpages/footer";
+import DeliveryTracker from "./pages/LocationPages/delivery-boy";
 // export const socket = io("https://trendshpere-backend-2.onrender.com");
 export const socket = io("http://localhost:8000");
 const App: React.FunctionComponent = () => {
@@ -154,6 +155,14 @@ const App: React.FunctionComponent = () => {
           element={
             <ProtectedRoute allowedRoles={["admin", "delivery_boy"]}>
               <OrderDetailsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/live-location"
+          element={
+            <ProtectedRoute allowedRoles={["admin", "delivery_boy"]}>
+              <DeliveryTracker />
             </ProtectedRoute>
           }
         />

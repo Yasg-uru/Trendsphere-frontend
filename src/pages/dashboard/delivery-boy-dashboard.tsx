@@ -145,7 +145,8 @@ export default function DeliveryBoyDashboard() {
           </Link>
           <a
             className="flex items-center mt-2 py-2 px-4  hover:bg-background"
-            href="#"
+            href="/live-location"
+            target="_blank"
           >
             <MapPin className="mr-3 h-5 w-5" />
             Route Planner

@@ -1,6 +1,7 @@
 declare global {
     interface Window {
-     Razorpay:any
+     Razorpay:any;
+     initMap:any;
     }
   }
   export {}
