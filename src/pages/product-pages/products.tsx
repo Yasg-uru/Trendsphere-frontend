@@ -25,16 +25,16 @@ import {
 } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Search, Filter, RefreshCcw, Star } from "lucide-react";
-import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
+import { Search, Filter, RefreshCcw, Star } from 'lucide-react';
+import { useAppSelector } from "@/state-manager/hook";
 import Loader from "@/helper/Loader";
-// import { IProductFrontend } from "@/types/productState/product.type";
-import { ApplyFilter } from "@/state-manager/slices/productSlice";
+import { IProductFrontend } from "@/types/productState/product.type";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation, useNavigate } from "react-router-dom";
 
 export default function ProductsPage() {
   const { isLoading, products } = useAppSelector((state) => state.product);
+  const [filteredProducts, setFilteredProducts] = useState<IProductFrontend[]>([]);
   const [genders, setGenders] = useState<string[]>([]);
   const [childcategory, setChildcategory] = useState<string[]>([]);
   const [maxPrice, setMaxPrice] = useState<number>(0);
@@ -42,10 +42,8 @@ export default function ProductsPage() {
   const [brands, setBrands] = useState<string[]>([]);
   const [colors, setColors] = useState<string[]>([]);
   const [sizes, setSizes] = useState<string[]>([]);
-  // const [minRating, setMinRating] = useState<number>(0);
   const [materials, setMaterials] = useState<string[]>([]);
-  const [isRefreshFunctionCalled, setIsRefreshFunctionCalled] =
-    useState<boolean>(false);
+  const [isRefreshFunctionCalled, setIsRefreshFunctionCalled] = useState<boolean>(false);
   const navigate = useNavigate();
   const [filters, setFilters] = useState({
     search: "",
@@ -59,9 +57,7 @@ export default function ProductsPage() {
     sustainabilityRating: 0,
   });
   const [showFilters, setShowFilters] = useState(false);
-  const [isPriceFilterEnabled, setIsPriceFilterEnabled] =
-    useState<boolean>(false);
-  const dispatch = useAppDispatch();
+  const [isPriceFilterEnabled, setIsPriceFilterEnabled] = useState<boolean>(false);
   const { toast } = useToast();
   const location = useLocation();
   const prevFiltersRef = useRef(filters);
@@ -107,6 +103,8 @@ export default function ProductsPage() {
         ...new Set(products.flatMap((product) => product.materials)),
       ];
       setMaterials(Materials);
+
+      setFilteredProducts(products);
     }
   }, [products]);
 
@@ -116,31 +114,92 @@ export default function ProductsPage() {
       return;
     }
     if (JSON.stringify(prevFiltersRef.current) !== JSON.stringify(filters)) {
-      const params = {
-        childcategory: filters.childcategory,
-        minPrice: filters.priceRange[0],
-        maxPrice: filters.priceRange[1],
-        brands: filters.selectedBrands,
-        colors: filters.selectedColors,
-        sizes: filters.selectedSizes,
-        minRating: filters.sustainabilityRating,
-        materials: filters.selectedMaterials,
-      };
-
-      dispatch(ApplyFilter(params))
-        .then(() => {
-          toast({
-            title: "Filter applied successfully",
-          });
-        })
-        .catch(() => {
-          toast({
-            title: "Sorry, no results found",
-          });
-        });
+      applyFilters();
       prevFiltersRef.current = filters;
     }
   }, [filters, location.state]);
+
+  const applyFilters = () => {
+    let filtered = [...products];
+
+    // Apply search filter
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      filtered = filtered.filter(
+        (product) =>
+          product.name.toLowerCase().includes(searchLower) ||
+          product.description.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Apply gender filter
+    if (filters.gender && filters.gender !== "all") {
+      filtered = filtered.filter((product) => product.gender === filters.gender);
+    }
+
+    // Apply childcategory filter
+    if (filters.childcategory && filters.childcategory !== "all") {
+      filtered = filtered.filter(
+        (product) => product.childcategory === filters.childcategory
+      );
+    }
+
+    // Apply price range filter
+    if (isPriceFilterEnabled) {
+      filtered = filtered.filter(
+        (product) =>
+          product.basePrice >= filters.priceRange[0] &&
+          product.basePrice <= filters.priceRange[1]
+      );
+    }
+
+    // Apply brand filter
+    if (filters.selectedBrands.length > 0) {
+      filtered = filtered.filter((product) =>
+        filters.selectedBrands.includes(product.brand)
+      );
+    }
+
+    // Apply color filter
+    if (filters.selectedColors.length > 0) {
+      filtered = filtered.filter((product) =>
+        product.variants.some((variant) =>
+          filters.selectedColors.includes(variant.color)
+        )
+      );
+    }
+
+    // Apply size filter
+    if (filters.selectedSizes.length > 0) {
+      filtered = filtered.filter((product) =>
+        product.variants.some((variant) =>
+          variant.size.some((s) => filters.selectedSizes.includes(s.size))
+        )
+      );
+    }
+
+    // Apply material filter
+    if (filters.selectedMaterials.length > 0) {
+      filtered = filtered.filter((product) =>
+        product.materials.some((material) =>
+          filters.selectedMaterials.includes(material)
+        )
+      );
+    }
+
+    // Apply sustainability rating filter
+    if (filters.sustainabilityRating > 0) {
+      filtered = filtered.filter(
+        (product) => product.sustainabilityRating >= filters.sustainabilityRating
+      );
+    }
+
+    setFilteredProducts(filtered);
+    toast({
+      title: filtered.length > 0 ? "Filters applied successfully" : "No results found",
+    });
+  };
+
   const handlePriceFilterToggle = () => {
     setIsPriceFilterEnabled(!isPriceFilterEnabled);
     if (!isPriceFilterEnabled) {
@@ -149,6 +208,7 @@ export default function ProductsPage() {
       setFilters((prev) => ({ ...prev, priceRange: [0, maxPrice] }));
     }
   };
+
   const handleCheckboxChange = (
     filterKey:
       | "selectedBrands"
@@ -176,24 +236,27 @@ export default function ProductsPage() {
 
   const handleRefresh = () => {
     setIsRefreshFunctionCalled(true);
-    const { category, subcategory, childcategory } = location.state;
-    dispatch(ApplyFilter({ category, subcategory, childcategory }))
-      .then(() => {
-        toast({ title: "Refreshed Successfully" });
-      })
-      .catch(() => {
-        toast({ title: "Failed to refresh" });
-      })
-      .finally(() => {
-        setIsRefreshFunctionCalled(false);
-      });
+    setFilters({
+      search: "",
+      gender: "",
+      childcategory: "",
+      priceRange: [minPrice, maxPrice],
+      selectedBrands: [],
+      selectedColors: [],
+      selectedSizes: [],
+      selectedMaterials: [],
+      sustainabilityRating: 0,
+    });
+    setFilteredProducts(products);
+    setIsRefreshFunctionCalled(false);
+    toast({ title: "Filters reset successfully" });
   };
 
   if (isLoading && !isRefreshFunctionCalled) {
     return <Loader />;
   }
 
-  if (products.length === 0) {
+  if (filteredProducts.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
         <div className="text-red-500 font-bold text-xl mb-4">
@@ -236,7 +299,7 @@ export default function ProductsPage() {
               showFilters ? "block" : "hidden md:block"
             }`}
           >
-            <div>
+           <div>
               <Label
                 htmlFor="search"
                 className="text-lg font-semibold mb-2 block"
@@ -491,6 +554,7 @@ export default function ProductsPage() {
                 </SelectContent>
               </Select>
             </div>
+
           </aside>
 
           <section className="flex-1">
@@ -528,7 +592,7 @@ export default function ProductsPage() {
             </Breadcrumb>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map((product) => (
+              {filteredProducts.map((product) => (
                 <Card
                   key={product._id}
                   onClick={() =>
@@ -568,12 +632,6 @@ export default function ProductsPage() {
                         />
                       ))}
                     </div>
-                    {/* <Button
-                      variant="outline"
-                      className="font-semibold transition-colors duration-200 hover:bg-primary hover:text-primary-foreground"
-                    >
-                      View Details
-                    </Button> */}
                   </CardFooter>
                 </Card>
               ))}
