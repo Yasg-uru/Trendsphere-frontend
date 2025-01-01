@@ -1,6 +1,6 @@
+import { useAuthContext } from "@/contexts/authContext.context";
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { isTokenExpired, getTokenPayload } from "@/utils/auth.utils";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -12,18 +12,18 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   allowedRoles,
 }) => {
   const navigate = useNavigate();
-
+  const { isAuthenticated, authUser } = useAuthContext();
+  console.log("this is is authenticated", isAuthenticated);
+  console.log("this is authuser", authUser);
   useEffect(() => {
-    const payload = getTokenPayload();
-
-    if (isTokenExpired() || !payload) {
+    if (!isAuthenticated || !authUser) {
       navigate("/Sign-in");
-    } else if (!allowedRoles.includes(payload.role || "")) {
+    } else if (!allowedRoles.includes(authUser.Role || "")) {
       navigate("/access-denied");
     }
-  }, [navigate, allowedRoles]);
+  }, [isAuthenticated, authUser, navigate, allowedRoles]);
 
-  return <>{!isTokenExpired() && children}</>;
+  return <>{isAuthenticated ? children : null}</>;
 };
 
 export default ProtectedRoute;

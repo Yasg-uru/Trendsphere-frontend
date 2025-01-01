@@ -104,6 +104,7 @@ export const Login = createAsyncThunk(
     }
   }
 );
+
 export const Register = createAsyncThunk(
   "auth/register",
   async (formdata: z.infer<typeof signUpSchema>, { rejectWithValue }) => {
@@ -210,6 +211,7 @@ const authSlice = createSlice({
   reducers: {},
   extraReducers(builder) {
     builder.addCase(Login.fulfilled, (state, action) => {
+      localStorage.setItem("token", action.payload.token);
       state.userInfo = action.payload.user;
       state.isAuthenticated = true;
       state.isLoading = false;
@@ -307,9 +309,9 @@ const authSlice = createSlice({
     builder.addCase(ResetuserPassword.rejected, (state) => {
       state.isLoading = false;
     });
-    builder.addCase(getuserData.fulfilled,(state,action)=>{
-      state.userInfo=action.payload.user;
-    })
+    builder.addCase(getuserData.fulfilled, (state, action) => {
+      state.userInfo = action.payload.user;
+    });
   },
 });
 export const {} = authSlice.actions;
