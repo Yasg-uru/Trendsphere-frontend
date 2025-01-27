@@ -26,7 +26,7 @@ const AuthProvider: React.FunctionComponent<authProviderProps> = ({
   const [token, setToken] = useState<string | null>(
     localStorage.getItem("token")
   );
-  const {toast}=useToast();
+  const { toast } = useToast();
   // Check authentication status
   const CheckAuth = async (): Promise<void> => {
     if (!token) {
@@ -40,17 +40,17 @@ const AuthProvider: React.FunctionComponent<authProviderProps> = ({
         withCredentials: true,
       });
       toast({
-        title :"fetched user details successfully"
-      })
+        title: "fetched user details successfully",
+      });
       const { user } = response.data;
 
       setAuthUser(user);
       setIsAuthenticated(true);
     } catch (error) {
       toast({
-        title :"failed to fetch user details",
-        variant:"destructive"
-      })
+        title: "failed to fetch user details",
+        variant: "destructive",
+      });
       console.error("Authentication failed", error);
       setIsAuthenticated(false);
       setAuthUser(null);
@@ -71,9 +71,7 @@ const AuthProvider: React.FunctionComponent<authProviderProps> = ({
     // Automatically check authentication when the component mounts
     if (token) {
       CheckAuth();
-    } else {
-      setIsAuthenticated(false);
-    }
+    } 
   }, [token]); // Runs whenever the token changes
 
   // If the token changes, store it in localStorage
