@@ -80,7 +80,7 @@ const AuthProvider: React.FunctionComponent<authProviderProps> = ({
       localStorage.setItem("token", token);
     }
   }, [token]);
-
+console.log('this is authuser and isauthenticated',authUser,isAuthenticated)
   return (
     <authContext.Provider
       value={{ authUser, isAuthenticated, isLoading, CheckAuth, logout }}

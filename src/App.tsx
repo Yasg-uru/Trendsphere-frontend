@@ -117,7 +117,7 @@ const App: React.FunctionComponent = () => {
           }
         />
         <Route
-          path="/create-product"
+          path="/add-product"
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
               <AddProduct />
