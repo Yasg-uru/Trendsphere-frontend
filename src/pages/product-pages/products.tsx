@@ -16,21 +16,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Search, Filter, RefreshCcw, Star } from 'lucide-react';
+import { Search, Filter, RefreshCcw } from 'lucide-react';
 import { useAppSelector } from "@/state-manager/hook";
 import Loader from "@/helper/Loader";
 import { IProductFrontend } from "@/types/productState/product.type";
 import { useToast } from "@/hooks/use-toast";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation} from "react-router-dom";
+import ProductCard from "./product-card";
 
 export default function ProductsPage() {
   const { isLoading, products } = useAppSelector((state) => state.product);
@@ -44,7 +39,7 @@ export default function ProductsPage() {
   const [sizes, setSizes] = useState<string[]>([]);
   const [materials, setMaterials] = useState<string[]>([]);
   const [isRefreshFunctionCalled, setIsRefreshFunctionCalled] = useState<boolean>(false);
-  const navigate = useNavigate();
+  
   const [filters, setFilters] = useState({
     search: "",
     gender: "",
@@ -591,49 +586,9 @@ export default function ProductsPage() {
               </BreadcrumbList>
             </Breadcrumb>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-2">
               {filteredProducts.map((product) => (
-                <Card
-                  key={product._id}
-                  onClick={() =>
-                    navigate("/details", { state: { id: product._id } })
-                  }
-                  className="cursor-pointer hover:shadow-lg transition-shadow duration-300"
-                >
-                  <CardHeader className="p-0">
-                    <img
-                      src={product.defaultImage}
-                      alt={product.name}
-                      className="w-full h-64 object-cover rounded-t-lg"
-                    />
-                  </CardHeader>
-                  <CardContent className="p-4">
-                    <CardTitle className="text-xl font-bold mb-2">
-                      {product.name}
-                    </CardTitle>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      {product.brand}
-                    </p>
-                    <p className="font-bold text-lg text-primary">
-                      ${product.basePrice.toFixed(2)}
-                    </p>
-                  </CardContent>
-                  <CardFooter className="flex justify-between items-center p-4 bg-secondary rounded-b-lg">
-                    <div className="flex items-center">
-                      <span className="text-sm mr-2">Rating:</span>
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`w-4 h-4 ${
-                            i < product.sustainabilityRating
-                              ? "text-yellow-400 fill-current"
-                              : "text-gray-300"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  </CardFooter>
-                </Card>
+                <ProductCard product={product}/>
               ))}
             </div>
           </section>
