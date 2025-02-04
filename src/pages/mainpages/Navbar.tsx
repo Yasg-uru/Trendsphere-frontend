@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { Moon, Sun, Menu, X, Search, ShoppingCart, LogIn } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -61,17 +61,17 @@ export default function Navbar() {
     }
   }, [debouncedsearchQuery, dispatch, toast])
 
-  const handleClick = () => {
+  const handleClick = useCallback(() => {
     const params = {
       category: currentCategory,
       subcategory: currentSubCategory,
       childcategory: currentChildCategory,
-    }
+    };
     dispatch(ApplyFilter(params))
       .then(() => {
         toast({
-          title: "Fetched successfully your results ",
-        })
+          title: "Fetched successfully your results",
+        });
         if (location.pathname === "/products") {
           navigate("/products", {
             replace: true,
@@ -81,7 +81,7 @@ export default function Navbar() {
               childcategory: currentChildCategory,
               fromNavbar: true,
             },
-          })
+          });
         } else {
           navigate("/products", {
             state: {
@@ -90,15 +90,15 @@ export default function Navbar() {
               childcategory: currentChildCategory,
               fromNavbar: true,
             },
-          })
+          });
         }
       })
       .catch(() => {
         toast({
           title: "Failed to Fetch results",
-        })
-      })
-  }
+        });
+      });
+  }, [currentCategory, currentSubCategory, currentChildCategory, dispatch, navigate, location.pathname, toast]);
 
   const { categories } = useAppSelector((state) => state.product)
   const { userInfo } = useAppSelector((state) => state.auth)
