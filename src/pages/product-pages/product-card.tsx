@@ -53,7 +53,7 @@ const ProductCard: React.FunctionComponent<{ product: IProductFrontend }> = ({ p
         style={{ rotateX, rotateY, scale, transformStyle: "preserve-3d" }}
         className="relative will-change-transform"
       >
-       <Card className="relative dark:bg-black backdrop-blur-md border border-gray-800 hover:border-blue-500/50 transition-all duration-300 overflow-hidden w-full max-w-md px-5">
+       <Card className="relative bg-background backdrop-blur-md border border-gray-800 hover:border-blue-500/50 transition-all duration-300 overflow-hidden w-full max-w-md px-5">
 
         <AnimatePresence>
         {isHovered && (
