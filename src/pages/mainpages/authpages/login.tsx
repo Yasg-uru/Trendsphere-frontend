@@ -15,10 +15,10 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
-import { Login } from "@/state-manager/slices/authSlice";
+
 import { useToast } from "@/hooks/use-toast";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuthContext } from "@/contexts/authContext.context";
 export const signInSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
   password: z
@@ -31,7 +31,7 @@ type SignInFormValues = z.infer<typeof signInSchema>;
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [signInError, setSignInError] = useState<string | null>(null);
-
+  const { isLoading, UserLogin } = useAuthContext();
   const {
     register,
     handleSubmit,
@@ -39,22 +39,20 @@ export default function SignInForm() {
   } = useForm<SignInFormValues>({
     resolver: zodResolver(signInSchema),
   });
-  const dispatch = useAppDispatch();
-  const { isLoading } = useAppSelector((state) => state.auth);
+
   const { toast } = useToast();
   const navigate = useNavigate();
   const onSubmit = async (data: SignInFormValues) => {
     setSignInError(null);
-    dispatch(Login(data))
-      .unwrap()
+    UserLogin(data)
       .then(() => {
         toast({
-          title: "Logged in successfully",
+          title: "logged in successfully",
         });
         navigate("/");
       })
-      .catch(() => {
-        setSignInError("Invalid email or password. Please try again.");
+      .catch((error) => {
+        setSignInError(error);
       });
   };
 
