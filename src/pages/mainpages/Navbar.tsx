@@ -260,12 +260,12 @@ export default function Navbar() {
                       <span>My Orders</span>
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
+                  {/* <DropdownMenuItem>
                     <Link to="#" className="flex items-center gap-2">
                       <div className="h-4 w-4" />
                       <span>Wishlist</span>
                     </Link>
-                  </DropdownMenuItem>
+                  </DropdownMenuItem> */}
                   {isAuthenticated && userInfo?.Role === "admin" && (
                     <DropdownMenuItem>
                       <Link to="/dashboard" className="flex items-center gap-2">
@@ -429,13 +429,13 @@ export default function Navbar() {
                     >
                       My Orders
                     </Link>
-                    <Link
+                    {/* <Link
                       to="#"
                       className="block px-2 py-1 hover:bg-accent rounded-md"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Wishlist
-                    </Link>
+                    </Link> */}
                     {isAuthenticated && userInfo?.Role === "admin" && (
                       <>
                         <Link
