@@ -167,7 +167,8 @@ export default function Carts() {
     }
   };
 
-  const isAvailable = (stock: number) => stock > 0;
+  const isAvailable = (stock?: number) => (stock !== undefined && stock > 0);
+
 
   const isDiscountValid = (validFrom: string, validUntil: string) => {
     const currentDate = new Date();
@@ -261,6 +262,7 @@ export default function Carts() {
           <div className="text-sm text-muted-foreground">
             Loyalty Points: {item.loyaltyPoints}
           </div>
+          <p>stocks : {item.stocks}</p>
           {!available && (
             <div className="text-sm text-red-600 font-semibold">
               Currently Unavailable

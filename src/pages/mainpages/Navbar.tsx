@@ -72,26 +72,15 @@ export default function Navbar() {
         toast({
           title: "Fetched successfully your results",
         });
-        if (location.pathname === "/products") {
-          navigate("/products", {
-            replace: true,
-            state: {
-              category: currentCategory,
-              subcategory: currentSubCategory,
-              childcategory: currentChildCategory,
-              fromNavbar: true,
-            },
-          });
-        } else {
-          navigate("/products", {
-            state: {
-              category: currentCategory,
-              subcategory: currentSubCategory,
-              childcategory: currentChildCategory,
-              fromNavbar: true,
-            },
-          });
-        }
+        navigate("/products", {
+          replace: true, // This ensures it does not push multiple history entries
+          state: {
+            category: currentCategory,
+            subcategory: currentSubCategory,
+            childcategory: currentChildCategory,
+            fromNavbar: true,
+          },
+        });
       })
       .catch(() => {
         toast({

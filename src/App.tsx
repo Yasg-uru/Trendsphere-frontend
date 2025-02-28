@@ -79,7 +79,8 @@ const App: React.FunctionComponent = () => {
         <Route
           path="/mycarts"
           element={
-            <ProtectedRoute allowedRoles={["user", "admin", "delivery_boy"]}>
+            <ProtectedRoute 
+            allowedRoles={["user", "admin", "delivery_boy"]}>
               <Carts />
             </ProtectedRoute>
           }
@@ -87,7 +88,8 @@ const App: React.FunctionComponent = () => {
         <Route
           path="/review/:productId"
           element={
-            <ProtectedRoute allowedRoles={["user", "admin", "delivery_boy"]}>
+            <ProtectedRoute 
+            allowedRoles={["user", "admin", "delivery_boy"]}>
               <AddReview />
             </ProtectedRoute>
           }
@@ -95,7 +97,8 @@ const App: React.FunctionComponent = () => {
         <Route
           path="/order"
           element={
-            <ProtectedRoute allowedRoles={["admin"]}>
+            <ProtectedRoute 
+            allowedRoles={["admin"]}>
               <CreateOrder />
             </ProtectedRoute>
           }
@@ -103,7 +106,8 @@ const App: React.FunctionComponent = () => {
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute allowedRoles={["admin"]}>
+            <ProtectedRoute 
+            allowedRoles={["admin"]}>
               <Dashboard />
             </ProtectedRoute>
           }
@@ -111,7 +115,8 @@ const App: React.FunctionComponent = () => {
         <Route
           path="/delivery-dashboard"
           element={
-            <ProtectedRoute allowedRoles={["delivery_boy", "admin"]}>
+            <ProtectedRoute 
+            allowedRoles={["delivery_boy", "admin"]}>
               <DeliveryBoyDashboard />
             </ProtectedRoute>
           }
@@ -119,7 +124,8 @@ const App: React.FunctionComponent = () => {
         <Route
           path="/add-product"
           element={
-            <ProtectedRoute allowedRoles={["admin"]}>
+            <ProtectedRoute 
+            allowedRoles={["admin"]}>
               <AddProduct />
             </ProtectedRoute>
           }
@@ -127,7 +133,8 @@ const App: React.FunctionComponent = () => {
         <Route
           path="/u/orders"
           element={
-            <ProtectedRoute allowedRoles={["user", "admin", "delivery_boy"]}>
+            <ProtectedRoute
+             allowedRoles={["user", "admin", "delivery_boy"]}>
               <Orders />
             </ProtectedRoute>
           }
@@ -135,7 +142,8 @@ const App: React.FunctionComponent = () => {
         <Route
           path="/u/order/details/:orderId"
           element={
-            <ProtectedRoute allowedRoles={["user", "admin", "delivery_boy"]}>
+            <ProtectedRoute 
+            allowedRoles={["user", "admin", "delivery_boy"]}>
               <OrderDetail />
             </ProtectedRoute>
           }
@@ -145,7 +153,8 @@ const App: React.FunctionComponent = () => {
         <Route
           path="/orders"
           element={
-            <ProtectedRoute allowedRoles={["delivery_boy", "admin"]}>
+            <ProtectedRoute 
+            allowedRoles={["delivery_boy", "admin"]}>
               <OrdersAdmin />
             </ProtectedRoute>
           }
@@ -153,7 +162,8 @@ const App: React.FunctionComponent = () => {
         <Route
           path="/orders/details/:orderId"
           element={
-            <ProtectedRoute allowedRoles={["admin", "delivery_boy"]}>
+            <ProtectedRoute 
+            allowedRoles={["admin", "delivery_boy"]}>
               <OrderDetailsPage />
             </ProtectedRoute>
           }
@@ -161,7 +171,8 @@ const App: React.FunctionComponent = () => {
         <Route
           path="/live-location"
           element={
-            <ProtectedRoute allowedRoles={["admin", "delivery_boy"]}>
+            <ProtectedRoute
+             allowedRoles={["admin", "delivery_boy"]}>
               <DeliveryTracker />
             </ProtectedRoute>
           }
