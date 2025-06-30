@@ -26,7 +26,7 @@ import {
   orderproduct,
   OrderProductWithProduct,
 } from "@/types/ordertypes/initialState";
-import { useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 import Loader from "@/helper/Loader";
 import {
@@ -93,6 +93,7 @@ const orderstatusSchema = z.object({
 });
 type StatusFormValues = z.infer<typeof orderstatusSchema>;
 export default function OrderDetailsPage() {
+  const navigate = useNavigate();
   const [order, setOrder] = useState<IOrder | null>(null); // Set the initial value explicitly as `null`
 
   const { orderId } = useParams<{ orderId: string }>();
@@ -334,7 +335,7 @@ export default function OrderDetailsPage() {
   };
   return (
     <div className="container mx-auto p-4 space-y-8">
-      <Button variant="ghost" className="mb-4">
+      <Button variant="ghost" className="mb-4" onClick={()=>navigate(-1)}>
         <ArrowLeft className="mr-2 h-4 w-4" /> Back to Orders
       </Button>
 

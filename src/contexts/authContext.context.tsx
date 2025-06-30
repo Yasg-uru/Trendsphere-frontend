@@ -5,47 +5,42 @@ import { useAppDispatch } from "@/state-manager/hook";
 import { Login, Logout } from "@/state-manager/slices/authSlice";
 import { User } from "@/types/authState/initialState";
 import React, { createContext, useEffect, useState } from "react";
-
 import { z } from "zod";
 
 interface authContextProps {
   isAuthenticated: boolean;
   authUser: User | null;
   isLoading: boolean;
-  CheckAuth: () => void;
-  logout: () => void;
+  isInitialized: boolean; // New flag to track initial auth check
+  CheckAuth: () => Promise<void>;
+  logout: () => Promise<void>;
   UserLogin: (data: z.infer<typeof signInSchema>) => Promise<void>;
 }
 
 export const authContext = createContext<authContextProps | null>(null);
 
-interface authProviderProps {
-  children: React.ReactNode;
-}
-
-const AuthProvider: React.FunctionComponent<authProviderProps> = ({ children }) => {
+const AuthProvider: React.FunctionComponent<{ children: React.ReactNode }> = ({ children }) => {
   const dispatch = useAppDispatch();
   const { toast } = useToast();
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [authUser, setAuthUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true); // Start as true
+  const [isInitialized, setIsInitialized] = useState<boolean>(false); // New state
 
   const CheckAuth = async (): Promise<void> => {
     try {
       setIsLoading(true);
       const response = await axiosInstance.get(`/user/me`, { withCredentials: true });
-
-      toast({ title: "Fetched user details successfully" });
       setAuthUser(response.data);
       setIsAuthenticated(true);
     } catch (error) {
-      toast({ title: "Failed to fetch user details", description:"please login to continue ", variant: "destructive" });
-      console.error("Authentication failed", error);
       setAuthUser(null);
       setIsAuthenticated(false);
+      console.error("Authentication check failed", error);
     } finally {
       setIsLoading(false);
+      setIsInitialized(true); // Mark auth check as complete
     }
   };
 
@@ -53,51 +48,39 @@ const AuthProvider: React.FunctionComponent<authProviderProps> = ({ children }) 
     CheckAuth();
   }, []);
 
-const logout = async () => {
-  try {
-    setIsLoading(true);
-    await dispatch(Logout()).unwrap();
-    
-    // Clear local state
-    setAuthUser(null);
-    setIsAuthenticated(false);
-    
-    // Show success message
-    toast({
-      title: "Logged out successfully",
-    });
-    
-    
-  } catch (error) {
-    toast({
-      title: "Logout failed",
-      variant: "destructive",
-      description: "There was an error while logging out"
-    });
-    console.error("Logout error:", error);
-  } finally {
-    setIsLoading(false);
-  }
-};
+  const logout = async () => {
+    try {
+      setIsLoading(true);
+      await dispatch(Logout()).unwrap();
+      setAuthUser(null);
+      setIsAuthenticated(false);
+      toast({ title: "Logged out successfully" });
+    } catch (error) {
+      toast({
+        title: "Logout failed",
+        variant: "destructive",
+        description: "There was an error while logging out"
+      });
+      console.error("Logout error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const UserLogin = async (data: z.infer<typeof signInSchema>): Promise<void> => {
-  setIsLoading(true);
-  return dispatch(Login(data))
-    .unwrap()
-    .then((data) => {
-      setAuthUser(data.user);
+    setIsLoading(true);
+    try {
+      const result = await dispatch(Login(data)).unwrap();
+      setAuthUser(result.user);
       setIsAuthenticated(true);
-      CheckAuth();
-    })
-    .catch((error) => {
+      await CheckAuth(); // Wait for auth check to complete
+    } catch (error) {
       console.error("Login error:", error);
-      return Promise.reject(error); // Required so SignInForm can use it
-    })
-    .finally(() => {
+      throw error;
+    } finally {
       setIsLoading(false);
-    });
-};
-
+    }
+  };
 
   return (
     <authContext.Provider
@@ -105,6 +88,7 @@ const logout = async () => {
         authUser,
         isAuthenticated,
         isLoading,
+        isInitialized, // Include in context
         CheckAuth,
         logout,
         UserLogin,
