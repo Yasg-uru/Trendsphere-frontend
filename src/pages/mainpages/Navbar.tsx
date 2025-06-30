@@ -1,17 +1,17 @@
-import { useCallback, useEffect, useState } from "react"
-import { Link, useLocation, useNavigate } from "react-router-dom"
-import { Moon, Sun, Menu, X, Search, ShoppingCart, LogIn } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { useTheme } from "@/components/theme-provider"
+import { useCallback, useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Moon, Sun, Menu, X, Search, ShoppingCart, LogIn, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useTheme } from "@/components/theme-provider";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuSeparator,
   DropdownMenuItem,
-} from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -19,31 +19,39 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu"
-import { useAppDispatch, useAppSelector } from "@/state-manager/hook"
-import { ApplyFilter, searchProducts } from "@/state-manager/slices/productSlice"
-import { useToast } from "@/hooks/use-toast"
-import { Logout } from "@/state-manager/slices/authSlice"
-import { useDebounce } from "@uidotdev/usehooks"
-import { SearchResults } from "../product-pages/searchbar"
-import Loader from "@/helper/Loader"
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+} from "@/components/ui/navigation-menu";
+import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
+import {
+  ApplyFilter,
+  searchProducts,
+} from "@/state-manager/slices/productSlice";
+import { useToast } from "@/hooks/use-toast";
+import { Logout } from "@/state-manager/slices/authSlice";
+import { useDebounce } from "@uidotdev/usehooks";
+import { SearchResults } from "../product-pages/searchbar";
+// import Loader from "@/helper/Loader";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 export default function Navbar() {
-  const { theme, setTheme } = useTheme()
-  const { isLoading } = useAppSelector((state) => state.product)
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [currentCategory, setCurrentCategory] = useState<string>("")
-  const [currentSubCategory, setCurrentSubCategory] = useState<string>("")
-  const [currentChildCategory, setCurrentChildCategory] = useState<string>("")
-  const dispatch = useAppDispatch()
-  const { toast } = useToast()
-  const navigate = useNavigate()
-  const location = useLocation()
-  const { isAuthenticated } = useAppSelector((state) => state.auth)
-  const [searchQuery, setSearchQuery] = useState<string>("")
-  const debouncedsearchQuery = useDebounce(searchQuery, 500)
+  const { theme, setTheme } = useTheme();
+  const { isLoading } = useAppSelector((state) => state.product);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [currentCategory, setCurrentCategory] = useState<string>("");
+  const [currentSubCategory, setCurrentSubCategory] = useState<string>("");
+  const [currentChildCategory, setCurrentChildCategory] = useState<string>("");
+  const dispatch = useAppDispatch();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const debouncedsearchQuery = useDebounce(searchQuery, 500);
 
   useEffect(() => {
     if (debouncedsearchQuery) {
@@ -51,15 +59,15 @@ export default function Navbar() {
         .then(() => {
           toast({
             title: "Searched successfully",
-          })
+          });
         })
         .catch((error) => {
           toast({
             title: error,
-          })
-        })
+          });
+        });
     }
-  }, [debouncedsearchQuery, dispatch, toast])
+  }, [debouncedsearchQuery, dispatch, toast]);
 
   const handleClick = useCallback(() => {
     const params = {
@@ -87,45 +95,49 @@ export default function Navbar() {
           title: "Failed to Fetch results",
         });
       });
-  }, [currentCategory, currentSubCategory, currentChildCategory, dispatch, navigate, location.pathname, toast]);
+  }, [
+    currentCategory,
+    currentSubCategory,
+    currentChildCategory,
+    dispatch,
+    navigate,
+    location.pathname,
+    toast,
+  ]);
 
-  const { categories } = useAppSelector((state) => state.product)
-  const { userInfo } = useAppSelector((state) => state.auth)
+  const { categories } = useAppSelector((state) => state.product);
+  const { userInfo } = useAppSelector((state) => state.auth);
 
   const handleCategoryHover = (category: string) => {
-    setCurrentCategory(category)
-    setCurrentSubCategory("")
-    setCurrentChildCategory("")
-  }
+    setCurrentCategory(category);
+    setCurrentSubCategory("");
+    setCurrentChildCategory("");
+  };
 
   const handleSubcategoryHover = (subcategory: string) => {
-    setCurrentSubCategory(subcategory)
-    setCurrentChildCategory("")
-  }
+    setCurrentSubCategory(subcategory);
+    setCurrentChildCategory("");
+  };
 
   const handleChildCategoryClick = (childCategory: string) => {
-    setCurrentChildCategory(childCategory)
-  }
+    setCurrentChildCategory(childCategory);
+  };
 
   const handleSubCategoryClick = () => {
     if (!currentSubCategory && !currentCategory) {
-      return
+      return;
     }
-    handleClick()
-  }
+    handleClick();
+  };
 
   useEffect(() => {
     if (!currentChildCategory) {
-      return
+      return;
     }
-    handleClick()
-  }, [currentChildCategory, handleClick]) // Added handleClick to dependencies
+    handleClick();
+  }, [currentChildCategory, handleClick]); // Added handleClick to dependencies
 
-  const { carts } = useAppSelector((state) => state.auth)
-
-  if (isLoading) {
-    return <Loader />
-  }
+  const { carts } = useAppSelector((state) => state.auth);
 
   return (
     <nav className="bg-background border-b">
@@ -133,60 +145,86 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0">
-              <span className="text-2xl font-bold text-primary">Trendsphere</span>
+              <span className="text-2xl font-bold text-primary">
+                Trendsphere
+              </span>
             </Link>
             <div className="hidden md:block ml-10">
               <div className="container px-4 md:px-6 py-4">
-                <NavigationMenu>
-                  <ScrollArea className="w-[500px] whitespace-nowrap rounded-md border">
-                    <NavigationMenuList className="flex space-x-2 px-1">
-                      {categories &&
-                        categories.length > 0 &&
-                        categories.map((categoryItem, index) => (
-                          <NavigationMenuItem
-                            key={index}
-                            onMouseEnter={() => {
-                              handleCategoryHover(categoryItem.category)
-                            }}
-                            onClick={handleClick}
-                          >
-                            <NavigationMenuTrigger>{categoryItem.category}</NavigationMenuTrigger>
-                            <NavigationMenuContent className="cursor-pointer">
-                              <div className="grid w-[600px] p-4 gap-4">
-                                {categoryItem.subcategories.map((subcat, subIndex) => (
-                                  <div key={subIndex} className="space-y-2">
-                                    <NavigationMenuLink
-                                      asChild
-                                      onMouseEnter={() => handleSubcategoryHover(subcat.subcategory)}
-                                      onClick={handleSubCategoryClick}
-                                    >
-                                      <Link to="#" className="block text-lg font-semibold text-primary hover:underline">
-                                        {subcat.subcategory}
-                                      </Link>
-                                    </NavigationMenuLink>
-                                    {subcat.childcategories && subcat.childcategories.length > 0 && (
-                                      <div className="grid grid-cols-2 gap-2">
-                                        {subcat.childcategories.map((child, childIndex) => (
-                                          <span
-                                            key={childIndex}
-                                            onClick={() => handleChildCategoryClick(child)}
-                                            className="text-sm text-muted-foreground hover:text-primary hover:underline cursor-pointer"
+                {isLoading ? (
+                  <div className="px-4 py-2 text-sm text-muted-foreground animate-pulse flex ">
+   <Loader2 className="animate-spin "/> Please wait while loading categories...
+  </div>
+                ) : (
+                  <NavigationMenu>
+                    <ScrollArea className="w-[500px] whitespace-nowrap rounded-md border">
+                      <NavigationMenuList className="flex space-x-2 px-1">
+                        {categories &&
+                          categories.length > 0 &&
+                          categories.map((categoryItem, index) => (
+                            <NavigationMenuItem
+                              key={index}
+                              onMouseEnter={() => {
+                                handleCategoryHover(categoryItem.category);
+                              }}
+                              onClick={handleClick}
+                            >
+                              <NavigationMenuTrigger>
+                                {categoryItem.category}
+                              </NavigationMenuTrigger>
+                              <NavigationMenuContent className="cursor-pointer">
+                                <div className="grid w-[600px] p-4 gap-4">
+                                  {categoryItem.subcategories.map(
+                                    (subcat, subIndex) => (
+                                      <div key={subIndex} className="space-y-2">
+                                        <NavigationMenuLink
+                                          asChild
+                                          onMouseEnter={() =>
+                                            handleSubcategoryHover(
+                                              subcat.subcategory
+                                            )
+                                          }
+                                          onClick={handleSubCategoryClick}
+                                        >
+                                          <Link
+                                            to="#"
+                                            className="block text-lg font-semibold text-primary hover:underline"
                                           >
-                                            {child}
-                                          </span>
-                                        ))}
+                                            {subcat.subcategory}
+                                          </Link>
+                                        </NavigationMenuLink>
+                                        {subcat.childcategories &&
+                                          subcat.childcategories.length > 0 && (
+                                            <div className="grid grid-cols-2 gap-2">
+                                              {subcat.childcategories.map(
+                                                (child, childIndex) => (
+                                                  <span
+                                                    key={childIndex}
+                                                    onClick={() =>
+                                                      handleChildCategoryClick(
+                                                        child
+                                                      )
+                                                    }
+                                                    className="text-sm text-muted-foreground hover:text-primary hover:underline cursor-pointer"
+                                                  >
+                                                    {child}
+                                                  </span>
+                                                )
+                                              )}
+                                            </div>
+                                          )}
                                       </div>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            </NavigationMenuContent>
-                          </NavigationMenuItem>
-                        ))}
-                    </NavigationMenuList>
-                    <ScrollBar orientation="horizontal" />
-                  </ScrollArea>
-                </NavigationMenu>
+                                    )
+                                  )}
+                                </div>
+                              </NavigationMenuContent>
+                            </NavigationMenuItem>
+                          ))}
+                      </NavigationMenuList>
+                      <ScrollBar orientation="horizontal" />
+                    </ScrollArea>
+                  </NavigationMenu>
+                )}
               </div>
             </div>
           </div>
@@ -215,8 +253,16 @@ export default function Navbar() {
               </Link>
             )}
             <Button variant={"outline"}>{userInfo?.loyaltyPoints}</Button>
-            <Button variant="ghost" size="icon" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
-              {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            >
+              {theme === "dark" ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
               <span className="sr-only">Toggle theme</span>
             </Button>
             {!isAuthenticated ? (
@@ -225,7 +271,7 @@ export default function Navbar() {
                 size="sm"
                 className={`font-semibold transition-colors duration-200 dark:text-black dark:bg-white text-white bg-black`}
                 onClick={() => {
-                  navigate("/sign-in")
+                  navigate("/sign-in");
                 }}
               >
                 <LogIn className="w-4 h-4 mr-2" />
@@ -237,7 +283,9 @@ export default function Navbar() {
                   <Button variant="ghost" size="icon" className="rounded-full">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src="/placeholder-user.jpg" />
-                      <AvatarFallback>{userInfo?.username.slice(0, 2).toUpperCase()}</AvatarFallback>
+                      <AvatarFallback>
+                        {userInfo?.username.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
                     </Avatar>
                     <span className="sr-only">Toggle user menu</span>
                   </Button>
@@ -246,11 +294,15 @@ export default function Navbar() {
                   <div className="flex items-center gap-2 p-2">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src="/placeholder-user.jpg" />
-                      <AvatarFallback>{userInfo?.username.slice(0, 1)}</AvatarFallback>
+                      <AvatarFallback>
+                        {userInfo?.username.slice(0, 1)}
+                      </AvatarFallback>
                     </Avatar>
                     <div className="grid gap-0.5 leading-none">
                       <div className="font-semibold">{userInfo?.username}</div>
-                      <div className="text-sm text-muted-foreground">{userInfo?.email}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {userInfo?.email}
+                      </div>
                     </div>
                   </div>
                   <DropdownMenuSeparator />
@@ -276,7 +328,10 @@ export default function Navbar() {
                   )}
                   {isAuthenticated && userInfo?.Role === "admin" && (
                     <DropdownMenuItem>
-                      <Link to="/add-product" className="flex items-center gap-2">
+                      <Link
+                        to="/add-product"
+                        className="flex items-center gap-2"
+                      >
                         <div className="h-4 w-4" />
                         <span>Add Product</span>
                       </Link>
@@ -284,7 +339,10 @@ export default function Navbar() {
                   )}
                   {isAuthenticated && userInfo?.Role === "delivery_boy" && (
                     <DropdownMenuItem>
-                      <Link to="/delivery-dashboard" className="flex items-center gap-2">
+                      <Link
+                        to="/delivery-dashboard"
+                        className="flex items-center gap-2"
+                      >
                         <div className="h-4 w-4" />
                         <span>Dashboard</span>
                       </Link>
@@ -295,11 +353,11 @@ export default function Navbar() {
                     onClick={() => {
                       dispatch(Logout())
                         .then(() => {
-                          toast({ title: "Logged out successfully" })
+                          toast({ title: "Logged out successfully" });
                         })
                         .catch((error) => {
-                          toast({ title: error, variant: "destructive" })
-                        })
+                          toast({ title: error, variant: "destructive" });
+                        });
                     }}
                   >
                     <Link to="#" className="flex items-center gap-2">
@@ -312,8 +370,16 @@ export default function Navbar() {
             )}
           </div>
           <div className="md:hidden flex items-center">
-            <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
               <span className="sr-only">Open main menu</span>
             </Button>
           </div>
@@ -335,28 +401,31 @@ export default function Navbar() {
                             to="#"
                             className="block text-lg font-semibold text-primary hover:underline"
                             onClick={() => {
-                              handleSubcategoryHover(subcat.subcategory)
-                              handleSubCategoryClick()
+                              handleSubcategoryHover(subcat.subcategory);
+                              handleSubCategoryClick();
                             }}
                           >
                             {subcat.subcategory}
                           </Link>
-                          {subcat.childcategories && subcat.childcategories.length > 0 && (
-                            <div className="grid grid-cols-2 gap-2 pl-4">
-                              {subcat.childcategories.map((child, childIndex) => (
-                                <span
-                                  key={childIndex}
-                                  onClick={() => {
-                                    handleChildCategoryClick(child)
-                                    setMobileMenuOpen(false)
-                                  }}
-                                  className="text-sm text-muted-foreground hover:text-primary hover:underline cursor-pointer"
-                                >
-                                  {child}
-                                </span>
-                              ))}
-                            </div>
-                          )}
+                          {subcat.childcategories &&
+                            subcat.childcategories.length > 0 && (
+                              <div className="grid grid-cols-2 gap-2 pl-4">
+                                {subcat.childcategories.map(
+                                  (child, childIndex) => (
+                                    <span
+                                      key={childIndex}
+                                      onClick={() => {
+                                        handleChildCategoryClick(child);
+                                        setMobileMenuOpen(false);
+                                      }}
+                                      className="text-sm text-muted-foreground hover:text-primary hover:underline cursor-pointer"
+                                    >
+                                      {child}
+                                    </span>
+                                  )
+                                )}
+                              </div>
+                            )}
                         </div>
                       ))}
                     </AccordionContent>
@@ -391,8 +460,16 @@ export default function Navbar() {
                   </Link>
                 )}
                 <Button variant={"outline"}>{userInfo?.loyaltyPoints}</Button>
-                <Button variant="ghost" size="icon" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
-                  {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                >
+                  {theme === "dark" ? (
+                    <Sun className="h-5 w-5" />
+                  ) : (
+                    <Moon className="h-5 w-5" />
+                  )}
                   <span className="sr-only">Toggle theme</span>
                 </Button>
               </div>
@@ -402,8 +479,8 @@ export default function Navbar() {
                   size="sm"
                   className="w-full font-semibold transition-colors duration-200"
                   onClick={() => {
-                    navigate("/sign-in")
-                    setMobileMenuOpen(false)
+                    navigate("/sign-in");
+                    setMobileMenuOpen(false);
                   }}
                 >
                   <LogIn className="w-4 h-4 mr-2" />
@@ -414,11 +491,15 @@ export default function Navbar() {
                   <div className="flex items-center gap-2 p-2">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src="/placeholder-user.jpg" />
-                      <AvatarFallback>{userInfo?.username.slice(0, 2).toUpperCase()}</AvatarFallback>
+                      <AvatarFallback>
+                        {userInfo?.username.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
                     </Avatar>
                     <div className="grid gap-0.5 leading-none">
                       <div className="font-semibold">{userInfo?.username}</div>
-                      <div className="text-sm text-muted-foreground">{userInfo?.email}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {userInfo?.email}
+                      </div>
                     </div>
                   </div>
                   <div className="mt-2 space-y-2">
@@ -469,12 +550,12 @@ export default function Navbar() {
                       onClick={() => {
                         dispatch(Logout())
                           .then(() => {
-                            toast({ title: "Logged out successfully" })
-                            setMobileMenuOpen(false)
+                            toast({ title: "Logged out successfully" });
+                            setMobileMenuOpen(false);
                           })
                           .catch((error) => {
-                            toast({ title: error, variant: "destructive" })
-                          })
+                            toast({ title: error, variant: "destructive" });
+                          });
                       }}
                     >
                       Logout
@@ -488,6 +569,5 @@ export default function Navbar() {
       )}
       <SearchResults />
     </nav>
-  )
+  );
 }
-

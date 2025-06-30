@@ -79,9 +79,7 @@ export default function Home() {
       });
   };
 
-  if (isLoading) {
-    return <Loader />;
-  }
+  
 
   console.log("this is a top rated products :", topRated);
   return (

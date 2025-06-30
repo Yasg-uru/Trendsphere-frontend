@@ -26,41 +26,23 @@ const AuthProvider: React.FunctionComponent<authProviderProps> = ({ children }) 
   const dispatch = useAppDispatch();
   const { toast } = useToast();
 
-  // Load stored user from localStorage
-  const storedUser = localStorage.getItem("authUser");
-  const storedAuth = localStorage.getItem("isAuthenticated");
-
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
-    storedAuth ? JSON.parse(storedAuth) : false
-  );
-  const [authUser, setAuthUser] = useState<User | null>(
-    storedUser ? JSON.parse(storedUser) : null
-  );
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [authUser, setAuthUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Check authentication status
   const CheckAuth = async (): Promise<void> => {
     try {
       setIsLoading(true);
       const response = await axiosInstance.get(`/user/me`, { withCredentials: true });
 
       toast({ title: "Fetched user details successfully" });
-
       setAuthUser(response.data);
       setIsAuthenticated(true);
-
-      // Store user data in localStorage
-      localStorage.setItem("authUser", JSON.stringify(response.data));
-      localStorage.setItem("isAuthenticated", JSON.stringify(true));
     } catch (error) {
-      toast({ title: "Failed to fetch user details", variant: "destructive" });
+      toast({ title: "Failed to fetch user details", description:"please login to continue ", variant: "destructive" });
       console.error("Authentication failed", error);
-      setIsAuthenticated(false);
       setAuthUser(null);
-
-      // Remove user data from localStorage
-      localStorage.removeItem("authUser");
-      localStorage.removeItem("isAuthenticated");
+      setIsAuthenticated(false);
     } finally {
       setIsLoading(false);
     }
@@ -70,14 +52,9 @@ const AuthProvider: React.FunctionComponent<authProviderProps> = ({ children }) 
     CheckAuth();
   }, []);
 
-  // Log out functionality
   const logout = () => {
-    setIsAuthenticated(false);
     setAuthUser(null);
-
-    // Clear user data from localStorage
-    localStorage.removeItem("authUser");
-    localStorage.removeItem("isAuthenticated");
+    setIsAuthenticated(false);
   };
 
   const UserLogin = async (data: z.infer<typeof signInSchema>): Promise<void> => {
@@ -96,7 +73,16 @@ const AuthProvider: React.FunctionComponent<authProviderProps> = ({ children }) 
   };
 
   return (
-    <authContext.Provider value={{ authUser, isAuthenticated, isLoading, CheckAuth, logout, UserLogin }}>
+    <authContext.Provider
+      value={{
+        authUser,
+        isAuthenticated,
+        isLoading,
+        CheckAuth,
+        logout,
+        UserLogin,
+      }}
+    >
       {children}
     </authContext.Provider>
   );
