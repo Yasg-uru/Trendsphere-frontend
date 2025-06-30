@@ -44,11 +44,11 @@ export default function SignInForm() {
   const navigate = useNavigate();
   const onSubmit = async (data: SignInFormValues) => {
     setSignInError(null);
-    UserLogin(data)
-      .then(() => {
+    UserLogin(data).then(() => {
         toast({
           title: "logged in successfully",
         });
+        window.location.reload()
         navigate("/");
       })
       .catch((error) => {

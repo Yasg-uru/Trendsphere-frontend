@@ -58,19 +58,23 @@ const AuthProvider: React.FunctionComponent<authProviderProps> = ({ children }) 
   };
 
   const UserLogin = async (data: z.infer<typeof signInSchema>): Promise<void> => {
-    setIsLoading(true);
-    dispatch(Login(data))
-      .unwrap()
-      .then((data) => {
-        setAuthUser(data.user);
-        setIsAuthenticated(true);
-        CheckAuth();
-      })
-      .catch((error) => Promise.reject(error))
-      .finally(() => {
-        setIsLoading(false);
-      });
-  };
+  setIsLoading(true);
+  return dispatch(Login(data))
+    .unwrap()
+    .then((data) => {
+      setAuthUser(data.user);
+      setIsAuthenticated(true);
+      CheckAuth();
+    })
+    .catch((error) => {
+      console.error("Login error:", error);
+      return Promise.reject(error); // Required so SignInForm can use it
+    })
+    .finally(() => {
+      setIsLoading(false);
+    });
+};
+
 
   return (
     <authContext.Provider

@@ -1,8 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
-import { ArrowRight } from "lucide-react";
-import { useEffect } from "react";
+import { ArrowRight, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 import {
@@ -10,24 +10,30 @@ import {
   getcategories,
 } from "@/state-manager/slices/productSlice";
 import { useToast } from "@/hooks/use-toast";
-import Loader from "@/helper/Loader";
+// import Loader from "@/helper/Loader";
 import { Typewriter } from "react-simple-typewriter";
 export default function Home() {
   const dispatch = useAppDispatch();
   const { toast } = useToast();
-
+  const [isLoading , setIsLoading]= useState<boolean>(false);
   const {
     topRated = [],
-    isLoading,
+    // isLoading,
     MappedCategoriesWithImage = [],
   } = useAppSelector((state) => state.product);
   console.log("this is a mapped categories:", MappedCategoriesWithImage);
   useEffect(() => {
-    dispatch(getcategories()).catch((error) => {
+    setIsLoading(true);
+    dispatch(getcategories()).then(()=>{
+setIsLoading(false);
+    }).catch((error) => {
+      setIsLoading(false);
       toast({
         title: error,
       });
-    });
+    }).finally(()=>{
+setIsLoading(false);
+    })
     // dispatch(TopRatedProducts())
     //   .unwrap()
     //   .then(() => {
@@ -130,7 +136,7 @@ export default function Home() {
       <section className="mb-12">
         <h2 className="text-3xl font-bold mb-6">Product Categories</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {MappedCategoriesWithImage.length > 0 &&
+          { isLoading? <Loader2 className="animate-spin h-4 w-4"/> : !isLoading &&  MappedCategoriesWithImage.length > 0 &&
             MappedCategoriesWithImage.map((category, index) => (
               <Link
                 to="#"

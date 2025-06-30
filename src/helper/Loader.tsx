@@ -1,3 +1,5 @@
+import React from "react";
+
 function LoaderIcon(
   props: JSX.IntrinsicAttributes & React.SVGProps<SVGSVGElement>
 ) {
@@ -25,14 +27,18 @@ function LoaderIcon(
     </svg>
   );
 }
-import React from "react";
 
-const Loader: React.FunctionComponent = () => {
+interface LoaderProps {
+  title?: string;
+}
+
+const Loader: React.FunctionComponent<LoaderProps> = ({ title = "Loading..." }) => {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-      <div className="flex animate-spin items-center justify-center rounded-full bg-primary p-4 text-primary-foreground">
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background/60 backdrop-blur-xl">
+      <div className="flex animate-spin items-center justify-center rounded-full bg-primary p-4 text-primary-foreground shadow-lg">
         <LoaderIcon className="h-8 w-8" />
       </div>
+      <p className="mt-4 text-sm text-muted-foreground">{title}</p>
     </div>
   );
 };

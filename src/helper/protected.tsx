@@ -1,30 +1,37 @@
 import { useAuthContext } from "@/contexts/authContext.context";
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const ProtectedRoute: React.FC<{ children:ReactNode,
-  allowedRoles:string[];}> = ({
+interface ProtectedRouteProps {
+  children: ReactNode;
+  allowedRoles: string[];
+}
+
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
   allowedRoles,
 }) => {
   const navigate = useNavigate();
   const { isAuthenticated, authUser, isLoading } = useAuthContext();
+  const [checked, setChecked] = useState(false);
 
   useEffect(() => {
     if (!isLoading) {
       if (!isAuthenticated || !authUser) {
         navigate("/Sign-in");
-      } 
-      // else if (!allowedRoles.includes(authUser.Role || "")) {
-      //   navigate("/access-denied");
-      // }
+      } else if (!allowedRoles.includes(authUser.Role || "")) {
+        navigate("/access-denied");
+      } else {
+        setChecked(true); // User is allowed
+      }
     }
-  }, [isAuthenticated, authUser, navigate, allowedRoles]);
+  }, [isAuthenticated, authUser, isLoading, allowedRoles, navigate]);
 
-  if (isLoading) {
-    return <div>Loading...</div>; // Show a loading spinner or message
+  if (isLoading || !checked) {
+    return <div>Loading...</div>; // Use a real spinner if needed
   }
 
-  return <>{isAuthenticated ? children : null}</>;
+  return <>{children}</>;
 };
+
 export default ProtectedRoute;
