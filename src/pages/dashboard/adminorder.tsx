@@ -26,7 +26,7 @@ import {
   orderproduct,
   OrderProductWithProduct,
 } from "@/types/ordertypes/initialState";
-import { Navigate, useNavigate, useParams } from "react-router-dom";
+import {  useNavigate, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/state-manager/hook";
 import Loader from "@/helper/Loader";
 import {
