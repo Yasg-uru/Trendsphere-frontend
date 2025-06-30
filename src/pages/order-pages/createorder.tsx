@@ -191,7 +191,16 @@ export default function CreateOrder() {
                 toast({
                   title: "Your payment verified successfully",
                 });
+
                 dispatch(getuserData());
+                navigate("/order-success", {
+                  state: {
+                    orderId: orderinfo._id,
+                    amount: orderinfo.finalAmount,
+                    items: selectedProducts.length,
+                  },
+                  replace: true,
+                });
               })
               .catch((error) => {
                 toast({

@@ -17,9 +17,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   useEffect(() => {
     if (!isLoading) {
-      if (!isAuthenticated || !authUser) {
-        navigate("/Sign-in");
-      } else if (!allowedRoles.includes(authUser.Role || "")) {
+      if (!isAuthenticated ) {
+        navigate("/Sign-in", {replace:true });
+      } else if ( authUser &&!allowedRoles.includes(authUser.Role || "")) {
         navigate("/access-denied");
       } else {
         setChecked(true); // User is allowed

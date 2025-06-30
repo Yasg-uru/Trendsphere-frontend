@@ -2,9 +2,10 @@ import axiosInstance from "@/helper/axiosinstance";
 import { useToast } from "@/hooks/use-toast";
 import { signInSchema } from "@/pages/mainpages/authpages/login";
 import { useAppDispatch } from "@/state-manager/hook";
-import { Login } from "@/state-manager/slices/authSlice";
+import { Login, Logout } from "@/state-manager/slices/authSlice";
 import { User } from "@/types/authState/initialState";
 import React, { createContext, useEffect, useState } from "react";
+
 import { z } from "zod";
 
 interface authContextProps {
@@ -52,10 +53,32 @@ const AuthProvider: React.FunctionComponent<authProviderProps> = ({ children }) 
     CheckAuth();
   }, []);
 
-  const logout = () => {
+const logout = async () => {
+  try {
+    setIsLoading(true);
+    await dispatch(Logout()).unwrap();
+    
+    // Clear local state
     setAuthUser(null);
     setIsAuthenticated(false);
-  };
+    
+    // Show success message
+    toast({
+      title: "Logged out successfully",
+    });
+    
+    
+  } catch (error) {
+    toast({
+      title: "Logout failed",
+      variant: "destructive",
+      description: "There was an error while logging out"
+    });
+    console.error("Logout error:", error);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const UserLogin = async (data: z.infer<typeof signInSchema>): Promise<void> => {
   setIsLoading(true);

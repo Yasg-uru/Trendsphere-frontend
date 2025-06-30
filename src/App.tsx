@@ -31,6 +31,7 @@ import ErrorPage from "./pages/mainpages/somethings-went-wrong";
 import AccessDeniedPage from "./pages/mainpages/access-denied-page";
 import Footer from "./pages/mainpages/footer";
 import DeliveryTracker from "./pages/LocationPages/delivery-boy";
+import OrderSuccess from "./pages/order-pages/order-success";
 export const socket = io("https://trendshpere-backend-3.onrender.com");
 // export const socket = io("http://localhost:8000");
 const App: React.FunctionComponent = () => {
@@ -76,38 +77,13 @@ const App: React.FunctionComponent = () => {
         <Route path="/verify/:email" element={<VerifyOTP />} />
         <Route path="/products" element={<Products />} />
         <Route path="/details" element={<Details />} />
-        <Route
-          path="/mycarts"
-          element={
-            <ProtectedRoute 
-            allowedRoles={["user", "admin", "delivery_boy"]}>
-              <Carts />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/review/:productId"
-          element={
-            <ProtectedRoute 
-            allowedRoles={["user", "admin", "delivery_boy"]}>
-              <AddReview />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/order"
-          element={
-            <ProtectedRoute 
-            allowedRoles={["admin"]}>
-              <CreateOrder />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/mycarts" element={<Carts />} />
+        <Route path="/review/:productId" element={<AddReview />} />
+        <Route path="/order" element={<CreateOrder />} />
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute 
-            allowedRoles={["admin"]}>
+            <ProtectedRoute allowedRoles={["admin"]}>
               <Dashboard />
             </ProtectedRoute>
           }
@@ -115,8 +91,7 @@ const App: React.FunctionComponent = () => {
         <Route
           path="/delivery-dashboard"
           element={
-            <ProtectedRoute 
-            allowedRoles={["delivery_boy", "admin"]}>
+            <ProtectedRoute allowedRoles={["delivery_boy", "admin"]}>
               <DeliveryBoyDashboard />
             </ProtectedRoute>
           }
@@ -124,37 +99,19 @@ const App: React.FunctionComponent = () => {
         <Route
           path="/add-product"
           element={
-            <ProtectedRoute 
-            allowedRoles={["admin"]}>
+            <ProtectedRoute allowedRoles={["admin"]}>
               <AddProduct />
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/u/orders"
-          element={
-            <ProtectedRoute
-             allowedRoles={["user", "admin", "delivery_boy"]}>
-              <Orders />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/u/order/details/:orderId"
-          element={
-            <ProtectedRoute 
-            allowedRoles={["user", "admin", "delivery_boy"]}>
-              <OrderDetail />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/u/orders" element={<Orders />} />
+        <Route path="/u/order/details/:orderId" element={<OrderDetail />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route
           path="/orders"
           element={
-            <ProtectedRoute 
-            allowedRoles={["delivery_boy", "admin"]}>
+            <ProtectedRoute allowedRoles={["delivery_boy", "admin"]}>
               <OrdersAdmin />
             </ProtectedRoute>
           }
@@ -162,8 +119,7 @@ const App: React.FunctionComponent = () => {
         <Route
           path="/orders/details/:orderId"
           element={
-            <ProtectedRoute 
-            allowedRoles={["admin", "delivery_boy"]}>
+            <ProtectedRoute allowedRoles={["admin", "delivery_boy"]}>
               <OrderDetailsPage />
             </ProtectedRoute>
           }
@@ -171,8 +127,7 @@ const App: React.FunctionComponent = () => {
         <Route
           path="/live-location"
           element={
-            <ProtectedRoute
-             allowedRoles={["admin", "delivery_boy"]}>
+            <ProtectedRoute allowedRoles={["admin", "delivery_boy"]}>
               <DeliveryTracker />
             </ProtectedRoute>
           }
@@ -180,6 +135,7 @@ const App: React.FunctionComponent = () => {
         <Route path="/review/:productId" element={<ReviewForm />} />
         <Route path="*" element={<ErrorPage />} />
         <Route path="/access-denied" element={<AccessDeniedPage />} />
+        <Route path="/order-success" element={<OrderSuccess />} />
       </Routes>
       <Footer />
       <DeliveryRatingDialog

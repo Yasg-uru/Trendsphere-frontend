@@ -48,8 +48,8 @@ export default function SignInForm() {
         toast({
           title: "logged in successfully",
         });
-        window.location.reload()
-        navigate("/");
+        // window.location.reload()
+        navigate("/",{replace:true });
       })
       .catch((error) => {
         setSignInError(error);
